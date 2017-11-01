@@ -42,6 +42,7 @@
 #include "plugin.h"
 #include "stubs.h"
 #include "config.h"
+#include "debug.h"
 #include <QPlainTextEdit>
 #include <QVBoxLayout>
 #include "QCommanderWidget.h"
@@ -71,10 +72,10 @@ public:
         if(statusBar)
         {
             QWidget *parent = statusBar->parentWidget();
-            QCommanderWidget *commanderWidget = new QCommanderWidget(parent);
-            commanderWidget->setPlaceholderText("Input Lua code here");
-            commanderWidget->setFont(QFont("Courier", 12));
+            commanderWidget = new QCommanderWidget(parent);
             QVBoxLayout *layout = new QVBoxLayout(parent);
+            layout->setSpacing(0);
+            layout->setMargin(0);
             parent->setLayout(layout);
             layout->addWidget(statusBar);
             layout->addWidget(commanderWidget);
@@ -87,15 +88,45 @@ public:
 
     virtual void onInstancePass(bool objectsErased, bool objectsCreated, bool modelLoaded, bool sceneLoaded, bool undoCalled, bool redoCalled, bool sceneSwitched, bool editModeActive, bool objectsScaled, bool selectionStateChanged, bool keyPressed, bool simulationStarted, bool simulationEnded)
     {
+        int id = qRegisterMetaType< QMap<int,QString> >();
+
         if(firstInstancePass)
         {
             firstInstancePass = false;
             UIFunctions::getInstance(); // construct UIFunctions here (SIM thread)
+            QObject::connect(commanderWidget, &QCommanderWidget::execCode, UIFunctions::getInstance(), &UIFunctions::onExecCode);
+            QObject::connect(UIFunctions::getInstance(), &UIFunctions::scriptListChanged, commanderWidget, &QCommanderWidget::onScriptListChanged);
+        }
+
+        if(objectsErased || objectsCreated || modelLoaded || sceneLoaded || undoCalled || redoCalled || sceneSwitched)
+        {
+            DBG << "object list changed" << std::endl;
+            QMap<int,QString> childScripts;
+            QMap<int,QString> jointCtrlCalbacks;
+            QMap<int,QString> customizationScripts;
+            int i = 0;
+            while(1)
+            {
+                int handle = simGetObjects(i++, sim_handle_all);
+                if(handle == -1) break;
+                char *name_cstr = simGetObjectName(handle);
+                QString name = QString::fromUtf8(name_cstr);
+                simReleaseBuffer(name_cstr);
+                int childScript = simGetScriptAssociatedWithObject(handle);
+                int customizationScript = simGetCustomizationScriptAssociatedWithObject(handle);
+                // TODO: add joint ctrl callbacks
+                if(childScript != -1)
+                    childScripts[handle] = name;
+                if(customizationScript != -1)
+                    customizationScripts[handle] = name;
+            }
+            UIFunctions::getInstance()->scriptListChanged(childScripts, jointCtrlCalbacks, customizationScripts);
         }
     }
 
 private:
     bool firstInstancePass = true;
+    QCommanderWidget *commanderWidget = 0L;
 };
 
 VREP_PLUGIN(PLUGIN_NAME, PLUGIN_VERSION, Plugin)

@@ -26,9 +26,10 @@ private:
     static UIFunctions *instance;
 
 public slots:
-    void onExecCode(QString code);
+    void onExecCode(QString code, int scriptHandleOrType, QString scriptName);
 
 signals:
+    void scriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> jointCtrlCallbacks, QMap<int,QString> customizationScripts);
 };
 
 #endif // UIFUNCTIONS_H_INCLUDED

@@ -53,11 +53,11 @@ void UIFunctions::connectSignals()
     connect(uiproxy, &UIProxy::execCode, this, &UIFunctions::onExecCode);
 }
 
-void UIFunctions::onExecCode(QString code)
+void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scriptName)
 {
     ASSERT_THREAD(!UI);
 
-    static boost::format fmt("LUA: %s");
-    simAddStatusbarMessage((fmt % code.toStdString()).str().c_str());
+    static boost::format fmt("LUA EXEC [type=%d, obj=%s]: %s");
+    simAddStatusbarMessage((fmt % scriptHandleOrType % scriptName.toStdString() % code.toStdString()).str().c_str());
 }
 
