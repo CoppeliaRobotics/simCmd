@@ -192,7 +192,7 @@ public:
         }
     }
 
-    virtual void onInstancePass(bool objectsErased, bool objectsCreated, bool modelLoaded, bool sceneLoaded, bool undoCalled, bool redoCalled, bool sceneSwitched, bool editModeActive, bool objectsScaled, bool selectionStateChanged, bool keyPressed, bool simulationStarted, bool simulationEnded)
+    virtual void onInstancePass(bool objectsErased, bool objectsCreated, bool modelLoaded, bool sceneLoaded, bool undoCalled, bool redoCalled, bool sceneSwitched, bool editModeActive, bool objectsScaled, bool selectionStateChanged, bool keyPressed, bool simulationStarted, bool simulationEnded, bool scriptCreated, bool scriptErased)
     {
         int id = qRegisterMetaType< QMap<int,QString> >();
 
@@ -213,7 +213,7 @@ public:
             simPersistentDataWrite("LuaCommanderOptions", (simChar*)&options, sizeof(options), 1);
         }
 
-        if(objectsErased || objectsCreated || modelLoaded || sceneLoaded || undoCalled || redoCalled || sceneSwitched)
+        if(objectsErased || objectsCreated || modelLoaded || sceneLoaded || undoCalled || redoCalled || sceneSwitched || scriptCreated || scriptErased)
         {
             DBG << "object list changed" << std::endl;
             QMap<int,QString> childScripts;
