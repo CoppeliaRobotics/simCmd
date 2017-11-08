@@ -120,6 +120,7 @@ public:
         // attach widget to V-REP main window
         QWidget *parent = statusBar->parentWidget();
         commanderWidget = new QCommanderWidget(parent);
+        commanderWidget->setVisible(false);
         QVBoxLayout *layout = new QVBoxLayout(parent);
         layout->setSpacing(0);
         layout->setMargin(0);
@@ -130,14 +131,10 @@ public:
         // add menu items to V-REP main window
         MENUITEM_TOGGLE_VISIBILITY = menuLabels.size();
         menuLabels.push_back("Enable");
-        menuState.push_back((options.enabled ? itemChecked : 0) + itemEnabled);
-
         MENUITEM_AUTO_RETURN = menuLabels.size();
         menuLabels.push_back("Automatically return input statement");
-        menuState.push_back((options.enabled ? itemEnabled : 0) + (options.autoReturn ? itemChecked : 0));
-
+        menuState.resize(menuLabels.size());
         menuHandles.resize(menuLabels.size());
-
         if(simAddModuleMenuEntry("Lua Commander", menuHandles.size(), &menuHandles[0]) == -1)
         {
             simAddStatusbarMessage("LuaCommander error: failed to create menu");
@@ -158,7 +155,7 @@ public:
         menuState[MENUITEM_AUTO_RETURN] = (options.enabled ? itemEnabled : 0) + (options.autoReturn ? itemChecked : 0);
         for(int i = 0; i < menuHandles.size(); i++)
             simSetModuleMenuItemState(menuHandles[i], menuState[i], menuLabels[i].c_str());
-        if(commanderWidget)
+        if(commanderWidget && !firstInstancePass)
             commanderWidget->setVisible(options.enabled);
     }
 
