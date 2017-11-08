@@ -238,7 +238,7 @@ public:
         if(optionsChangedFromGui.load())
         {
             optionsChangedFromGui.store(false);
-            simPersistentDataWrite("LuaCommanderOptions", (simChar*)&options, sizeof(options), 1);
+            options.save();
         }
 
         if(objectsErased || objectsCreated || modelLoaded || sceneLoaded || undoCalled || redoCalled || sceneSwitched || scriptCreated || scriptErased)
