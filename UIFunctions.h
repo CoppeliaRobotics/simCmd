@@ -3,6 +3,8 @@
 
 #include "config.h"
 
+#include <atomic>
+
 #include <QObject>
 #include <QString>
 
@@ -19,6 +21,8 @@ public:
     static void destroyInstance();
 
     void connectSignals();
+
+    std::atomic<bool> autoReturn;
 
 private:
     UIFunctions(QObject *parent = 0);

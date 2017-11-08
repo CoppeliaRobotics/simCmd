@@ -11,6 +11,7 @@ UIFunctions *UIFunctions::instance = NULL;
 UIFunctions::UIFunctions(QObject *parent)
     : QObject(parent)
 {
+    autoReturn.store(true);
     connectSignals();
 }
 
