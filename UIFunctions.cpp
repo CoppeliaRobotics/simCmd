@@ -65,7 +65,8 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
         return;
     }
 
-    QString s = code + "@" + scriptName;
+    QString s = code;
+    if(!scriptName.isEmpty()) s += "@" + scriptName;
     QByteArray s1 = s.toLatin1();
 
 #ifdef DEBUG
