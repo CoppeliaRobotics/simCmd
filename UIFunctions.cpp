@@ -3,6 +3,7 @@
 #include "UIProxy.h"
 #include "stubs.h"
 #include <boost/format.hpp>
+#include <boost/lexical_cast.hpp>
 
 // UIFunctions is a singleton
 
@@ -54,6 +55,39 @@ void UIFunctions::connectSignals()
     connect(uiproxy, &UIProxy::execCode, this, &UIFunctions::onExecCode);
 }
 
+std::string UIFunctions::getStackTopAsString(int stackHandle)
+{
+    simBool boolValue;
+    simInt intValue;
+    simFloat floatValue;
+    simDouble doubleValue;
+    simChar *stringValue;
+    simInt stringSize;
+    std::string ret = "?";
+    if(simGetStackBoolValue(stackHandle, &boolValue) == 1)
+    {
+        ret = boolValue ? "true" : "false";
+    }
+    else if(simGetStackInt32Value(stackHandle, &intValue) == 1)
+    {
+        ret = boost::lexical_cast<std::string>(intValue);
+    }
+    else if(simGetStackDoubleValue(stackHandle, &doubleValue) == 1)
+    {
+        ret = boost::lexical_cast<std::string>(doubleValue);
+    }
+    else if(simGetStackFloatValue(stackHandle, &floatValue) == 1)
+    {
+        ret = boost::lexical_cast<std::string>(floatValue);
+    }
+    else if((stringValue = simGetStackStringValue(stackHandle, &stringSize)) != NULL)
+    {
+        ret = std::string(stringValue, stringSize);
+        simReleaseBuffer(stringValue);
+    }
+    return ret;
+}
+
 void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scriptName)
 {
     ASSERT_THREAD(!UI);
@@ -69,54 +103,23 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     if(!scriptName.isEmpty()) s += "@" + scriptName;
     QByteArray s1 = s.toLatin1();
 
-#ifdef DEBUG
-    simAddStatusbarMessage((boost::format("LuaCommander: code=%s") % s1.data()).str().c_str());
-    simAddStatusbarMessage((boost::format("LuaCommander: scriptHandleOrType=%d") % scriptHandleOrType).str().c_str());
-#endif // DEBUG
-
     simInt ret = simExecuteScriptString(scriptHandleOrType, s1.data(), stackHandle);
     if(ret != 0)
     {
-        simAddStatusbarMessage((boost::format("LuaCommander: error: simExecuteScriptString() returned %d") % ret).str().c_str());
-        simReleaseStack(stackHandle);
-        return;
+        simAddStatusbarMessage((boost::format("LuaCommander: error: %s") % getStackTopAsString(stackHandle)).str().c_str());
     }
-
-    simInt size = simGetStackSize(stackHandle);
-    if(size == 0)
+    else
     {
-        simAddStatusbarMessage("LuaCommander: info: no value returned");
-    }
-    if(size > 0)
-    {
-        if(size > 1)
-            simAddStatusbarMessage("LuaCommander: warning: more than one value returned (only showing first value)");
-        simBool boolValue;
-        simInt intValue;
-        simFloat floatValue;
-        simDouble doubleValue;
-        simChar *stringValue;
-        simInt stringSize;
-        if(simGetStackBoolValue(stackHandle, &boolValue) == 1)
+        simInt size = simGetStackSize(stackHandle);
+        if(size == 0)
         {
-            simAddStatusbarMessage((boost::format("LuaCommander: %s") % (boolValue ? "true" : "false")).str().c_str());
+            simAddStatusbarMessage("LuaCommander: no result");
         }
-        else if(simGetStackDoubleValue(stackHandle, &doubleValue) == 1)
+        if(size > 0)
         {
-            simAddStatusbarMessage((boost::format("LuaCommander: %f") % doubleValue).str().c_str());
-        }
-        else if(simGetStackFloatValue(stackHandle, &floatValue) == 1)
-        {
-            simAddStatusbarMessage((boost::format("LuaCommander: %f") % floatValue).str().c_str());
-        }
-        else if(simGetStackInt32Value(stackHandle, &intValue) == 1)
-        {
-            simAddStatusbarMessage((boost::format("LuaCommander: %d") % intValue).str().c_str());
-        }
-        else if((stringValue = simGetStackStringValue(stackHandle, &stringSize)) != NULL)
-        {
-            simAddStatusbarMessage((boost::format("LuaCommander: %s") % stringValue).str().c_str());
-            simReleaseBuffer(stringValue);
+            if(size > 1)
+                simAddStatusbarMessage("LuaCommander: warning: more than one value returned (only showing first value)");
+            simAddStatusbarMessage((boost::format("LuaCommander: result: %s") % getStackTopAsString(stackHandle)).str().c_str());
         }
     }
     simReleaseStack(stackHandle);

@@ -29,6 +29,8 @@ private:
 
     static UIFunctions *instance;
 
+    std::string getStackTopAsString(int stackHandle);
+
 public slots:
     void onExecCode(QString code, int scriptHandleOrType, QString scriptName);
 
