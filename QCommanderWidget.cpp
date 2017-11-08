@@ -36,7 +36,7 @@ void QCommanderWidget::onReturnPressed()
         QVariantList data = comboBox->itemData(comboBox->currentIndex()).toList();
         type = data[0].toInt();
         handle = data[1].toInt();
-        name = data[2].toInt();
+        name = data[2].toString();
     }
     emit execCode(code, type, name);
     lineEdit->setText("");
