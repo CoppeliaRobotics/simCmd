@@ -154,6 +154,8 @@ public:
 
     void updateMenuItems()
     {
+        menuState[MENUITEM_TOGGLE_VISIBILITY] = (options.enabled ? itemChecked : 0) + itemEnabled;
+        menuState[MENUITEM_AUTO_RETURN] = (options.enabled ? itemEnabled : 0) + (options.autoReturn ? itemChecked : 0);
         for(int i = 0; i < menuHandles.size(); i++)
             simSetModuleMenuItemState(menuHandles[i], menuState[i], menuLabels[i].c_str());
         if(commanderWidget)
