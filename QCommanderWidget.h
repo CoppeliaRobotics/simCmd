@@ -47,7 +47,7 @@ private slots:
     void onDownPressed();
 
 public slots:
-    void onScriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> jointCtrlCallbacks, QMap<int,QString> customizationScripts);
+    void onScriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> jointCtrlCallbacks, QMap<int,QString> customizationScripts, bool simRunning);
 
 signals:
     void execCode(QString code, int scriptHandleOrType, QString scriptName);

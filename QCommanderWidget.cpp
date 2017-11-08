@@ -112,7 +112,7 @@ void QCommanderWidget::onDownPressed()
     setHistoryIndex(++historyIndex);
 }
 
-void QCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> jointCtrlCallbacks, QMap<int,QString> customizationScripts)
+void QCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> jointCtrlCallbacks, QMap<int,QString> customizationScripts, bool simRunning)
 {
     // save current item:
     QVariant old = scriptCombo->itemData(scriptCombo->currentIndex());
@@ -127,12 +127,19 @@ void QCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QMap<
     int index = 0, selectedIndex = -1;
     {
         QVariantList data;
+        data << sim_scripttype_sandboxscript << 0 << QString();
+        scriptCombo->addItem("Sandbox script", data);
+        if(data == old) selectedIndex = index;
+        index++;
+    }
+    if(simRunning) {
+        QVariantList data;
         data << sim_scripttype_mainscript << 0 << QString();
         scriptCombo->addItem("Main script", data);
         if(data == old) selectedIndex = index;
         index++;
     }
-    {
+    if(simRunning) {
         QMapIterator<int,QString> i(childScripts);
         while(i.hasNext())
         {
@@ -144,7 +151,7 @@ void QCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QMap<
             index++;
         }
     }
-    {
+    if(simRunning) {
         QMapIterator<int,QString> i(jointCtrlCallbacks);
         while(i.hasNext())
         {
@@ -156,7 +163,7 @@ void QCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QMap<
             index++;
         }
     }
-    {
+    if(simRunning) {
         QVariantList data;
         data << sim_scripttype_contactcallback << 0 << QString();
         scriptCombo->addItem("Contact callback", data);
@@ -185,5 +192,7 @@ void QCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QMap<
 
     if(selectedIndex >= 0)
         scriptCombo->setCurrentIndex(selectedIndex);
+    else
+        scriptCombo->setCurrentIndex(0);
 }
 
