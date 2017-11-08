@@ -58,7 +58,50 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
 {
     ASSERT_THREAD(!UI);
 
-    static boost::format fmt("LUA EXEC [type=%d, obj=%s]: %s");
-    simAddStatusbarMessage((fmt % scriptHandleOrType % scriptName.toStdString() % code.toStdString()).str().c_str());
+    QString s = code + "@" + scriptName;
+    QByteArray s1 = s.toLatin1();
+    simInt stackHandle = simCreateStack();
+    if(stackHandle != -1)
+    {
+        simExecuteScriptString(scriptHandleOrType, s1.data(), stackHandle);
+        simInt size = simGetStackSize(stackHandle);
+        if(size == 0)
+        {
+            simAddStatusbarMessage("LuaCommander: there are no items in my stack");
+        }
+        if(size > 0)
+        {
+            if(size > 1)
+                simAddStatusbarMessage("LuaCommander: warning: there is more than one item in my stack");
+            simBool boolValue;
+            simInt intValue;
+            simFloat floatValue;
+            simDouble doubleValue;
+            simChar *stringValue;
+            simInt stringSize;
+            if(simGetStackBoolValue(stackHandle, &boolValue) == 1)
+            {
+                simAddStatusbarMessage((boost::format("LuaCommander: %s") % (boolValue ? "true" : "false")).str().c_str());
+            }
+            else if(simGetStackDoubleValue(stackHandle, &doubleValue) == 1)
+            {
+                simAddStatusbarMessage((boost::format("LuaCommander: %f") % doubleValue).str().c_str());
+            }
+            else if(simGetStackFloatValue(stackHandle, &floatValue) == 1)
+            {
+                simAddStatusbarMessage((boost::format("LuaCommander: %f") % floatValue).str().c_str());
+            }
+            else if(simGetStackInt32Value(stackHandle, &intValue) == 1)
+            {
+                simAddStatusbarMessage((boost::format("LuaCommander: %d") % intValue).str().c_str());
+            }
+            else if((stringValue = simGetStackStringValue(stackHandle, &stringSize)) != NULL)
+            {
+                simAddStatusbarMessage((boost::format("LuaCommander: %s") % stringValue).str().c_str());
+                simReleaseBuffer(stringValue);
+            }
+        }
+        simReleaseStack(stackHandle);
+    }
 }
 
