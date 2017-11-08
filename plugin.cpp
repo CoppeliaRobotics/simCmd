@@ -192,6 +192,34 @@ public:
         }
     }
 
+    void updateScriptsList()
+    {
+        bool simRunning = simGetSimulationState() == sim_simulation_advancing_running;
+        QMap<int,QString> childScripts;
+        QMap<int,QString> jointCtrlCalbacks;
+        QMap<int,QString> customizationScripts;
+        int i = 0;
+        while(1)
+        {
+            int handle = simGetObjects(i++, sim_handle_all);
+            if(handle == -1) break;
+            char *name_cstr = simGetObjectName(handle);
+            QString name = QString::fromUtf8(name_cstr);
+            simReleaseBuffer(name_cstr);
+            if(simRunning)
+            {
+                int childScript = simGetScriptAssociatedWithObject(handle);
+                if(childScript != -1)
+                    childScripts[handle] = name;
+            }
+            int customizationScript = simGetCustomizationScriptAssociatedWithObject(handle);
+            if(customizationScript != -1)
+                customizationScripts[handle] = name;
+            // TODO: add joint ctrl callbacks
+        }
+        UIFunctions::getInstance()->scriptListChanged(childScripts, jointCtrlCalbacks, customizationScripts);
+    }
+
     virtual void onInstancePass(bool objectsErased, bool objectsCreated, bool modelLoaded, bool sceneLoaded, bool undoCalled, bool redoCalled, bool sceneSwitched, bool editModeActive, bool objectsScaled, bool selectionStateChanged, bool keyPressed, bool simulationStarted, bool simulationEnded, bool scriptCreated, bool scriptErased)
     {
         int id = qRegisterMetaType< QMap<int,QString> >();
@@ -215,28 +243,18 @@ public:
 
         if(objectsErased || objectsCreated || modelLoaded || sceneLoaded || undoCalled || redoCalled || sceneSwitched || scriptCreated || scriptErased)
         {
-            DBG << "object list changed" << std::endl;
-            QMap<int,QString> childScripts;
-            QMap<int,QString> jointCtrlCalbacks;
-            QMap<int,QString> customizationScripts;
-            int i = 0;
-            while(1)
-            {
-                int handle = simGetObjects(i++, sim_handle_all);
-                if(handle == -1) break;
-                char *name_cstr = simGetObjectName(handle);
-                QString name = QString::fromUtf8(name_cstr);
-                simReleaseBuffer(name_cstr);
-                int childScript = simGetScriptAssociatedWithObject(handle);
-                int customizationScript = simGetCustomizationScriptAssociatedWithObject(handle);
-                // TODO: add joint ctrl callbacks
-                if(childScript != -1)
-                    childScripts[handle] = name;
-                if(customizationScript != -1)
-                    customizationScripts[handle] = name;
-            }
-            UIFunctions::getInstance()->scriptListChanged(childScripts, jointCtrlCalbacks, customizationScripts);
+            updateScriptsList();
         }
+    }
+
+    virtual void onSimulationAboutToStart()
+    {
+        updateScriptsList();
+    }
+
+    virtual void onSimulationEnded()
+    {
+        updateScriptsList();
     }
 
 private:
