@@ -78,7 +78,7 @@ struct PersistentOptions
         bool ok = dataLength == sizeof(*this);
         if(ok)
         {
-            memcpy(pdata, this, sizeof(*this));
+            memcpy(this, pdata, sizeof(*this));
             UIFunctions::getInstance()->autoReturn.store(autoReturn);
             std::cout << "LuaCommander: Loaded persistent options:" << std::endl;
             dump();
