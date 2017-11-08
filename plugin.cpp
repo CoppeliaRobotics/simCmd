@@ -59,14 +59,20 @@ struct PersistentOptions
         return "LuaCommanderOptions";
     }
 
+    void dump()
+    {
+        std::cout << "LuaCommander:     enabled=" << enabled << std::endl;
+        std::cout << "LuaCommander:     autoReturn=" << autoReturn << std::endl;
+    }
+
     bool load()
     {
-        std::cout << "Loading persistent options..." << std::endl;
+        std::cout << "LuaCommander: Loading persistent options..." << std::endl;
         simInt dataLength;
         simChar *pdata = simPersistentDataRead(dataTag(), &dataLength);
         if(!pdata)
         {
-            std::cout << "Could not load persistent options: null pointer error" << std::endl;
+            std::cout << "LuaCommander: Could not load persistent options: null pointer error" << std::endl;
             return false;
         }
         bool ok = dataLength == sizeof(*this);
@@ -74,11 +80,12 @@ struct PersistentOptions
         {
             memcpy(pdata, this, sizeof(*this));
             UIFunctions::getInstance()->autoReturn.store(autoReturn);
-            std::cout << "Loaded persistent options: enabled=" << enabled << ", autoReturn=" << autoReturn << std::endl;
+            std::cout << "LuaCommander: Loaded persistent options:" << std::endl;
+            dump();
         }
         else
         {
-            std::cout << "Could not load persistent options: incorrect data length " << dataLength << ", should be " << sizeof(*this) << std::endl;
+            std::cout << "LuaCommander: Could not load persistent options: incorrect data length " << dataLength << ", should be " << sizeof(*this) << std::endl;
         }
         simReleaseBuffer(pdata);
         return ok;
@@ -86,6 +93,8 @@ struct PersistentOptions
 
     bool save()
     {
+        std::cout << "LuaCommander: Saving persistent options:" << std::endl;
+        dump();
         return simPersistentDataWrite(dataTag(), (simChar*)this, sizeof(*this), 1) != -1;
     }
 };
