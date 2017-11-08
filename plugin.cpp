@@ -101,17 +101,7 @@ public:
         UIProxy::getInstance(); // construct UIProxy here (UI thread)
 
         // find the StatusBar widget (QPlainTextEdit)
-        QList<QWidget*> children = UIProxy::vrepMainWindow->findChildren<QWidget*>();
-        QPlainTextEdit *statusBar = 0L;
-        foreach(QWidget *w, children)
-        {
-            if(QPlainTextEdit *qpe = qobject_cast<QPlainTextEdit*>(w))
-            {
-                statusBar = qpe;
-                break;
-            }
-        }
-
+        QPlainTextEdit *statusBar = findStatusBar();
         if(!statusBar)
         {
             simAddStatusbarMessage("LuaCommander error: cannot find the statusbar widget");
@@ -145,6 +135,23 @@ public:
             return;
         }
         updateMenuItems();
+    }
+
+    QPlainTextEdit * findStatusBar()
+    {
+        QPlainTextEdit *statusBar = UIProxy::vrepMainWindow->findChild<QPlainTextEdit*>("statusBar");
+        if(statusBar) return statusBar;
+
+        // we have an old V-REP version, find the statusBar widget in an alternative way:
+        QList<QWidget*> children = UIProxy::vrepMainWindow->findChildren<QWidget*>();
+        foreach(QWidget *w, children)
+        {
+            if(QPlainTextEdit *qpe = qobject_cast<QPlainTextEdit*>(w))
+            {
+                return qpe;
+            }
+        }
+        return 0L;
     }
 
     void updateMenuItems()
