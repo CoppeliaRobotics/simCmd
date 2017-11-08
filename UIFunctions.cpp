@@ -61,20 +61,22 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     simInt stackHandle = simCreateStack();
     if(stackHandle == -1)
     {
-        simAddStatusbarMessage("LuaCommander: failed to create a stack");
+        simAddStatusbarMessage("LuaCommander: error: failed to create a stack");
         return;
     }
 
     QString s = code + "@" + scriptName;
     QByteArray s1 = s.toLatin1();
 
+#ifdef DEBUG
     simAddStatusbarMessage((boost::format("LuaCommander: code=%s") % s1.data()).str().c_str());
     simAddStatusbarMessage((boost::format("LuaCommander: scriptHandleOrType=%d") % scriptHandleOrType).str().c_str());
+#endif // DEBUG
 
     simInt ret = simExecuteScriptString(scriptHandleOrType, s1.data(), stackHandle);
     if(ret != 0)
     {
-        simAddStatusbarMessage((boost::format("LuaCommander: script error (simExecuteScriptString() returned %d)") % ret).str().c_str());
+        simAddStatusbarMessage((boost::format("LuaCommander: error: simExecuteScriptString() returned %d") % ret).str().c_str());
         simReleaseStack(stackHandle);
         return;
     }
@@ -87,7 +89,7 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     if(size > 0)
     {
         if(size > 1)
-            simAddStatusbarMessage("LuaCommander: warning: more than one value returned");
+            simAddStatusbarMessage("LuaCommander: warning: more than one value returned (only showing first value)");
         simBool boolValue;
         simInt intValue;
         simFloat floatValue;
