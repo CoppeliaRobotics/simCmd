@@ -66,8 +66,3 @@ void UIProxy::destroyInstance()
     DBG << "[leave]" << std::endl;
 }
 
-//void UIProxy::onSetText(TextBrowser *textbrowser, std::string text, bool suppressSignals)
-//{
-//    textbrowser->setText(text, suppressSignals);
-//}
-

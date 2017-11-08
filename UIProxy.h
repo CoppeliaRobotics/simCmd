@@ -30,7 +30,6 @@ public:
     static QWidget *vrepMainWindow;
 
 public slots:
-    //void onSetText(TextBrowser *textbrowser, std::string text, bool suppressSignals);
 
 signals:
     void execCode(QString code, int scriptHandleOrType, QString scriptName);
