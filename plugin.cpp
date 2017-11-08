@@ -51,7 +51,7 @@
 
 struct PersistentOptions
 {
-    bool enabled = true;
+    bool enabled = false;
     bool autoReturn = true;
 
     const char * dataTag()
@@ -228,8 +228,8 @@ public:
             QObject::connect(commanderWidget, &QCommanderWidget::execCode, UIFunctions::getInstance(), &UIFunctions::onExecCode);
             QObject::connect(UIFunctions::getInstance(), &UIFunctions::scriptListChanged, commanderWidget, &QCommanderWidget::onScriptListChanged);
 
-            if(options.load())
-                optionsChangedFromData.store(true);
+            options.load();
+            optionsChangedFromData.store(true);
         }
 
         if(optionsChangedFromGui.load())
