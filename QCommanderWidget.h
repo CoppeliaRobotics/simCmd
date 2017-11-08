@@ -7,6 +7,22 @@
 #include <QLineEdit>
 #include <QComboBox>
 
+class QCommanderEditor : public QLineEdit
+{
+    Q_OBJECT
+
+public:
+    explicit QCommanderEditor(QWidget *parent = 0);
+    ~QCommanderEditor();
+
+    void keyPressEvent(QKeyEvent *event);
+
+signals:
+    void escapePressed();
+    void upPressed();
+    void downPressed();
+};
+
 class QCommanderWidget : public QWidget
 {
     Q_OBJECT
@@ -16,11 +32,19 @@ public:
     ~QCommanderWidget();
 
 protected:
-    QLineEdit *lineEdit;
-    QComboBox *comboBox;
+    QCommanderEditor *editor;
+    QComboBox *scriptCombo;
+
+    QStringList history;
+    int historyIndex;
+
+    void setHistoryIndex(int index);
 
 private slots:
     void onReturnPressed();
+    void onEscapePressed();
+    void onUpPressed();
+    void onDownPressed();
 
 public slots:
     void onScriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> jointCtrlCallbacks, QMap<int,QString> customizationScripts);
