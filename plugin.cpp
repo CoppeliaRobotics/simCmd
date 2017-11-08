@@ -165,7 +165,6 @@ public:
         {
             const int i = MENUITEM_TOGGLE_VISIBILITY;
             options.enabled = !options.enabled;
-            menuState[i] = (options.enabled ? itemChecked : 0) + itemEnabled;
             optionsChangedFromGui.store(true);
             updateMenuItems();
         }
@@ -174,7 +173,6 @@ public:
             const int i = MENUITEM_AUTO_RETURN;
             options.autoReturn = !options.autoReturn;
             UIFunctions::getInstance()->autoReturn = options.autoReturn;
-            menuState[i] = (options.enabled ? itemEnabled : 0) + (options.autoReturn ? itemChecked : 0);
             optionsChangedFromGui.store(true);
             updateMenuItems();
         }
