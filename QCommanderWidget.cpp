@@ -103,13 +103,12 @@ void QCommanderWidget::onEscapePressed()
 void QCommanderWidget::onUpPressed()
 {
     if(historyIndex == -1) setHistoryIndex(history.size() - 1);
-    else setHistoryIndex(--historyIndex);
+    else if(historyIndex > 0) setHistoryIndex(--historyIndex);
 }
 
 void QCommanderWidget::onDownPressed()
 {
-    if(historyIndex == -1) return;
-    setHistoryIndex(++historyIndex);
+    if(historyIndex >= 0) setHistoryIndex(++historyIndex);
 }
 
 void QCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> jointCtrlCallbacks, QMap<int,QString> customizationScripts, bool simRunning)
