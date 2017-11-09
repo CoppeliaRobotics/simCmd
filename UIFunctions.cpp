@@ -2,7 +2,6 @@
 #include "debug.h"
 #include "UIProxy.h"
 #include "stubs.h"
-#include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 
 // UIFunctions is a singleton
@@ -103,25 +102,23 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     if(!scriptName.isEmpty()) s += "@" + scriptName;
     QByteArray s1 = s.toLatin1();
 
+    std::string echo = "> " + code.toStdString();
+    simAddStatusbarMessage(echo.c_str());
+
     simInt ret = simExecuteScriptString(scriptHandleOrType, s1.data(), stackHandle);
     if(ret != 0)
     {
-        simAddStatusbarMessage((boost::format("LuaCommander: error: %s") % getStackTopAsString(stackHandle)).str().c_str());
+        simAddStatusbarMessage(getStackTopAsString(stackHandle).c_str());
     }
     else
     {
         simInt size = simGetStackSize(stackHandle);
-        if(size == 0)
-        {
-            simAddStatusbarMessage("LuaCommander: no result");
-        }
         if(size > 0)
         {
-            if(size > 1)
-                simAddStatusbarMessage("LuaCommander: warning: more than one value returned (only showing first value)");
-            simAddStatusbarMessage((boost::format("LuaCommander: result: %s") % getStackTopAsString(stackHandle)).str().c_str());
+            simAddStatusbarMessage(getStackTopAsString(stackHandle).c_str());
         }
     }
+
     simReleaseStack(stackHandle);
 }
 
