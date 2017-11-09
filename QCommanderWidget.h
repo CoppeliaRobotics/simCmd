@@ -21,6 +21,9 @@ signals:
     void escapePressed();
     void upPressed();
     void downPressed();
+
+public slots:
+    void moveCursorToEnd();
 };
 
 class QCommanderWidget : public QWidget

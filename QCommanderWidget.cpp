@@ -4,6 +4,7 @@
 #include <boost/format.hpp>
 #include <QHBoxLayout>
 #include <QKeyEvent>
+#include <QTimer>
 
 QCommanderEditor::QCommanderEditor(QWidget *parent)
     : QLineEdit(parent)
@@ -28,13 +29,20 @@ void QCommanderEditor::keyPressEvent(QKeyEvent *event)
     {
         emit downPressed();
     }
+    else
+    {
+        QLineEdit::keyPressEvent(event);
+    }
+}
 
-    QLineEdit::keyPressEvent(event);
+void QCommanderEditor::moveCursorToEnd()
+{
+    setCursorPosition(text().size());
 }
 
 QCommanderWidget::QCommanderWidget(QWidget *parent)
     : QWidget(parent),
-      historyIndex(-1)
+      historyIndex(0)
 {
     editor = new QCommanderEditor(this);
     editor->setPlaceholderText("Input Lua code here");
@@ -59,22 +67,18 @@ QCommanderWidget::~QCommanderWidget()
 
 void QCommanderWidget::setHistoryIndex(int index)
 {
-    historyIndex = index;
+    if(history.size() == 0) return;
 
-    if(index == -1)
-    {
-        editor->setText("");
-        return;
-    }
+    historyIndex = index;
 
     if(historyIndex < 0)
         historyIndex = 0;
 
-    if(historyIndex >= history.size() - 1)
+    if(historyIndex > history.size() - 1)
         historyIndex = history.size() - 1;
 
     editor->setText(history[historyIndex]);
-    editor->setCursorPosition(history[historyIndex].size() - 1);
+    QTimer::singleShot(0, editor, &QCommanderEditor::moveCursorToEnd);
 }
 
 void QCommanderWidget::onReturnPressed()
@@ -92,23 +96,24 @@ void QCommanderWidget::onReturnPressed()
     }
     emit execCode(code, type, name);
     history << code;
-    setHistoryIndex(-1);
+    historyIndex = history.size();
+    editor->setText("");
 }
 
 void QCommanderWidget::onEscapePressed()
 {
-    setHistoryIndex(-1);
+    historyIndex = history.size();
+    editor->setText("");
 }
 
 void QCommanderWidget::onUpPressed()
 {
-    if(historyIndex == -1) setHistoryIndex(history.size() - 1);
-    else if(historyIndex > 0) setHistoryIndex(--historyIndex);
+    setHistoryIndex(--historyIndex);
 }
 
 void QCommanderWidget::onDownPressed()
 {
-    if(historyIndex >= 0) setHistoryIndex(++historyIndex);
+    setHistoryIndex(++historyIndex);
 }
 
 void QCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> jointCtrlCallbacks, QMap<int,QString> customizationScripts, bool simRunning)
