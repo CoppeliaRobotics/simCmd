@@ -191,7 +191,6 @@ public:
     {
         bool simRunning = simGetSimulationState() == sim_simulation_advancing_running;
         QMap<int,QString> childScripts;
-        QMap<int,QString> jointCtrlCalbacks;
         QMap<int,QString> customizationScripts;
         int i = 0;
         while(1)
@@ -210,9 +209,8 @@ public:
             int customizationScript = simGetCustomizationScriptAssociatedWithObject(handle);
             if(customizationScript != -1)
                 customizationScripts[handle] = name;
-            // TODO: add joint ctrl callbacks
         }
-        UIFunctions::getInstance()->scriptListChanged(childScripts, jointCtrlCalbacks, customizationScripts, simRunning);
+        UIFunctions::getInstance()->scriptListChanged(childScripts, customizationScripts, simRunning);
     }
 
     virtual void onInstancePass(bool objectsErased, bool objectsCreated, bool modelLoaded, bool sceneLoaded, bool undoCalled, bool redoCalled, bool sceneSwitched, bool editModeActive, bool objectsScaled, bool selectionStateChanged, bool keyPressed, bool simulationStarted, bool simulationEnded, bool scriptCreated, bool scriptErased)

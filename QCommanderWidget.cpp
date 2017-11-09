@@ -116,7 +116,7 @@ void QCommanderWidget::onDownPressed()
     setHistoryIndex(++historyIndex);
 }
 
-void QCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> jointCtrlCallbacks, QMap<int,QString> customizationScripts, bool simRunning)
+void QCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning)
 {
     // save current item:
     QVariant old = scriptCombo->itemData(scriptCombo->currentIndex());
@@ -126,7 +126,6 @@ void QCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QMap<
 
     // populate combo box:
     static boost::format childScriptFmt("Child script of '%s'");
-    static boost::format jointCtrlCallbackFmt("Joint Control Callback script of '%s'");
     static boost::format customizationScriptFmt("Customization script of '%s'");
     int index = 0, selectedIndex = -1;
     {
@@ -155,25 +154,6 @@ void QCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QMap<
             index++;
         }
     }
-    if(simRunning) {
-        QMapIterator<int,QString> i(jointCtrlCallbacks);
-        while(i.hasNext())
-        {
-            i.next();
-            QVariantList data;
-            data << sim_scripttype_jointctrlcallback << i.key() << i.value();
-            scriptCombo->addItem((jointCtrlCallbackFmt % i.value().toStdString()).str().c_str(), data);
-            if(data == old) selectedIndex = index;
-            index++;
-        }
-    }
-    if(simRunning) {
-        QVariantList data;
-        data << sim_scripttype_contactcallback << 0 << QString();
-        scriptCombo->addItem("Contact callback", data);
-        if(data == old) selectedIndex = index;
-        index++;
-    }
     {
         QMapIterator<int,QString> i(customizationScripts);
         while(i.hasNext())
@@ -185,13 +165,6 @@ void QCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QMap<
             if(data == old) selectedIndex = index;
             index++;
         }
-    }
-    {
-        QVariantList data;
-        data << sim_scripttype_generalcallback << 0 << QString();
-        scriptCombo->addItem("General callback", data);
-        if(data == old) selectedIndex = index;
-        index++;
     }
 
     if(selectedIndex >= 0)

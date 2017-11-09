@@ -35,7 +35,7 @@ public slots:
     void onExecCode(QString code, int scriptHandleOrType, QString scriptName);
 
 signals:
-    void scriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> jointCtrlCallbacks, QMap<int,QString> customizationScripts, bool simRunning);
+    void scriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning);
 };
 
 #endif // UIFUNCTIONS_H_INCLUDED
