@@ -68,10 +68,6 @@ std::string UIFunctions::getStackTopAsString(int stackHandle)
     {
         ret = boolValue ? "true" : "false";
     }
-    else if(simGetStackInt32Value(stackHandle, &intValue) == 1)
-    {
-        ret = boost::lexical_cast<std::string>(intValue);
-    }
     else if(simGetStackDoubleValue(stackHandle, &doubleValue) == 1)
     {
         ret = boost::lexical_cast<std::string>(doubleValue);
@@ -79,6 +75,10 @@ std::string UIFunctions::getStackTopAsString(int stackHandle)
     else if(simGetStackFloatValue(stackHandle, &floatValue) == 1)
     {
         ret = boost::lexical_cast<std::string>(floatValue);
+    }
+    else if(simGetStackInt32Value(stackHandle, &intValue) == 1)
+    {
+        ret = boost::lexical_cast<std::string>(intValue);
     }
     else if((stringValue = simGetStackStringValue(stackHandle, &stringSize)) != NULL)
     {
