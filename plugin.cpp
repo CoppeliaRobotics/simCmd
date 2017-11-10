@@ -228,6 +228,14 @@ public:
             optionsChangedFromData.store(true);
         }
 
+        if(commanderWidget->closeFlag.load())
+        {
+            commanderWidget->closeFlag.store(false);
+            options.enabled = false;
+            optionsChangedFromGui.store(true);
+            updateMenuItems();
+        }
+
         if(optionsChangedFromGui.load())
         {
             optionsChangedFromGui.store(false);

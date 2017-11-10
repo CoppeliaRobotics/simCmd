@@ -49,16 +49,21 @@ QCommanderWidget::QCommanderWidget(QWidget *parent)
     editor->setFont(QFont("Courier", 12));
     scriptCombo = new QComboBox(this);
     scriptCombo->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+    closeButton = new QPushButton(QString::fromUtf8("\u2715"), this);
+    closeButton->setFlat(true);
+    closeButton->setStyleSheet("margin-left: 5px; margin-right: 5px; font-size: 14pt;");
     QHBoxLayout *layout = new QHBoxLayout(this);
     layout->setSpacing(0);
     layout->setMargin(0);
     setLayout(layout);
     layout->addWidget(editor);
     layout->addWidget(scriptCombo);
+    layout->addWidget(closeButton);
     connect(editor, &QCommanderEditor::returnPressed, this, &QCommanderWidget::onReturnPressed);
     connect(editor, &QCommanderEditor::escapePressed, this, &QCommanderWidget::onEscapePressed);
     connect(editor, &QCommanderEditor::upPressed, this, &QCommanderWidget::onUpPressed);
     connect(editor, &QCommanderEditor::downPressed, this, &QCommanderWidget::onDownPressed);
+    connect(closeButton, &QPushButton::clicked, this, &QCommanderWidget::onClose);
 }
 
 QCommanderWidget::~QCommanderWidget()
@@ -114,6 +119,11 @@ void QCommanderWidget::onUpPressed()
 void QCommanderWidget::onDownPressed()
 {
     setHistoryIndex(++historyIndex);
+}
+
+void QCommanderWidget::onClose()
+{
+    closeFlag.store(true);
 }
 
 void QCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning)
