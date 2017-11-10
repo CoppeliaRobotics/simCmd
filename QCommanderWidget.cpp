@@ -162,7 +162,9 @@ bool QCommanderWidget::getSelectedScriptInfo(int &type, int &handle, QString &na
         type = data[0].toInt();
         handle = data[1].toInt();
         name = data[2].toString();
+        return true;
     }
+    else return false;
 }
 
 void QCommanderWidget::onReturnPressed()
