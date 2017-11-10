@@ -3,6 +3,7 @@
 #include "UIProxy.h"
 #include "stubs.h"
 #include <boost/lexical_cast.hpp>
+#include <QRegExp>
 
 // UIFunctions is a singleton
 
@@ -120,5 +121,47 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     }
 
     simReleaseStack(stackHandle);
+}
+
+static QStringList getCompletion(int scriptHandleOrType, QString word)
+{
+    simChar *buf = simGetApiFunc(scriptHandleOrType, word.toStdString().c_str());
+    QString bufStr = QString::fromUtf8(buf);
+    simReleaseBuffer(buf);
+    return bufStr.split(QRegExp("\\s+"), QString::SkipEmptyParts);
+}
+
+static int findInsertionPoint(QStringList &l, QString w)
+{
+    int lo = 0, hi = l.size() - 1;
+    while(lo <= hi)
+    {
+        int mid = (lo + hi) / 2;
+        if(l[mid] < w)
+            lo = mid + 1;
+        else if(w < l[mid])
+            hi = mid - 1;
+        else
+            return mid; // found at position mid
+    }
+    return lo; // not found, would be inserted at position lo
+}
+
+void UIFunctions::onGetPrevCompletion(int scriptHandleOrType, QString prefix, QString selection)
+{
+    QStringList cl = getCompletion(scriptHandleOrType, prefix);
+    if(cl.isEmpty()) return;
+    int i = findInsertionPoint(cl, prefix + selection) - 1;
+    if(i >= 0 && i < cl.size())
+        emit setCompletion(cl[i]);
+}
+
+void UIFunctions::onGetNextCompletion(int scriptHandleOrType, QString prefix, QString selection)
+{
+    QStringList cl = getCompletion(scriptHandleOrType, prefix);
+    if(cl.isEmpty()) return;
+    int i = selection == "" ? 0 : (findInsertionPoint(cl, prefix + selection) + 1);
+    if(i >= 0 && i < cl.size())
+        emit setCompletion(cl[i]);
 }
 

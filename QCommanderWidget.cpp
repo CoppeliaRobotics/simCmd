@@ -6,13 +6,52 @@
 #include <QKeyEvent>
 #include <QTimer>
 
-QCommanderEditor::QCommanderEditor(QWidget *parent)
-    : QLineEdit(parent)
+QCommanderEditor::QCommanderEditor(QCommanderWidget *parent)
+    : QLineEdit(parent),
+      commander(parent)
 {
+    installEventFilter(this);
 }
 
 QCommanderEditor::~QCommanderEditor()
 {
+}
+
+inline bool isID(QChar c)
+{
+    return c.isLetterOrNumber() || c == '_' || c == '.';
+}
+
+QString QCommanderEditor::tokenBehindCursor()
+{
+    QString t = text();
+    int c = hasSelectedText() ? selectionStart() : cursorPosition();
+
+    QString before = t.left(c);
+    QString sel = selectedText();
+    QString after = t.mid(c + sel.length());
+
+    if(!after.isEmpty() && isID(after[0])) return QString();
+
+    int j = before.length() - 1;
+    while(j >= 0 && isID(before[j])) j--;
+    return before.mid(j + 1);
+}
+
+void QCommanderEditor::setCompletion(QString s)
+{
+    QString b = tokenBehindCursor();
+    if(!s.startsWith(b)) return;
+    QString z = s.mid(b.length());
+    QString t = text();
+    int c = hasSelectedText() ? selectionStart() : cursorPosition();
+
+    QString before = t.left(c);
+    QString after = t.mid(c + selectedText().length());
+    QString newText = before + z + after;
+    setText(newText);
+    setCursorPosition(before.length());
+    setSelection(before.length(), (before + z).length());
 }
 
 void QCommanderEditor::keyPressEvent(QKeyEvent *event)
@@ -33,6 +72,34 @@ void QCommanderEditor::keyPressEvent(QKeyEvent *event)
     {
         QLineEdit::keyPressEvent(event);
     }
+}
+
+bool QCommanderEditor::eventFilter(QObject *obj, QEvent *event)
+{
+    if(event->type() == QEvent::KeyPress)
+    {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        int type = sim_scripttype_sandboxscript;
+        int handle = -1;
+        QString name;
+        if(keyEvent->key() == Qt::Key_Tab)
+        {
+            commander->getSelectedScriptInfo(type, handle, name);
+            QString t = tokenBehindCursor();
+            if(t.length() > 0)
+                emit getNextCompletion(type, t, selectedText());
+            return true;
+        }
+        if(keyEvent->key() == Qt::Key_Backtab)
+        {
+            commander->getSelectedScriptInfo(type, handle, name);
+            QString t = tokenBehindCursor();
+            if(t.length() > 0)
+                emit getPrevCompletion(type, t, selectedText());
+            return true;
+        }
+    }
+    return QObject::eventFilter(obj, event);
 }
 
 void QCommanderEditor::moveCursorToEnd()
@@ -87,12 +154,8 @@ void QCommanderWidget::setHistoryIndex(int index)
     QTimer::singleShot(0, editor, &QCommanderEditor::moveCursorToEnd);
 }
 
-void QCommanderWidget::onReturnPressed()
+bool QCommanderWidget::getSelectedScriptInfo(int &type, int &handle, QString &name)
 {
-    QString code = editor->text();
-    int type = sim_scripttype_mainscript;
-    int handle = -1;
-    QString name = "";
     if(scriptCombo->currentIndex() >= 0)
     {
         QVariantList data = scriptCombo->itemData(scriptCombo->currentIndex()).toList();
@@ -100,6 +163,15 @@ void QCommanderWidget::onReturnPressed()
         handle = data[1].toInt();
         name = data[2].toString();
     }
+}
+
+void QCommanderWidget::onReturnPressed()
+{
+    QString code = editor->text();
+    int type = sim_scripttype_sandboxscript;
+    int handle = -1;
+    QString name = "";
+    getSelectedScriptInfo(type, handle, name);
     emit execCode(code, type, name);
     history << code;
     historyIndex = history.size();

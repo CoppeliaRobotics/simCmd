@@ -33,9 +33,12 @@ private:
 
 public slots:
     void onExecCode(QString code, int scriptHandleOrType, QString scriptName);
+    void onGetPrevCompletion(int scriptHandleOrType, QString prefix, QString selection);
+    void onGetNextCompletion(int scriptHandleOrType, QString prefix, QString selection);
 
 signals:
     void scriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning);
+    void setCompletion(QString s);
 };
 
 #endif // UIFUNCTIONS_H_INCLUDED

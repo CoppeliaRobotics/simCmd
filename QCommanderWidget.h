@@ -10,13 +10,18 @@
 #include <QComboBox>
 #include <QPushButton>
 
+class QCommanderWidget;
+
 class QCommanderEditor : public QLineEdit
 {
     Q_OBJECT
 
 public:
-    explicit QCommanderEditor(QWidget *parent = 0);
+    explicit QCommanderEditor(QCommanderWidget *parent = 0);
     ~QCommanderEditor();
+
+    QString tokenBehindCursor();
+    void setCompletion(QString s);
 
     void keyPressEvent(QKeyEvent *event);
 
@@ -24,9 +29,16 @@ signals:
     void escapePressed();
     void upPressed();
     void downPressed();
+    void getPrevCompletion(int scriptHandleOrType, QString prefix, QString selection);
+    void getNextCompletion(int scriptHandleOrType, QString prefix, QString selection);
 
 public slots:
     void moveCursorToEnd();
+
+protected:
+    bool eventFilter(QObject *obj, QEvent *event);
+
+    QCommanderWidget *commander;
 };
 
 class QCommanderWidget : public QWidget
@@ -37,6 +49,8 @@ public:
     explicit QCommanderWidget(QWidget *parent = 0);
     ~QCommanderWidget();
 
+    inline QCommanderEditor * editorWidget() { return editor; }
+
 protected:
     QCommanderEditor *editor;
     QComboBox *scriptCombo;
@@ -46,6 +60,9 @@ protected:
     int historyIndex;
 
     void setHistoryIndex(int index);
+
+public:
+    bool getSelectedScriptInfo(int &type, int &handle, QString &name);
 
 private slots:
     void onReturnPressed();

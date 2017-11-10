@@ -223,7 +223,10 @@ public:
             UIFunctions::getInstance(); // construct UIFunctions here (SIM thread)
             QObject::connect(commanderWidget, &QCommanderWidget::execCode, UIFunctions::getInstance(), &UIFunctions::onExecCode);
             QObject::connect(UIFunctions::getInstance(), &UIFunctions::scriptListChanged, commanderWidget, &QCommanderWidget::onScriptListChanged);
-
+            QCommanderEditor *editor = commanderWidget->editorWidget();
+            QObject::connect(editor, &QCommanderEditor::getPrevCompletion, UIFunctions::getInstance(), &UIFunctions::onGetPrevCompletion);
+            QObject::connect(editor, &QCommanderEditor::getNextCompletion, UIFunctions::getInstance(), &UIFunctions::onGetNextCompletion);
+            QObject::connect(UIFunctions::getInstance(), &UIFunctions::setCompletion, editor, &QCommanderEditor::setCompletion);
             options.load();
             optionsChangedFromData.store(true);
         }
