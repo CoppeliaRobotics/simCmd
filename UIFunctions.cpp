@@ -165,3 +165,12 @@ void UIFunctions::onGetNextCompletion(int scriptHandleOrType, QString prefix, QS
         emit setCompletion(cl[i]);
 }
 
+void UIFunctions::onAskCallTip(int scriptHandleOrType, QString symbol)
+{
+    simChar *buf = simGetApiInfo(scriptHandleOrType, symbol.toStdString().c_str());
+    QString bufStr = QString::fromUtf8(buf);
+    if(!bufStr.isEmpty())
+        emit setCallTip(bufStr);
+    simReleaseBuffer(buf);
+}
+

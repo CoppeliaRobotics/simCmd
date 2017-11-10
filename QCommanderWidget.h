@@ -31,9 +31,11 @@ signals:
     void downPressed();
     void getPrevCompletion(int scriptHandleOrType, QString prefix, QString selection);
     void getNextCompletion(int scriptHandleOrType, QString prefix, QString selection);
+    void askCallTip(int scriptHandleOrType, QString symbol);
 
 public slots:
     void moveCursorToEnd();
+    void setCallTip(QString tip);
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);

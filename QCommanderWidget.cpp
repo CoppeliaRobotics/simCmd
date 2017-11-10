@@ -5,6 +5,8 @@
 #include <QHBoxLayout>
 #include <QKeyEvent>
 #include <QTimer>
+#include <QToolTip>
+#include <QApplication>
 
 QCommanderEditor::QCommanderEditor(QCommanderWidget *parent)
     : QLineEdit(parent),
@@ -59,19 +61,38 @@ void QCommanderEditor::keyPressEvent(QKeyEvent *event)
     if(event->key() == Qt::Key_Escape)
     {
         emit escapePressed();
+        return;
     }
     else if(event->key() == Qt::Key_Up)
     {
         emit upPressed();
+        return;
     }
     else if(event->key() == Qt::Key_Down)
     {
         emit downPressed();
+        return;
     }
-    else
+    else if(event->key() == Qt::Key_ParenLeft)
     {
-        QLineEdit::keyPressEvent(event);
+        int type = sim_scripttype_sandboxscript;
+        int handle = -1;
+        QString name;
+        commander->getSelectedScriptInfo(type, handle, name);
+
+        // find symbol before '('
+        QString symbol = text().left(cursorPosition());
+        int j = symbol.length() - 1;
+        while(j >= 0 && isID(symbol[j])) j--;
+        symbol = symbol.mid(j + 1);
+
+        emit askCallTip(type, symbol);
     }
+    else if(event->key() == Qt::Key_ParenRight)
+    {
+        setCallTip("");
+    }
+    QLineEdit::keyPressEvent(event);
 }
 
 bool QCommanderEditor::eventFilter(QObject *obj, QEvent *event)
@@ -105,6 +126,24 @@ bool QCommanderEditor::eventFilter(QObject *obj, QEvent *event)
 void QCommanderEditor::moveCursorToEnd()
 {
     setCursorPosition(text().size());
+}
+
+void QCommanderEditor::setCallTip(QString tip)
+{
+    if(tip.isEmpty())
+    {
+        QToolTip::hideText();
+    }
+    else
+    {
+        setToolTip(tip);
+
+        QPoint cur = mapToGlobal(cursorRect().topLeft());
+        QHelpEvent *event = new QHelpEvent(QEvent::ToolTip,
+                QPoint(this->pos().x(), this->pos().y()),
+                QPoint(cur.x(), cur.y() - 2 * this->height() - 2));
+        QApplication::postEvent(this, event);
+    }
 }
 
 QCommanderWidget::QCommanderWidget(QWidget *parent)

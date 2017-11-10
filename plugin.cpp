@@ -227,6 +227,8 @@ public:
             QObject::connect(editor, &QCommanderEditor::getPrevCompletion, UIFunctions::getInstance(), &UIFunctions::onGetPrevCompletion);
             QObject::connect(editor, &QCommanderEditor::getNextCompletion, UIFunctions::getInstance(), &UIFunctions::onGetNextCompletion);
             QObject::connect(UIFunctions::getInstance(), &UIFunctions::setCompletion, editor, &QCommanderEditor::setCompletion);
+            QObject::connect(editor, &QCommanderEditor::askCallTip, UIFunctions::getInstance(), &UIFunctions::onAskCallTip);
+            QObject::connect(UIFunctions::getInstance(), &UIFunctions::setCallTip, editor, &QCommanderEditor::setCallTip);
             options.load();
             optionsChangedFromData.store(true);
         }
