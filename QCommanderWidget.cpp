@@ -49,7 +49,8 @@ QCommanderWidget::QCommanderWidget(QWidget *parent)
     editor->setFont(QFont("Courier", 12));
     scriptCombo = new QComboBox(this);
     scriptCombo->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-    closeButton = new QPushButton(QString::fromUtf8("\u2715"), this);
+    closeButton = new QPushButton(this);
+    closeButton->setIcon(style()->standardIcon(QStyle::SP_TitleBarCloseButton));
     closeButton->setFlat(true);
     closeButton->setStyleSheet("margin-left: 5px; margin-right: 5px; font-size: 14pt;");
     QHBoxLayout *layout = new QHBoxLayout(this);
