@@ -51,7 +51,7 @@
 
 struct PersistentOptions
 {
-    bool enabled = false;
+    bool enabled = true;
     bool autoReturn = true;
 
     const char * dataTag()
