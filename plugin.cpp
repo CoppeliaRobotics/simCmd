@@ -242,20 +242,10 @@ public:
             options.save();
         }
 
-        if(objectsErased || objectsCreated || modelLoaded || sceneLoaded || undoCalled || redoCalled || sceneSwitched || scriptCreated || scriptErased)
+        if(objectsErased || objectsCreated || modelLoaded || sceneLoaded || undoCalled || redoCalled || sceneSwitched || scriptCreated || scriptErased || simulationStarted || simulationEnded)
         {
             updateScriptsList();
         }
-    }
-
-    virtual void onSimulationAboutToStart()
-    {
-        updateScriptsList();
-    }
-
-    virtual void onSimulationEnded()
-    {
-        updateScriptsList();
     }
 
 private:
