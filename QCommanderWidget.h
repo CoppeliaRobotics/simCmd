@@ -63,6 +63,8 @@ protected:
 
 public:
     bool getSelectedScriptInfo(int &type, int &handle, QString &name);
+    void execute();
+    void acceptCompletion();
 
 private slots:
     void onReturnPressed();

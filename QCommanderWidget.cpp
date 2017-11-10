@@ -167,7 +167,7 @@ bool QCommanderWidget::getSelectedScriptInfo(int &type, int &handle, QString &na
     else return false;
 }
 
-void QCommanderWidget::onReturnPressed()
+void QCommanderWidget::execute()
 {
     QString code = editor->text();
     int type = sim_scripttype_sandboxscript;
@@ -178,6 +178,22 @@ void QCommanderWidget::onReturnPressed()
     history << code;
     historyIndex = history.size();
     editor->setText("");
+}
+
+void QCommanderWidget::acceptCompletion()
+{
+    if(editor->hasSelectedText())
+    {
+        editor->setCursorPosition(editor->selectionStart() + editor->selectedText().length());
+    }
+}
+
+void QCommanderWidget::onReturnPressed()
+{
+    if(editor->hasSelectedText())
+        acceptCompletion();
+    else
+        execute();
 }
 
 void QCommanderWidget::onEscapePressed()
