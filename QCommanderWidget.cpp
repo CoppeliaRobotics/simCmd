@@ -190,6 +190,7 @@ void QCommanderWidget::setHistoryIndex(int index)
         historyIndex = history.size() - 1;
 
     editor->setText(history[historyIndex]);
+    editor->setCallTip("");
     QTimer::singleShot(0, editor, &QCommanderEditor::moveCursorToEnd);
 }
 
@@ -217,6 +218,7 @@ void QCommanderWidget::execute()
     history << code;
     historyIndex = history.size();
     editor->setText("");
+    editor->setCallTip("");
 }
 
 void QCommanderWidget::acceptCompletion()
@@ -224,6 +226,7 @@ void QCommanderWidget::acceptCompletion()
     if(editor->hasSelectedText())
     {
         editor->setCursorPosition(editor->selectionStart() + editor->selectedText().length());
+        editor->setCallTip("");
     }
 }
 
@@ -239,6 +242,7 @@ void QCommanderWidget::onEscapePressed()
 {
     historyIndex = history.size();
     editor->setText("");
+    editor->setCallTip("");
 }
 
 void QCommanderWidget::onUpPressed()
