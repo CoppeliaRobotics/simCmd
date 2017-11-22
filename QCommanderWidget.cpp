@@ -150,10 +150,13 @@ void QCommanderEditor::setCallTip(QString tip)
     {
         setToolTip(tip);
 
+        QFontMetrics fm(QToolTip::font());
+        QRect r = fm.boundingRect(QRect(0, 0, 500, 50), 0, tip);
+
         QPoint cur = mapToGlobal(cursorRect().topLeft());
         QHelpEvent *event = new QHelpEvent(QEvent::ToolTip,
-                QPoint(this->pos().x(), this->pos().y()),
-                QPoint(cur.x(), cur.y() - 2 * this->height() - 2));
+                QPoint(pos().x(), pos().y()),
+                QPoint(cur.x(), cur.y() - height() - r.height() - 4));
         QApplication::postEvent(this, event);
     }
 }
