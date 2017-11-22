@@ -114,6 +114,11 @@ public:
         updateMenuItems();
     }
 
+    void onEnd()
+    {
+        delete commanderWidget;
+    }
+
     QPlainTextEdit * findStatusBar()
     {
         QPlainTextEdit *statusBar = UIProxy::vrepMainWindow->findChild<QPlainTextEdit*>("statusBar");
