@@ -75,6 +75,13 @@ void QCommanderEditor::keyPressEvent(QKeyEvent *event)
     }
     else if(event->key() == Qt::Key_ParenLeft)
     {
+        // if there is completion, accept it:
+        if(hasSelectedText())
+        {
+            setCursorPosition(selectionStart() + selectedText().length());
+        }
+
+        // ask call tip:
         int type = sim_scripttype_sandboxscript;
         int handle = -1;
         QString name;
@@ -87,6 +94,11 @@ void QCommanderEditor::keyPressEvent(QKeyEvent *event)
         symbol = symbol.mid(j + 1);
 
         emit askCallTip(type, symbol);
+    }
+    else if(event->key() == Qt::Key_Comma)
+    {
+        // reshow last tooltip when comma is pressed
+        setCallTip(toolTip());
     }
     else if(event->key() == Qt::Key_ParenRight)
     {
