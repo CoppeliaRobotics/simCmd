@@ -78,6 +78,9 @@ public:
         if(!registerScriptStuff())
             throw std::runtime_error("failed to register script stuff");
 
+        optionsChangedFromGui.store(false);
+        optionsChangedFromData.store(false);
+
         UIProxy::getInstance(); // construct UIProxy here (UI thread)
 
         // find the StatusBar widget (QPlainTextEdit)

@@ -165,6 +165,7 @@ QCommanderWidget::QCommanderWidget(QWidget *parent)
     : QWidget(parent),
       historyIndex(0)
 {
+    closeFlag.store(false);
     editor = new QCommanderEditor(this);
     editor->setPlaceholderText("Input Lua code here (use TAB for auto-completion)");
     editor->setFont(QFont("Courier", 12));
