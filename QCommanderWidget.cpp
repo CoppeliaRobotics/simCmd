@@ -53,7 +53,7 @@ void QCommanderEditor::setCompletion(QString s)
     QString newText = before + z + after;
     setText(newText);
     setCursorPosition(before.length());
-    setSelection(before.length(), (before + z).length());
+    setSelection(before.length(), z.length());
 }
 
 void QCommanderEditor::keyPressEvent(QKeyEvent *event)
