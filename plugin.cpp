@@ -111,7 +111,7 @@ public:
             simAddStatusbarMessage("LuaCommander error: failed to create menu");
             return;
         }
-        updateMenuItems();
+        updateUI();
     }
 
     void onEnd()
@@ -131,6 +131,11 @@ public:
         menuState[MENUITEM_AUTO_RETURN] = (options.enabled ? itemEnabled : 0) + (options.autoReturn ? itemChecked : 0);
         for(int i = 0; i < menuHandles.size(); i++)
             simSetModuleMenuItemState(menuHandles[i], menuState[i], menuLabels[i].c_str());
+    }
+
+    void updateUI()
+    {
+        updateMenuItems();
         if(commanderWidget && !firstInstancePass)
             commanderWidget->setVisible(options.enabled);
     }
@@ -142,7 +147,7 @@ public:
             const int i = MENUITEM_TOGGLE_VISIBILITY;
             options.enabled = !options.enabled;
             optionsChangedFromGui.store(true);
-            updateMenuItems();
+            updateUI();
         }
         else if(itemHandle == menuHandles[MENUITEM_AUTO_RETURN])
         {
@@ -150,7 +155,7 @@ public:
             options.autoReturn = !options.autoReturn;
             UIFunctions::getInstance()->autoReturn = options.autoReturn;
             optionsChangedFromGui.store(true);
-            updateMenuItems();
+            updateUI();
         }
     }
 
@@ -159,7 +164,7 @@ public:
         if(optionsChangedFromData.load())
         {
             optionsChangedFromData.store(false);
-            updateMenuItems();
+            updateUI();
         }
     }
 
@@ -214,13 +219,14 @@ public:
             commanderWidget->closeFlag.store(false);
             options.enabled = false;
             optionsChangedFromGui.store(true);
-            updateMenuItems();
+            updateUI();
         }
 
         if(optionsChangedFromGui.load())
         {
             optionsChangedFromGui.store(false);
             options.save();
+            updateUI();
         }
 
         if(objectsErased || objectsCreated || modelLoaded || sceneLoaded || undoCalled || redoCalled || sceneSwitched || scriptCreated || scriptErased || simulationStarted || simulationEnded)
