@@ -156,8 +156,22 @@ public:
     void updateUI()
     {
         updateMenuItems();
-        if(commanderWidget && !firstInstancePass)
-            commanderWidget->setVisible(options.enabled);
+        if(commanderWidget)
+        {
+            bool oldVis = commanderWidget->isVisible();
+
+            if(!firstInstancePass)
+                commanderWidget->setVisible(options.enabled);
+
+            bool newVis = commanderWidget->isVisible();
+            if(oldVis && !newVis)
+            {
+                // when commander is hidden, focus the statusbar
+                QPlainTextEdit *statusBar = findStatusBar();
+                if(statusBar)
+                    statusBar->setFocus();
+            }
+        }
     }
 
     virtual void onMenuItemSelected(int itemHandle, int itemState)
