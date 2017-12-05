@@ -18,6 +18,7 @@
 #include "debug.h"
 #include <QPlainTextEdit>
 #include <QVBoxLayout>
+#include <QSplitter>
 #include "QCommanderWidget.h"
 
 struct PersistentOptions
@@ -92,13 +93,15 @@ public:
         }
 
         // attach widget to V-REP main window
-        QWidget *parent = statusBar->parentWidget();
-        commanderWidget = new QCommanderWidget(parent);
-        commanderWidget->setVisible(false);
-        QVBoxLayout *layout = new QVBoxLayout(parent);
+        splitter = (QSplitter*)statusBar->parentWidget();
+        splitterChild = new QWidget();
+        splitter->addWidget(splitterChild);
+        QVBoxLayout *layout = new QVBoxLayout();
         layout->setSpacing(0);
         layout->setMargin(0);
-        parent->setLayout(layout);
+        splitterChild->setLayout(layout);
+        commanderWidget = new QCommanderWidget();
+        commanderWidget->setVisible(false);
         layout->addWidget(statusBar);
         layout->addWidget(commanderWidget);
 
@@ -119,7 +122,10 @@ public:
 
     void onEnd()
     {
-        delete commanderWidget;
+        QPlainTextEdit *statusBar = findStatusBar();
+        if(statusBar)
+            splitter->addWidget(statusBar);
+        delete splitterChild;
     }
 
     QPlainTextEdit * findStatusBar()
@@ -241,6 +247,8 @@ public:
 private:
     bool firstInstancePass = true;
     bool pluginEnabled = true;
+    QSplitter *splitter = 0L;
+    QWidget *splitterChild = 0L;
     QCommanderWidget *commanderWidget = 0L;
     std::vector<simInt> menuHandles;
     std::vector<simInt> menuState;
