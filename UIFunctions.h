@@ -22,7 +22,7 @@ public:
 
     void connectSignals();
 
-    std::atomic<bool> autoReturn;
+    //std::atomic<bool> autoReturn;
 
 private:
     UIFunctions(QObject *parent = 0);

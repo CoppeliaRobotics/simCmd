@@ -23,7 +23,7 @@
 struct PersistentOptions
 {
     bool enabled = true;
-    bool autoReturn = true;
+    //bool autoReturn = true;
 
     const char * dataTag()
     {
@@ -33,7 +33,7 @@ struct PersistentOptions
     void dump()
     {
         std::cout << "LuaCommander:     enabled=" << enabled << std::endl;
-        std::cout << "LuaCommander:     autoReturn=" << autoReturn << std::endl;
+        //std::cout << "LuaCommander:     autoReturn=" << autoReturn << std::endl;
     }
 
     bool load()
@@ -50,7 +50,7 @@ struct PersistentOptions
         if(ok)
         {
             memcpy(this, pdata, sizeof(*this));
-            UIFunctions::getInstance()->autoReturn.store(autoReturn);
+            //UIFunctions::getInstance()->autoReturn.store(autoReturn);
             std::cout << "LuaCommander: Loaded persistent options:" << std::endl;
             dump();
         }
@@ -105,8 +105,8 @@ public:
         // add menu items to V-REP main window
         MENUITEM_TOGGLE_VISIBILITY = menuLabels.size();
         menuLabels.push_back("Enable");
-        MENUITEM_AUTO_RETURN = menuLabels.size();
-        menuLabels.push_back("Automatically return input statement");
+        //MENUITEM_AUTO_RETURN = menuLabels.size();
+        //menuLabels.push_back("Automatically return input statement");
         menuState.resize(menuLabels.size());
         menuHandles.resize(menuLabels.size());
         if(simAddModuleMenuEntry("Lua Commander", menuHandles.size(), &menuHandles[0]) == -1)
@@ -131,7 +131,7 @@ public:
     void updateMenuItems()
     {
         menuState[MENUITEM_TOGGLE_VISIBILITY] = (options.enabled ? itemChecked : 0) + itemEnabled;
-        menuState[MENUITEM_AUTO_RETURN] = (options.enabled ? itemEnabled : 0) + (options.autoReturn ? itemChecked : 0);
+        //menuState[MENUITEM_AUTO_RETURN] = (options.enabled ? itemEnabled : 0) + (options.autoReturn ? itemChecked : 0);
         for(int i = 0; i < menuHandles.size(); i++)
             simSetModuleMenuItemState(menuHandles[i], menuState[i], menuLabels[i].c_str());
     }
@@ -152,14 +152,14 @@ public:
             optionsChangedFromGui.store(true);
             updateUI();
         }
-        else if(itemHandle == menuHandles[MENUITEM_AUTO_RETURN])
+        /*else if(itemHandle == menuHandles[MENUITEM_AUTO_RETURN])
         {
             const int i = MENUITEM_AUTO_RETURN;
             options.autoReturn = !options.autoReturn;
             UIFunctions::getInstance()->autoReturn = options.autoReturn;
             optionsChangedFromGui.store(true);
             updateUI();
-        }
+        }*/
     }
 
     virtual void onGuiPass()
@@ -246,7 +246,7 @@ private:
     std::vector<simInt> menuState;
     std::vector<std::string> menuLabels;
     int MENUITEM_TOGGLE_VISIBILITY;
-    int MENUITEM_AUTO_RETURN;
+    //int MENUITEM_AUTO_RETURN;
     static const int itemEnabled = 1, itemChecked = 2;
     std::atomic<bool> optionsChangedFromGui;
     std::atomic<bool> optionsChangedFromData;
