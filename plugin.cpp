@@ -114,6 +114,7 @@ public:
         commanderWidget->setVisible(false);
         layout->addWidget(statusBar);
         layout->addWidget(commanderWidget);
+        splitterChild->setMaximumHeight(600);
 
         // add menu items to V-REP main window
         MENUITEM_TOGGLE_VISIBILITY = menuLabels.size();
