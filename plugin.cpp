@@ -133,10 +133,16 @@ public:
 
     void onEnd()
     {
+        // XXX: different platforms crash in some conditions
+        //      this seems to make every platform happy:
+#ifdef __APPLE__
+        delete commanderWidget;
+#else
         QPlainTextEdit *statusBar = findStatusBar();
         if(statusBar)
             splitter->addWidget(statusBar);
         delete splitterChild;
+#endif
     }
 
     QPlainTextEdit * findStatusBar()
