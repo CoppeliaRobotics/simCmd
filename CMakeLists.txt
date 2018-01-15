@@ -22,7 +22,7 @@ include_directories(${CMAKE_BINARY_DIR}/generated)
 include_directories(${CMAKE_SOURCE_DIR}/external)
 include_directories(${Boost_INCLUDE_DIRS})
 
-vrep_generate_stubs(${CMAKE_BINARY_DIR}/generated XML_FILE ${CMAKE_SOURCE_DIR}/callbacks.xml)
+vrep_generate_stubs(${CMAKE_BINARY_DIR}/generated XML_FILE ${CMAKE_SOURCE_DIR}/callbacks.xml LUA_FILE ${CMAKE_SOURCE_DIR}/simExtLuaCommander.lua)
 
 configure_file(${CMAKE_SOURCE_DIR}/config.h.in ${CMAKE_BINARY_DIR}/config.h)
 
