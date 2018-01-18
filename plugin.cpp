@@ -89,10 +89,7 @@ public:
         // find the StatusBar widget (QPlainTextEdit)
         QPlainTextEdit *statusBar = findStatusBar();
         if(!statusBar)
-        {
-            simAddStatusbarMessage("LuaCommander error: cannot find the statusbar widget");
-            return;
-        }
+            throw std::runtime_error("cannot find the statusbar widget");
 
         if(!registerScriptStuff())
             throw std::runtime_error("failed to register script stuff");
