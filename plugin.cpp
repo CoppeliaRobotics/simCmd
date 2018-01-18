@@ -86,14 +86,6 @@ class Plugin : public vrep::Plugin
 public:
     void onStart()
     {
-        if(!registerScriptStuff())
-            throw std::runtime_error("failed to register script stuff");
-
-        optionsChangedFromGui.store(false);
-        optionsChangedFromData.store(false);
-
-        UIProxy::getInstance(); // construct UIProxy here (UI thread)
-
         // find the StatusBar widget (QPlainTextEdit)
         QPlainTextEdit *statusBar = findStatusBar();
         if(!statusBar)
@@ -101,6 +93,14 @@ public:
             simAddStatusbarMessage("LuaCommander error: cannot find the statusbar widget");
             return;
         }
+
+        if(!registerScriptStuff())
+            throw std::runtime_error("failed to register script stuff");
+
+        optionsChangedFromGui.store(false);
+        optionsChangedFromData.store(false);
+
+        UIProxy::getInstance(); // construct UIProxy here (UI thread)
 
         // attach widget to V-REP main window
         splitter = (QSplitter*)statusBar->parentWidget();
@@ -133,6 +133,8 @@ public:
 
     void onEnd()
     {
+        if(!commanderWidget) return;
+
         // XXX: different platforms crash in some conditions
         //      this seems to make every platform happy:
 #ifdef __APPLE__
@@ -236,10 +238,12 @@ public:
 
     virtual void onInstancePass(bool objectsErased, bool objectsCreated, bool modelLoaded, bool sceneLoaded, bool undoCalled, bool redoCalled, bool sceneSwitched, bool editModeActive, bool objectsScaled, bool selectionStateChanged, bool keyPressed, bool simulationStarted, bool simulationEnded, bool scriptCreated, bool scriptErased)
     {
-        int id = qRegisterMetaType< QMap<int,QString> >();
+        if(!commanderWidget) return;
 
         if(firstInstancePass)
         {
+            int id = qRegisterMetaType< QMap<int,QString> >();
+
             firstInstancePass = false;
             UIFunctions::getInstance(); // construct UIFunctions here (SIM thread)
             QObject::connect(commanderWidget, &QCommanderWidget::execCode, UIFunctions::getInstance(), &UIFunctions::onExecCode);
