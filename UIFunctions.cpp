@@ -77,25 +77,24 @@ std::string UIFunctions::getStackTopAsString(int stackHandle)
         {
             int newSize = simGetStackSize(stackHandle);
             int tableSize = newSize - oldSize;
-            if(simUnfoldStackTable(stackHandle) != -1)
+
+            std::stringstream ss;
+            ss << "{";
+
+            for(int i = 0; i < tableSize / 2; i++)
             {
-                std::stringstream ss;
-                ss << "{";
-
-                for(int i = 0; i < tableSize / 2; i++)
-                {
-                    simInt keySize;
-                    simChar *key = simGetStackStringValue(stackHandle, &keySize);
-                    simPopStackItem(stackHandle, 1);
-                    std::string valueStr = getStackTopAsString(stackHandle);
-                    simPopStackItem(stackHandle, 1);
-                    ss << (i ? ", " : "") << (key ? key : "?") << "=" << valueStr;
-                }
-
-                ss << "}";
-                return ss.str();
+                simInt keySize;
+                simChar *key = simGetStackStringValue(stackHandle, &keySize);
+                simPopStackItem(stackHandle, 1);
+                std::string valueStr = getStackTopAsString(stackHandle);
+                simPopStackItem(stackHandle, 1);
+                ss << (i ? ", " : "") << (key ? key : "?") << "=" << valueStr;
             }
+
+            ss << "}";
+            return ss.str();
         }
+        else return "<table:unfold-error>";
     }
     else if(n > 0)
     {
