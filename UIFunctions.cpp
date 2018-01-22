@@ -84,10 +84,10 @@ std::string UIFunctions::getStackTopAsString(int stackHandle)
                     break;
                 }
 
-                simMoveStackItemToTop(stackHandle, 0);
+                simMoveStackItemToTop(stackHandle, oldSize - 1);
                 std::string key = getStackTopAsString(stackHandle);
 
-                simMoveStackItemToTop(stackHandle, 0);
+                simMoveStackItemToTop(stackHandle, oldSize - 1);
                 std::string value = getStackTopAsString(stackHandle);
 
                 ss << (i ? ", " : "");
