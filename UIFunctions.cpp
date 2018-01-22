@@ -68,7 +68,7 @@ std::string UIFunctions::getStackTopAsString(int stackHandle)
     if(n == 0)
     {
         // empty table
-        ret = "{}";
+        return "{}";
     }
     else if(n == -2)
     {
