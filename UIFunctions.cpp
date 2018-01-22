@@ -63,7 +63,6 @@ std::string UIFunctions::getStackTopAsString(int stackHandle)
     simDouble doubleValue;
     simChar *stringValue;
     simInt stringSize;
-    std::string ret = "?";
     int n = simGetStackTableInfo(stackHandle, 0);
     if(n == 0)
     {
@@ -198,7 +197,7 @@ std::string UIFunctions::getStackTopAsString(int stackHandle)
     }
     else if((stringValue = simGetStackStringValue(stackHandle, &stringSize)) != NULL)
     {
-        ret = std::string(stringValue, stringSize);
+        std::string ret = std::string(stringValue, stringSize);
         simReleaseBuffer(stringValue);
         return ret;
     }
