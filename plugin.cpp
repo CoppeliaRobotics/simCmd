@@ -86,6 +86,8 @@ class Plugin : public vrep::Plugin
 public:
     void onStart()
     {
+        UIProxy::getInstance(); // construct UIProxy here (UI thread)
+
         // find the StatusBar widget (QPlainTextEdit)
         QPlainTextEdit *statusBar = findStatusBar();
         if(!statusBar)
@@ -96,8 +98,6 @@ public:
 
         optionsChangedFromGui.store(false);
         optionsChangedFromData.store(false);
-
-        UIProxy::getInstance(); // construct UIProxy here (UI thread)
 
         // attach widget to V-REP main window
         splitter = (QSplitter*)statusBar->parentWidget();
