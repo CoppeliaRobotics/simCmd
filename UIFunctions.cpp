@@ -64,28 +64,145 @@ std::string UIFunctions::getStackTopAsString(int stackHandle)
     simChar *stringValue;
     simInt stringSize;
     std::string ret = "?";
-    if(simGetStackBoolValue(stackHandle, &boolValue) == 1)
+    int n = simGetStackTableInfo(stackHandle, 0);
+    if(n == 0)
     {
-        ret = boolValue ? "true" : "false";
+        // empty table
+        ret = "{}";
+    }
+    else if(n == -2)
+    {
+        // map-like table
+        int oldSize = simGetStackSize(stackHandle);
+        if(simUnfoldStackTable(stackHandle) != -1)
+        {
+            int newSize = simGetStackSize(stackHandle);
+            int tableSize = newSize - oldSize;
+            if(simUnfoldStackTable(stackHandle) != -1)
+            {
+                std::stringstream ss;
+                ss << "{";
+
+                for(int i = 0; i < tableSize / 2; i++)
+                {
+                    simInt keySize;
+                    simChar *key = simGetStackStringValue(stackHandle, &keySize);
+                    simPopStackItem(stackHandle, 1);
+                    std::string valueStr = getStackTopAsString(stackHandle);
+                    simPopStackItem(stackHandle, 1);
+                    ss << (i ? ", " : "") << (key ? key : "?") << "=" << valueStr;
+                }
+
+                ss << "}";
+                return ss.str();
+            }
+        }
+    }
+    else if(n > 0)
+    {
+        std::stringstream ss;
+        ss << "{";
+
+        // array-like table
+        if(simGetStackTableInfo(stackHandle, 1) == 1)
+        {
+            // of nils
+            for(int i = 0; i < n; i++)
+                ss << (i ? ", " : "") << "nil";
+        }
+        else if(simGetStackTableInfo(stackHandle, 2) == 1)
+        {
+            // of numbers
+            simDouble arrDouble[n];
+            simFloat arrFloat[n];
+            simInt arrInt[n];
+            simUChar arrByte[n];
+            if(simGetStackDoubleTable(stackHandle, &arrDouble[0], n) == 1)
+            {
+                for(int i = 0; i < n; i++)
+                    ss << (i ? ", " : "") << arrDouble[i];
+            }
+            else if(simGetStackFloatTable(stackHandle, &arrFloat[0], n) == 1)
+            {
+                for(int i = 0; i < n; i++)
+                    ss << (i ? ", " : "") << arrFloat[i];
+            }
+            else if(simGetStackInt32Table(stackHandle, &arrInt[0], n) == 1)
+            {
+                for(int i = 0; i < n; i++)
+                    ss << (i ? ", " : "") << arrInt[i];
+            }
+            else if(simGetStackUInt8Table(stackHandle, &arrByte[0], n) == 1)
+            {
+                for(int i = 0; i < n; i++)
+                    ss << (i ? ", " : "") << arrByte[i];
+            }
+            else ss << "???";
+        }
+#if 0
+        else if(simGetStackTableInfo(stackHandle, 2) == 1)
+        {
+            // of booleans
+        }
+        else if(simGetStackTableInfo(stackHandle, 2) == 1)
+        {
+            // of strings
+        }
+        else if(simGetStackTableInfo(stackHandle, 2) == 1)
+        {
+            // of tables
+        }
+#endif
+        else
+        {
+            int oldSize = simGetStackSize(stackHandle);
+            if(simUnfoldStackTable(stackHandle) != -1)
+            {
+                int newSize = simGetStackSize(stackHandle);
+                int tableSize = newSize - oldSize;
+                if(simUnfoldStackTable(stackHandle) != -1)
+                {
+                    for(int i = 0; i < tableSize / 2; i++)
+                    {
+                        simInt keySize;
+                        //simChar *key = simGetStackStringValue(stackHandle, &keySize);
+                        simPopStackItem(stackHandle, 1);
+                        std::string valueStr = getStackTopAsString(stackHandle);
+                        simPopStackItem(stackHandle, 1);
+                        ss << (i ? ", " : "") << valueStr;
+                    }
+                }
+                else ss << "???";
+            }
+            else ss << "???";
+        }
+
+        ss << "}";
+        return ss.str();
+    }
+    else if(simGetStackBoolValue(stackHandle, &boolValue) == 1)
+    {
+        return boolValue ? "true" : "false";
     }
     else if(simGetStackDoubleValue(stackHandle, &doubleValue) == 1)
     {
-        ret = boost::lexical_cast<std::string>(doubleValue);
+        return boost::lexical_cast<std::string>(doubleValue);
     }
     else if(simGetStackFloatValue(stackHandle, &floatValue) == 1)
     {
-        ret = boost::lexical_cast<std::string>(floatValue);
+        return boost::lexical_cast<std::string>(floatValue);
     }
     else if(simGetStackInt32Value(stackHandle, &intValue) == 1)
     {
-        ret = boost::lexical_cast<std::string>(intValue);
+        return boost::lexical_cast<std::string>(intValue);
     }
     else if((stringValue = simGetStackStringValue(stackHandle, &stringSize)) != NULL)
     {
         ret = std::string(stringValue, stringSize);
         simReleaseBuffer(stringValue);
+        return ret;
     }
-    return ret;
+    return "?";
 }
 
 void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scriptName)
