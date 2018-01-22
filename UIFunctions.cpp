@@ -78,23 +78,21 @@ std::string UIFunctions::getStackTopAsString(int stackHandle)
 
             for(int i = 0; i < numItems; i++)
             {
-                simMoveStackItemToTop(stackHandle, 0);
-                std::string key = getStackTopAsString(stackHandle);
-                simPopStackItem(stackHandle, 1);
-
-                simMoveStackItemToTop(stackHandle, 0);
-                std::string value = getStackTopAsString(stackHandle);
-                simPopStackItem(stackHandle, 1);
-
-                ss << (i ? ", " : "");
-                if(n < 0) ss << key << "=";
-                ss << value;
-
-                if(i > limit)
+                if(i >= limit)
                 {
                     ss << " ... (" << numItems << " items)";
                     break;
                 }
+
+                simMoveStackItemToTop(stackHandle, 0);
+                std::string key = getStackTopAsString(stackHandle);
+
+                simMoveStackItemToTop(stackHandle, 0);
+                std::string value = getStackTopAsString(stackHandle);
+
+                ss << (i ? ", " : "");
+                if(n < 0) ss << key << "=";
+                ss << value;
             }
 
             ss << "}";
@@ -104,27 +102,36 @@ std::string UIFunctions::getStackTopAsString(int stackHandle)
     }
     else if(simGetStackBoolValue(stackHandle, &boolValue) == 1)
     {
+        simPopStackItem(stackHandle, 1);
         return boolValue ? "true" : "false";
     }
     else if(simGetStackDoubleValue(stackHandle, &doubleValue) == 1)
     {
+        simPopStackItem(stackHandle, 1);
         return boost::lexical_cast<std::string>(doubleValue);
     }
     else if(simGetStackFloatValue(stackHandle, &floatValue) == 1)
     {
+        simPopStackItem(stackHandle, 1);
         return boost::lexical_cast<std::string>(floatValue);
     }
     else if(simGetStackInt32Value(stackHandle, &intValue) == 1)
     {
+        simPopStackItem(stackHandle, 1);
         return boost::lexical_cast<std::string>(intValue);
     }
     else if((stringValue = simGetStackStringValue(stackHandle, &stringSize)) != NULL)
     {
+        simPopStackItem(stackHandle, 1);
         std::string ret = "\"" + std::string(stringValue, stringSize) + "\"";
         simReleaseBuffer(stringValue);
         return ret;
     }
-    return "?";
+    else
+    {
+        simPopStackItem(stackHandle, 1);
+        return "?";
+    }
 }
 
 void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scriptName)
