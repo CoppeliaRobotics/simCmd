@@ -57,6 +57,7 @@ void UIFunctions::connectSignals()
 
 std::string UIFunctions::getStackTopAsString(int stackHandle)
 {
+    static const int limit = 20;
     simBool boolValue;
     simInt intValue;
     simFloat floatValue;
@@ -64,119 +65,42 @@ std::string UIFunctions::getStackTopAsString(int stackHandle)
     simChar *stringValue;
     simInt stringSize;
     int n = simGetStackTableInfo(stackHandle, 0);
-    if(n == 0)
+    if(n == -2 || n >= 0)
     {
-        // empty table
-        return "{}";
-    }
-    else if(n == -2)
-    {
-        // map-like table
         int oldSize = simGetStackSize(stackHandle);
         if(simUnfoldStackTable(stackHandle) != -1)
         {
             int newSize = simGetStackSize(stackHandle);
-            int tableSize = newSize - oldSize;
+            int numItems = (newSize - oldSize + 1) / 2;
 
             std::stringstream ss;
             ss << "{";
 
-            for(int i = 0; i < tableSize / 2; i++)
+            for(int i = 0; i < numItems; i++)
             {
-                simInt keySize;
-                simChar *key = simGetStackStringValue(stackHandle, &keySize);
+                simMoveStackItemToTop(stackHandle, 0);
+                std::string key = getStackTopAsString(stackHandle);
                 simPopStackItem(stackHandle, 1);
-                std::string valueStr = getStackTopAsString(stackHandle);
+
+                simMoveStackItemToTop(stackHandle, 0);
+                std::string value = getStackTopAsString(stackHandle);
                 simPopStackItem(stackHandle, 1);
-                ss << (i ? ", " : "") << (key ? key : "?") << "=" << valueStr;
+
+                ss << (i ? ", " : "");
+                if(n < 0) ss << key << "=";
+                ss << value;
+
+                if(i > limit)
+                {
+                    ss << " ... (" << numItems << " items)";
+                    break;
+                }
             }
 
             ss << "}";
             return ss.str();
         }
-        else return "<table:unfold-error>";
-    }
-    else if(n > 0)
-    {
-        std::stringstream ss;
-        ss << "{";
-
-        // array-like table
-        if(simGetStackTableInfo(stackHandle, 1) == 1)
-        {
-            // of nils
-            for(int i = 0; i < n; i++)
-                ss << (i ? ", " : "") << "nil";
-        }
-        else if(simGetStackTableInfo(stackHandle, 2) == 1)
-        {
-            // of numbers
-            simDouble arrDouble[n];
-            simFloat arrFloat[n];
-            simInt arrInt[n];
-            simUChar arrByte[n];
-            if(simGetStackDoubleTable(stackHandle, &arrDouble[0], n) == 1)
-            {
-                for(int i = 0; i < n; i++)
-                    ss << (i ? ", " : "") << arrDouble[i];
-            }
-            else if(simGetStackFloatTable(stackHandle, &arrFloat[0], n) == 1)
-            {
-                for(int i = 0; i < n; i++)
-                    ss << (i ? ", " : "") << arrFloat[i];
-            }
-            else if(simGetStackInt32Table(stackHandle, &arrInt[0], n) == 1)
-            {
-                for(int i = 0; i < n; i++)
-                    ss << (i ? ", " : "") << arrInt[i];
-            }
-            else if(simGetStackUInt8Table(stackHandle, &arrByte[0], n) == 1)
-            {
-                for(int i = 0; i < n; i++)
-                    ss << (i ? ", " : "") << arrByte[i];
-            }
-            else ss << "???";
-        }
-#if 0
-        else if(simGetStackTableInfo(stackHandle, 2) == 1)
-        {
-            // of booleans
-        }
-        else if(simGetStackTableInfo(stackHandle, 2) == 1)
-        {
-            // of strings
-        }
-        else if(simGetStackTableInfo(stackHandle, 2) == 1)
-        {
-            // of tables
-        }
-#endif
-        else
-        {
-            int oldSize = simGetStackSize(stackHandle);
-            if(simUnfoldStackTable(stackHandle) != -1)
-            {
-                int newSize = simGetStackSize(stackHandle);
-                int tableSize = newSize - oldSize;
-                if(simUnfoldStackTable(stackHandle) != -1)
-                {
-                    for(int i = 0; i < tableSize / 2; i++)
-                    {
-                        simInt keySize;
-                        //simChar *key = simGetStackStringValue(stackHandle, &keySize);
-                        simPopStackItem(stackHandle, 1);
-                        std::string valueStr = getStackTopAsString(stackHandle);
-                        simPopStackItem(stackHandle, 1);
-                        ss << (i ? ", " : "") << valueStr;
-                    }
-                }
-                else ss << "???";
-            }
-            else ss << "???";
-        }
-
-        ss << "}";
-        return ss.str();
+        else return "<table:unfold-err>";
     }
     else if(simGetStackBoolValue(stackHandle, &boolValue) == 1)
     {
@@ -196,7 +120,7 @@ std::string UIFunctions::getStackTopAsString(int stackHandle)
     }
     else if((stringValue = simGetStackStringValue(stackHandle, &stringSize)) != NULL)
     {
-        std::string ret = std::string(stringValue, stringSize);
+        std::string ret = "\"" + std::string(stringValue, stringSize) + "\"";
         simReleaseBuffer(stringValue);
         return ret;
     }
