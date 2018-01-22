@@ -55,7 +55,7 @@ void UIFunctions::connectSignals()
     connect(uiproxy, &UIProxy::execCode, this, &UIFunctions::onExecCode);
 }
 
-std::string UIFunctions::getStackTopAsString(int stackHandle)
+std::string UIFunctions::getStackTopAsString(int stackHandle, bool quoteStrings)
 {
     static const int limit = 20;
     simBool boolValue;
@@ -85,7 +85,7 @@ std::string UIFunctions::getStackTopAsString(int stackHandle)
                 }
 
                 simMoveStackItemToTop(stackHandle, oldSize - 1);
-                std::string key = getStackTopAsString(stackHandle);
+                std::string key = getStackTopAsString(stackHandle, false);
 
                 simMoveStackItemToTop(stackHandle, oldSize - 1);
                 std::string value = getStackTopAsString(stackHandle);
@@ -123,9 +123,12 @@ std::string UIFunctions::getStackTopAsString(int stackHandle)
     else if((stringValue = simGetStackStringValue(stackHandle, &stringSize)) != NULL)
     {
         simPopStackItem(stackHandle, 1);
-        std::string ret = "\"" + std::string(stringValue, stringSize) + "\"";
+        std::stringstream ss;
+        if(quoteStrings) ss << "\"";
+        ss << std::string(stringValue, stringSize);
+        if(quoteStrings) ss << "\"";
         simReleaseBuffer(stringValue);
-        return ret;
+        return ss.str();
     }
     else
     {
