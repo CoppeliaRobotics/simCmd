@@ -10,6 +10,21 @@
 #include <QComboBox>
 #include <QPushButton>
 
+class QGlobalEventFilter : public QObject
+{
+    Q_OBJECT
+
+private:
+    QGlobalEventFilter(QWidget *widget);
+    QWidget *widget_;
+    static QGlobalEventFilter *instance_;
+
+public:
+    bool eventFilter(QObject *object, QEvent *event);
+    static void install(QWidget *widget);
+    static void uninstall();
+};
+
 class QCommanderWidget;
 
 class QCommanderEditor : public QLineEdit
@@ -32,6 +47,7 @@ signals:
     void getPrevCompletion(int scriptHandleOrType, QString prefix, QString selection);
     void getNextCompletion(int scriptHandleOrType, QString prefix, QString selection);
     void askCallTip(int scriptHandleOrType, QString symbol);
+    void clear();
 
 public slots:
     void moveCursorToEnd();
@@ -74,6 +90,7 @@ private slots:
     void onUpPressed();
     void onDownPressed();
     void onClose();
+    void onClear();
 
 public slots:
     void onScriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning);

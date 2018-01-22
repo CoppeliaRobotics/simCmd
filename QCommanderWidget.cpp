@@ -8,15 +8,56 @@
 #include <QToolTip>
 #include <QApplication>
 
+#ifdef Q_OS_MACOS
+#define Q_REAL_CTRL Qt::MetaModifier
+#else
+#define Q_REAL_CTRL Qt::ControlModifier
+#endif
+
+QGlobalEventFilter * QGlobalEventFilter::instance_ = NULL;
+
+QGlobalEventFilter::QGlobalEventFilter(QWidget *widget)
+    : widget_(widget)
+{
+}
+
+bool QGlobalEventFilter::eventFilter(QObject *object, QEvent *event)
+{
+    if(event->type() == QEvent::KeyPress)
+    {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        if(keyEvent->key() == Qt::Key_C && keyEvent->modifiers().testFlag(Q_REAL_CTRL) && keyEvent->modifiers().testFlag(Qt::AltModifier))
+        {
+            if(widget_->isVisible())
+                widget_->setFocus();
+            return true;
+        }
+    }
+    return QObject::eventFilter(object, event);
+}
+
+void QGlobalEventFilter::install(QWidget *widget)
+{
+    instance_ = new QGlobalEventFilter(widget);
+    QCoreApplication::instance()->installEventFilter(instance_);
+}
+
+void QGlobalEventFilter::uninstall()
+{
+    QCoreApplication::instance()->removeEventFilter(instance_);
+}
+
 QCommanderEditor::QCommanderEditor(QCommanderWidget *parent)
     : QLineEdit(parent),
       commander(parent)
 {
     installEventFilter(this);
+    QGlobalEventFilter::install(this);
 }
 
 QCommanderEditor::~QCommanderEditor()
 {
+    QGlobalEventFilter::uninstall();
 }
 
 inline bool isID(QChar c)
@@ -104,6 +145,11 @@ void QCommanderEditor::keyPressEvent(QKeyEvent *event)
     {
         setCallTip("");
     }
+    else if(event->key() == Qt::Key_L && event->modifiers().testFlag(Q_REAL_CTRL))
+    {
+        emit clear();
+        return;
+    }
     QLineEdit::keyPressEvent(event);
 }
 
@@ -186,6 +232,7 @@ QCommanderWidget::QCommanderWidget(QWidget *parent)
     connect(editor, &QCommanderEditor::escapePressed, this, &QCommanderWidget::onEscapePressed);
     connect(editor, &QCommanderEditor::upPressed, this, &QCommanderWidget::onUpPressed);
     connect(editor, &QCommanderEditor::downPressed, this, &QCommanderWidget::onDownPressed);
+    connect(editor, &QCommanderEditor::clear, this, &QCommanderWidget::onClear);
     connect(closeButton, &QPushButton::clicked, this, &QCommanderWidget::onClose);
 }
 
@@ -274,6 +321,11 @@ void QCommanderWidget::onDownPressed()
 void QCommanderWidget::onClose()
 {
     closeFlag.store(true);
+}
+
+void QCommanderWidget::onClear()
+{
+    simAddStatusbarMessage(NULL);
 }
 
 void QCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning)
