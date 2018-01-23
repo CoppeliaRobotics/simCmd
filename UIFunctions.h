@@ -29,7 +29,7 @@ private:
 
     static UIFunctions *instance;
 
-    std::string getStackTopAsString(int stackHandle, bool quoteStrings = true);
+    std::string getStackTopAsString(int stackHandle, int depth = 0, bool quoteStrings = true);
 
 public slots:
     void onExecCode(QString code, int scriptHandleOrType, QString scriptName);

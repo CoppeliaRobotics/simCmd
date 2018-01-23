@@ -55,7 +55,7 @@ void UIFunctions::connectSignals()
     connect(uiproxy, &UIProxy::execCode, this, &UIFunctions::onExecCode);
 }
 
-std::string UIFunctions::getStackTopAsString(int stackHandle, bool quoteStrings)
+std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool quoteStrings)
 {
     static const int limit = 20;
     simBool boolValue;
@@ -78,23 +78,35 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, bool quoteStrings)
 
             for(int i = 0; i < numItems; i++)
             {
-                if(i >= limit)
+                simMoveStackItemToTop(stackHandle, oldSize - 1);
+                std::string key = getStackTopAsString(stackHandle, depth + 1, false);
+
+                simMoveStackItemToTop(stackHandle, oldSize - 1);
+                std::string value = getStackTopAsString(stackHandle, depth + 1);
+
+                if(n > 0)
                 {
-                    ss << " ... (" << numItems << " items)";
-                    break;
+                    if(i >= limit)
+                    {
+                        ss << " ... (" << numItems << " items)";
+                        break;
+                    }
+                    ss << (i ? ", " : "") << value;
                 }
-
-                simMoveStackItemToTop(stackHandle, oldSize - 1);
-                std::string key = getStackTopAsString(stackHandle, false);
-
-                simMoveStackItemToTop(stackHandle, oldSize - 1);
-                std::string value = getStackTopAsString(stackHandle);
-
-                ss << (i ? ", " : "");
-                if(n < 0) ss << key << "=";
-                ss << value;
+                else
+                {
+                    ss << "\n";
+                    for(int d = 0; d < depth; d++)
+                        ss << "    ";
+                    ss << "    " << key << "=" << value << ((i + 1) < numItems ? "," : "");
+                }
             }
 
+            if(n < 0)
+            {
+                ss << "\n";
+                for(int d = 0; d < depth; d++) ss << "    ";
+            }
             ss << "}";
             return ss.str();
         }
