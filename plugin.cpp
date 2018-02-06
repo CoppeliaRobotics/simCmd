@@ -239,9 +239,10 @@ public:
 
         if(firstInstancePass)
         {
+            firstInstancePass = false;
+
             int id = qRegisterMetaType< QMap<int,QString> >();
 
-            firstInstancePass = false;
             UIFunctions::getInstance(); // construct UIFunctions here (SIM thread)
             QObject::connect(commanderWidget, &QCommanderWidget::execCode, UIFunctions::getInstance(), &UIFunctions::onExecCode);
             QObject::connect(UIFunctions::getInstance(), &UIFunctions::scriptListChanged, commanderWidget, &QCommanderWidget::onScriptListChanged);
