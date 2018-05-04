@@ -88,6 +88,8 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
             std::stringstream ss;
             ss << "{";
 
+            std::vector<std::string> lines;
+
             for(int i = 0; i < numItems; i++)
             {
                 simMoveStackItemToTop(stackHandle, oldSize - 1);
@@ -107,12 +109,31 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
                 }
                 else
                 {
+#if 0
                     ss << "\n";
                     for(int d = 0; d < depth; d++)
                         ss << "    ";
                     ss << "    " << key << "=" << value << ((i + 1) < numItems ? "," : "");
+#else
+                    lines.push_back(key + "=" + value);
+#endif
                 }
             }
+
+#if 1
+            if(lines.size())
+            {
+                std::sort(lines.begin(), lines.end());
+
+                for(int i = 0; i < lines.size(); i++)
+                {
+                    ss << "\n";
+                    for(int d = 0; d < depth; d++)
+                        ss << "    ";
+                    ss << "    " << lines[i] << ((i + 1) < numItems ? "," : "");
+                }
+            }
+#endif
 
             if(n < 0)
             {
@@ -131,7 +152,7 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
     }
     else if(n == sim_stack_table_circular_ref)
     {
-        return "...";
+        return "<...>";
     }
     else if(simGetStackBoolValue(stackHandle, &boolValue) == 1)
     {
