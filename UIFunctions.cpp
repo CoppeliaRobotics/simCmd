@@ -66,7 +66,7 @@ static inline bool isSpecialChar(char c)
     return true;
 }
 
-std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool quoteStrings)
+std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool quoteStrings, bool insideTable)
 {
     static const int arrayMaxItemsDisplayed = 20;
     static const int stringLongLimit = 160;
@@ -93,10 +93,10 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
             for(int i = 0; i < numItems; i++)
             {
                 simMoveStackItemToTop(stackHandle, oldSize - 1);
-                std::string key = getStackTopAsString(stackHandle, depth + 1, false);
+                std::string key = getStackTopAsString(stackHandle, depth + 1, false, true);
 
                 simMoveStackItemToTop(stackHandle, oldSize - 1);
-                std::string value = getStackTopAsString(stackHandle, depth + 1);
+                std::string value = getStackTopAsString(stackHandle, depth + 1, true, true);
 
                 if(n > 0)
                 {
@@ -182,34 +182,39 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
         if(quoteStrings)
             ss << "\"";
 
-        if(stringSize >= stringLongLimit)
+        if(insideTable)
         {
-            ss << "<long string>";
+            if(stringSize >= stringLongLimit)
+            {
+                ss << "<long string>";
+            }
+            else
+            {
+                bool isBuffer = false, isSpecial = false;
+                for(int i = 0; i < std::min(stringSize, stringLongLimit); i++)
+                {
+                    if(stringValue[i] == 0)
+                    {
+                        isBuffer = true;
+                        break;
+                    }
+                    if(isSpecialChar(stringValue[i]))
+                    {
+                        isSpecial = true;
+                        continue;
+                    }
+                }
+
+                if(isBuffer)
+                    ss << "<buffer string>";
+                else if(isSpecial)
+                    ss << "<string contains special chars>";
+                else
+                    ss << std::string(stringValue, stringSize);
+            }
         }
         else
-        {
-            bool isBuffer = false, isSpecial = false;
-            for(int i = 0; i < std::min(stringSize, stringLongLimit); i++)
-            {
-                if(stringValue[i] == 0)
-                {
-                    isBuffer = true;
-                    break;
-                }
-                if(isSpecialChar(stringValue[i]))
-                {
-                    isSpecial = true;
-                    continue;
-                }
-            }
-
-            if(isBuffer)
-                ss << "<buffer string>";
-            else if(isSpecial)
-                ss << "<string contains special chars>";
-            else
-                ss << std::string(stringValue, stringSize);
-        }
+            ss << std::string(stringValue, stringSize);
 
         if(quoteStrings)
             ss << "\"";
