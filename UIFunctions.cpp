@@ -66,7 +66,7 @@ static inline bool isSpecialChar(char c)
     return true;
 }
 
-std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool quoteStrings, bool insideTable)
+std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool quoteStrings, bool insideTable, std::string *strType)
 {
     static const int arrayMaxItemsDisplayed = 20;
     static const int stringLongLimit = 160;
@@ -79,6 +79,9 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
     int n = simGetStackTableInfo(stackHandle, 0);
     if(n == sim_stack_table_map || n >= 0)
     {
+        if(strType)
+            *strType = "table";
+
         int oldSize = simGetStackSize(stackHandle);
         if(simUnfoldStackTable(stackHandle) != -1)
         {
@@ -88,15 +91,17 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
             std::stringstream ss;
             ss << "{";
 
-            std::vector<std::string> lines;
+            std::vector<std::vector<std::string> > lines;
 
             for(int i = 0; i < numItems; i++)
             {
+                std::string type;
+
                 simMoveStackItemToTop(stackHandle, oldSize - 1);
                 std::string key = getStackTopAsString(stackHandle, depth + 1, false, true);
 
                 simMoveStackItemToTop(stackHandle, oldSize - 1);
-                std::string value = getStackTopAsString(stackHandle, depth + 1, true, true);
+                std::string value = getStackTopAsString(stackHandle, depth + 1, true, true, &type);
 
                 if(n > 0)
                 {
@@ -115,7 +120,11 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
                         ss << "    ";
                     ss << "    " << key << "=" << value << ((i + 1) < numItems ? "," : "");
 #else
-                    lines.push_back(key + "=" + value);
+                    std::vector<std::string> line;
+                    line.push_back(type);
+                    line.push_back(key);
+                    line.push_back(value);
+                    lines.push_back(line);
 #endif
                 }
             }
@@ -123,14 +132,18 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
 #if 1
             if(lines.size())
             {
-                std::sort(lines.begin(), lines.end());
+                std::sort(lines.begin(), lines.end(),
+                        [](const std::vector<std::string>& a, const std::vector<std::string>& b) {
+                    std::string sa = a[0] + a[1], sb = b[0] + b[1];
+                    return sa < sb;
+                });
 
                 for(int i = 0; i < lines.size(); i++)
                 {
                     ss << "\n";
                     for(int d = 0; d < depth; d++)
                         ss << "    ";
-                    ss << "    " << lines[i] << ((i + 1) < numItems ? "," : "");
+                    ss << "    " << lines[i][1] << "=" << lines[i][2] << ((i + 1) < numItems ? "," : "");
                 }
             }
 #endif
@@ -152,30 +165,48 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
     }
     else if(n == sim_stack_table_circular_ref)
     {
+        if(strType)
+            *strType = "table";
+
         return "<...>";
     }
     else if(simGetStackBoolValue(stackHandle, &boolValue) == 1)
     {
+        if(strType)
+            *strType = "bool";
+
         simPopStackItem(stackHandle, 1);
         return boolValue ? "true" : "false";
     }
     else if(simGetStackDoubleValue(stackHandle, &doubleValue) == 1)
     {
+        if(strType)
+            *strType = "number";
+
         simPopStackItem(stackHandle, 1);
         return boost::lexical_cast<std::string>(doubleValue);
     }
     else if(simGetStackFloatValue(stackHandle, &floatValue) == 1)
     {
+        if(strType)
+            *strType = "number";
+
         simPopStackItem(stackHandle, 1);
         return boost::lexical_cast<std::string>(floatValue);
     }
     else if(simGetStackInt32Value(stackHandle, &intValue) == 1)
     {
+        if(strType)
+            *strType = "number";
+
         simPopStackItem(stackHandle, 1);
         return boost::lexical_cast<std::string>(intValue);
     }
     else if((stringValue = simGetStackStringValue(stackHandle, &stringSize)) != NULL)
     {
+        if(strType)
+            *strType = "string";
+
         simPopStackItem(stackHandle, 1);
         std::stringstream ss;
 
@@ -224,6 +255,9 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
     }
     else
     {
+        if(strType)
+            *strType = "?";
+
         std::cout << "unable to convert stack top. n=" << n << std::endl;
         simDebugStack(stackHandle, -1);
         simPopStackItem(stackHandle, 1);
