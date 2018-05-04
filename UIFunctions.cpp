@@ -55,9 +55,21 @@ void UIFunctions::connectSignals()
     connect(uiproxy, &UIProxy::execCode, this, &UIFunctions::onExecCode);
 }
 
+static inline bool isSpecialChar(char c)
+{
+    if(c >= 'a' && c <= 'z') return false;
+    if(c >= 'A' && c <= 'Z') return false;
+    if(c >= '0' && c <= '9') return false;
+    static const char *allowed = "!@#$%^&*()_-+=[]{}\\|:;\"'<>,./?`~";
+    for(int i = 0; i < strlen(allowed); i++)
+        if(c == allowed[i]) return false;
+    return true;
+}
+
 std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool quoteStrings)
 {
-    static const int limit = 20;
+    static const int arrayMaxItemsDisplayed = 20;
+    static const int stringLongLimit = 160;
     simBool boolValue;
     simInt intValue;
     simFloat floatValue;
@@ -65,7 +77,7 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
     simChar *stringValue;
     simInt stringSize;
     int n = simGetStackTableInfo(stackHandle, 0);
-    if(n == -2 || n >= 0)
+    if(n == sim_stack_table_map || n >= 0)
     {
         int oldSize = simGetStackSize(stackHandle);
         if(simUnfoldStackTable(stackHandle) != -1)
@@ -86,7 +98,7 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
 
                 if(n > 0)
                 {
-                    if(i >= limit)
+                    if(i >= arrayMaxItemsDisplayed)
                     {
                         ss << " ... (" << numItems << " items)";
                         break;
@@ -110,7 +122,16 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
             ss << "}";
             return ss.str();
         }
-        else return "<table:unfold-err>";
+        else
+        {
+            std::cout << "table unfold error. n=" << n << std::endl;
+            simDebugStack(stackHandle, -1);
+            return "<table:unfold-err>";
+        }
+    }
+    else if(n == sim_stack_table_circular_ref)
+    {
+        return "...";
     }
     else if(simGetStackBoolValue(stackHandle, &boolValue) == 1)
     {
@@ -136,14 +157,49 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
     {
         simPopStackItem(stackHandle, 1);
         std::stringstream ss;
-        if(quoteStrings) ss << "\"";
-        ss << std::string(stringValue, stringSize);
-        if(quoteStrings) ss << "\"";
+
+        if(quoteStrings)
+            ss << "\"";
+
+        if(stringSize >= stringLongLimit)
+        {
+            ss << "<long string>";
+        }
+        else
+        {
+            bool isBuffer = false, isSpecial = false;
+            for(int i = 0; i < std::min(stringSize, stringLongLimit); i++)
+            {
+                if(stringValue[i] == 0)
+                {
+                    isBuffer = true;
+                    break;
+                }
+                if(isSpecialChar(stringValue[i]))
+                {
+                    isSpecial = true;
+                    continue;
+                }
+            }
+
+            if(isBuffer)
+                ss << "<buffer string>";
+            else if(isSpecial)
+                ss << "<string contains special chars>";
+            else
+                ss << std::string(stringValue, stringSize);
+        }
+
+        if(quoteStrings)
+            ss << "\"";
+
         simReleaseBuffer(stringValue);
         return ss.str();
     }
     else
     {
+        std::cout << "unable to convert stack top. n=" << n << std::endl;
+        simDebugStack(stackHandle, -1);
         simPopStackItem(stackHandle, 1);
         return "?";
     }
