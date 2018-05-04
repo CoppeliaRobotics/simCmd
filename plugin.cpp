@@ -233,7 +233,7 @@ public:
         UIFunctions::getInstance()->scriptListChanged(childScripts, customizationScripts, simRunning);
     }
 
-    virtual void onInstancePass(bool objectsErased, bool objectsCreated, bool modelLoaded, bool sceneLoaded, bool undoCalled, bool redoCalled, bool sceneSwitched, bool editModeActive, bool objectsScaled, bool selectionStateChanged, bool keyPressed, bool simulationStarted, bool simulationEnded, bool scriptCreated, bool scriptErased)
+    virtual void onInstancePass(const vrep::InstancePassFlags &flags, bool first)
     {
         if(!commanderWidget) return;
 
@@ -271,7 +271,7 @@ public:
             updateUI();
         }
 
-        if(objectsErased || objectsCreated || modelLoaded || sceneLoaded || undoCalled || redoCalled || sceneSwitched || scriptCreated || scriptErased || simulationStarted || simulationEnded)
+        if(flags.objectsErased || flags.objectsCreated || flags.modelLoaded || flags.sceneLoaded || flags.undoCalled || flags.redoCalled || flags.sceneSwitched || flags.scriptCreated || flags.scriptErased || flags.simulationStarted || flags.simulationEnded)
         {
             updateScriptsList();
         }
