@@ -22,7 +22,13 @@ public:
 
     void connectSignals();
 
-    //std::atomic<bool> autoReturn;
+    int arrayMaxItemsDisplayed = 20;
+    int stringLongLimit = 160;
+    bool stringShadowBuffersInMaps = true;
+    bool stringShadowSpecialsInMaps = true;
+    bool truncateStringsInMaps = true;
+    bool sortMapKeys = true;
+    bool sortMapKeysByType = true;
 
 private:
     UIFunctions(QObject *parent = 0);

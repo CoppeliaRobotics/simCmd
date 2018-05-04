@@ -12,7 +12,6 @@ UIFunctions *UIFunctions::instance = NULL;
 UIFunctions::UIFunctions(QObject *parent)
     : QObject(parent)
 {
-    //autoReturn.store(true);
     connectSignals();
 }
 
@@ -68,8 +67,6 @@ static inline bool isSpecialChar(char c)
 
 std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool quoteStrings, bool insideTable, std::string *strType)
 {
-    static const int arrayMaxItemsDisplayed = 20;
-    static const int stringLongLimit = 160;
     simBool boolValue;
     simInt intValue;
     simFloat floatValue;
@@ -114,29 +111,25 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
                 }
                 else
                 {
-#if 0
-                    ss << "\n";
-                    for(int d = 0; d < depth; d++)
-                        ss << "    ";
-                    ss << "    " << key << "=" << value << ((i + 1) < numItems ? "," : "");
-#else
                     std::vector<std::string> line;
                     line.push_back(type);
                     line.push_back(key);
                     line.push_back(value);
                     lines.push_back(line);
-#endif
                 }
             }
 
-#if 1
             if(lines.size())
             {
-                std::sort(lines.begin(), lines.end(),
-                        [](const std::vector<std::string>& a, const std::vector<std::string>& b) {
-                    std::string sa = a[0] + a[1], sb = b[0] + b[1];
-                    return sa < sb;
-                });
+                if(sortMapKeys)
+                {
+                    std::sort(lines.begin(), lines.end(), [this](const std::vector<std::string>& a, const std::vector<std::string>& b)
+                    {
+                        std::string sa = sortMapKeysByType ? (a[0] + a[1]) : a[1];
+                        std::string sb = sortMapKeysByType ? (b[0] + b[1]) : b[1];
+                        return sa < sb;
+                    });
+                }
 
                 for(int i = 0; i < lines.size(); i++)
                 {
@@ -146,7 +139,6 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
                     ss << "    " << lines[i][1] << "=" << lines[i][2] << ((i + 1) < numItems ? "," : "");
                 }
             }
-#endif
 
             if(n < 0)
             {
@@ -215,7 +207,7 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
 
         if(insideTable)
         {
-            if(stringSize >= stringLongLimit)
+            if(truncateStringsInMaps && stringSize >= stringLongLimit)
             {
                 ss << "<long string>";
             }
@@ -224,12 +216,12 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
                 bool isBuffer = false, isSpecial = false;
                 for(int i = 0; i < std::min(stringSize, stringLongLimit); i++)
                 {
-                    if(stringValue[i] == 0)
+                    if(stringShadowBuffersInMaps && stringValue[i] == 0)
                     {
                         isBuffer = true;
                         break;
                     }
-                    if(isSpecialChar(stringValue[i]))
+                    if(stringShadowSpecialsInMaps && isSpecialChar(stringValue[i]))
                     {
                         isSpecial = true;
                         continue;
