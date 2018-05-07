@@ -3,6 +3,7 @@
 #include "UIProxy.h"
 #include "stubs.h"
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <QRegExp>
 
 // UIFunctions is a singleton
@@ -77,7 +78,7 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
     if(n == sim_stack_table_map || n >= 0)
     {
         if(strType)
-            *strType = "table";
+            *strType = "90|table";
 
         int oldSize = simGetStackSize(stackHandle);
         if(simUnfoldStackTable(stackHandle) != -1)
@@ -158,14 +159,14 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
     else if(n == sim_stack_table_circular_ref)
     {
         if(strType)
-            *strType = "table";
+            *strType = "90|table";
 
         return "<...>";
     }
     else if(simGetStackBoolValue(stackHandle, &boolValue) == 1)
     {
         if(strType)
-            *strType = "bool";
+            *strType = "10|bool";
 
         simPopStackItem(stackHandle, 1);
         return boolValue ? "true" : "false";
@@ -173,7 +174,7 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
     else if(simGetStackDoubleValue(stackHandle, &doubleValue) == 1)
     {
         if(strType)
-            *strType = "number";
+            *strType = "30|number";
 
         simPopStackItem(stackHandle, 1);
         return boost::lexical_cast<std::string>(doubleValue);
@@ -181,7 +182,7 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
     else if(simGetStackFloatValue(stackHandle, &floatValue) == 1)
     {
         if(strType)
-            *strType = "number";
+            *strType = "30|number";
 
         simPopStackItem(stackHandle, 1);
         return boost::lexical_cast<std::string>(floatValue);
@@ -189,15 +190,26 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
     else if(simGetStackInt32Value(stackHandle, &intValue) == 1)
     {
         if(strType)
-            *strType = "number";
+            *strType = "30|number";
 
         simPopStackItem(stackHandle, 1);
         return boost::lexical_cast<std::string>(intValue);
     }
     else if((stringValue = simGetStackStringValue(stackHandle, &stringSize)) != NULL)
     {
+        std::string s(stringValue, stringSize);
+
         if(strType)
-            *strType = "string";
+        {
+            if(boost::starts_with(s, "<FUNCTION"))
+                *strType = "60|function";
+            else if(boost::starts_with(s, "<USERDATA"))
+                *strType = "70|userdata";
+            else if(boost::starts_with(s, "<THREAD"))
+                *strType = "80|thread";
+            else
+                *strType = "50|string";
+        }
 
         simPopStackItem(stackHandle, 1);
         std::stringstream ss;
@@ -233,11 +245,10 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
                 else if(isSpecial)
                     ss << "<string contains special chars>";
                 else
-                    ss << std::string(stringValue, stringSize);
+                    ss << s;
             }
         }
-        else
-            ss << std::string(stringValue, stringSize);
+        else ss << s;
 
         if(quoteStrings)
             ss << "\"";
