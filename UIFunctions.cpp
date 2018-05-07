@@ -324,12 +324,10 @@ void UIFunctions::parseStringRenderingFlags(PersistentOptions *popts, const QStr
 
         QStringList matchingOptions = getMatchingStringRenderingFlags(optName);
         if(matchingOptions.size() > 1)
-        {
-            QString matches = matchingOptions.join(", ");
-            throw std::runtime_error((boost::format("short option '%s' is ambiguous (would match: %s)") % optName.toStdString() % matches.toStdString()).str());
-        }
-        if(matchingOptions.size() == 1)
-            optName = matchingOptions[0];
+            throw std::runtime_error((boost::format("string rendering option '%s' is ambiguous (would match: %s)") % optName.toStdString() % matchingOptions.join(", ").toStdString()).str());
+        if(matchingOptions.size() == 0)
+            throw std::runtime_error((boost::format("unrecognized string rendering option: '%s' (valid options are: %s)") % optName.toStdString() % stringRenderingFlags.join(", ").toStdString()).str());
+        optName = matchingOptions[0];
 
         if(optName == "sort")
         {
@@ -338,16 +336,12 @@ void UIFunctions::parseStringRenderingFlags(PersistentOptions *popts, const QStr
             popts->mapSortKeysByType = optVal == "tk" || optVal == "t";
             popts->mapSortKeysByName = optVal == "tk" || optVal == "k";
         }
-        else if(optName == "precision")
+        if(optName == "precision")
         {
             int p = boost::lexical_cast<int>(optVal.toStdString());
             if(p < 0 || p > 20)
                 throw std::runtime_error((boost::format("invalid 'precision' option: '%d' (should be between 0 and 20)") % optVal.toStdString()).str());
             popts->floatPrecision = p;
-        }
-        else
-        {
-            throw std::runtime_error((boost::format("unrecognized string rendering option: '%s' (valid options are: %s)") % optName.toStdString() % stringRenderingFlags.join(", ").toStdString()).str());
         }
     }
 }
