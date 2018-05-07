@@ -128,12 +128,21 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
 
             if(lines.size())
             {
-                if(options.mapSortKeysByName)
+                if(options.mapSortKeysByName || options.mapSortKeysByType)
                 {
                     std::sort(lines.begin(), lines.end(), [this](const std::vector<std::string>& a, const std::vector<std::string>& b)
                     {
-                        std::string sa = options.mapSortKeysByType ? (a[0] + a[1]) : a[1];
-                        std::string sb = options.mapSortKeysByType ? (b[0] + b[1]) : b[1];
+                        std::string sa, sb;
+                        if(options.mapSortKeysByType)
+                        {
+                            sa += a[0];
+                            sb += b[0];
+                        }
+                        if(options.mapSortKeysByName)
+                        {
+                            sa += a[1];
+                            sb += b[1];
+                        }
                         return sa < sb;
                     });
                 }
