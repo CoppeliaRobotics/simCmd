@@ -56,6 +56,11 @@ void UIFunctions::connectSignals()
     connect(uiproxy, &UIProxy::execCode, this, &UIFunctions::onExecCode);
 }
 
+void UIFunctions::setOptions(const PersistentOptions &options)
+{
+    this->options = options;
+}
+
 static inline bool isSpecialChar(char c)
 {
     if(c >= 'a' && c <= 'z') return false;
@@ -104,7 +109,7 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
 
                 if(n > 0)
                 {
-                    if(i >= arrayMaxItemsDisplayed)
+                    if(i >= options.arrayMaxItemsDisplayed)
                     {
                         ss << " ... (" << numItems << " items)";
                         break;
@@ -123,12 +128,12 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
 
             if(lines.size())
             {
-                if(mapSortKeysByName)
+                if(options.mapSortKeysByName)
                 {
                     std::sort(lines.begin(), lines.end(), [this](const std::vector<std::string>& a, const std::vector<std::string>& b)
                     {
-                        std::string sa = mapSortKeysByType ? (a[0] + a[1]) : a[1];
-                        std::string sb = mapSortKeysByType ? (b[0] + b[1]) : b[1];
+                        std::string sa = options.mapSortKeysByType ? (a[0] + a[1]) : a[1];
+                        std::string sb = options.mapSortKeysByType ? (b[0] + b[1]) : b[1];
                         return sa < sb;
                     });
                 }
@@ -220,21 +225,21 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
 
         if(insideTable)
         {
-            if(mapShadowLongStrings && stringSize >= stringLongLimit)
+            if(options.mapShadowLongStrings && stringSize >= options.stringLongLimit)
             {
                 ss << "<long string>";
             }
             else
             {
                 bool isBuffer = false, isSpecial = false;
-                for(int i = 0; i < std::min(stringSize, stringLongLimit); i++)
+                for(int i = 0; i < std::min(stringSize, options.stringLongLimit); i++)
                 {
-                    if(mapShadowBufferStrings && stringValue[i] == 0)
+                    if(options.mapShadowBufferStrings && stringValue[i] == 0)
                     {
                         isBuffer = true;
                         break;
                     }
-                    if(mapShadowSpecialStrings && isSpecialChar(stringValue[i]))
+                    if(options.mapShadowSpecialStrings && isSpecialChar(stringValue[i]))
                     {
                         isSpecial = true;
                         continue;
@@ -358,40 +363,5 @@ void UIFunctions::onAskCallTip(int scriptHandleOrType, QString symbol)
     if(!bufStr.isEmpty())
         emit setCallTip(bufStr);
     simReleaseBuffer(buf);
-}
-
-void UIFunctions::onSetArrayMaxItemsDisplayed(int n)
-{
-    arrayMaxItemsDisplayed = n;
-}
-
-void UIFunctions::onSetStringLongLimit(int n)
-{
-    stringLongLimit = n;
-}
-
-void UIFunctions::onSetMapSortKeysByName(bool b)
-{
-    mapSortKeysByName = b;
-}
-
-void UIFunctions::onSetMapSortKeysByType(bool b)
-{
-    mapSortKeysByType = b;
-}
-
-void UIFunctions::onSetMapShadowLongStrings(bool b)
-{
-    mapShadowLongStrings = b;
-}
-
-void UIFunctions::onSetMapShadowBufferStrings(bool b)
-{
-    mapShadowBufferStrings = b;
-}
-
-void UIFunctions::onSetMapShadowSpecialStrings(bool b)
-{
-    mapShadowSpecialStrings = b;
 }
 

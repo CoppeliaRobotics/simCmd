@@ -3,12 +3,11 @@
 
 #include "config.h"
 
-#include <atomic>
-
 #include <QObject>
 #include <QString>
 
 #include "stubs.h"
+#include "PersistentOptions.h"
 
 class UIFunctions : public QObject
 {
@@ -22,6 +21,8 @@ public:
 
     void connectSignals();
 
+    void setOptions(const PersistentOptions &options);
+
 private:
     UIFunctions(QObject *parent = 0);
 
@@ -34,13 +35,6 @@ public slots:
     void onGetPrevCompletion(int scriptHandleOrType, QString prefix, QString selection);
     void onGetNextCompletion(int scriptHandleOrType, QString prefix, QString selection);
     void onAskCallTip(int scriptHandleOrType, QString symbol);
-    void onSetArrayMaxItemsDisplayed(int n);
-    void onSetStringLongLimit(int n);
-    void onSetMapSortKeysByName(bool b);
-    void onSetMapSortKeysByType(bool b);
-    void onSetMapShadowLongStrings(bool b);
-    void onSetMapShadowBufferStrings(bool b);
-    void onSetMapShadowSpecialStrings(bool b);
 
 signals:
     void scriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning);
@@ -48,13 +42,7 @@ signals:
     void setCallTip(QString s);
 
 private:
-    int arrayMaxItemsDisplayed = 20;
-    int stringLongLimit = 160;
-    bool mapSortKeysByName = true;
-    bool mapSortKeysByType = true;
-    bool mapShadowLongStrings = true;
-    bool mapShadowBufferStrings = true;
-    bool mapShadowSpecialStrings = true;
+    PersistentOptions options;
 };
 
 #endif // UIFUNCTIONS_H_INCLUDED

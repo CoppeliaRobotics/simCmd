@@ -31,6 +31,7 @@ set(SOURCES
     UIProxy.cpp
     debug.cpp
     plugin.cpp
+    PersistentOptions.cpp
     QCommanderWidget.cpp
     ${CMAKE_SOURCE_DIR}/external/v_repPlusPlus/Plugin.cpp
     ${CMAKE_BINARY_DIR}/generated/stubs.cpp

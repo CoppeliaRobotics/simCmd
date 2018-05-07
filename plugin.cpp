@@ -18,85 +18,8 @@
 #include <QPlainTextEdit>
 #include <QVBoxLayout>
 #include <QSplitter>
+#include "PersistentOptions.h"
 #include "QCommanderWidget.h"
-
-struct PersistentOptions
-{
-    bool enabled = true;
-    int arrayMaxItemsDisplayed = 20;
-    int stringLongLimit = 160;
-    bool mapSortKeysByName = true;
-    bool mapSortKeysByType = true;
-    bool mapShadowLongStrings = true;
-    bool mapShadowBufferStrings = true;
-    bool mapShadowSpecialStrings = true;
-
-    const char * dataTag()
-    {
-        return "LuaCommanderOptions";
-    }
-
-    void dump()
-    {
-        std::cout << "LuaCommander:     enabled=" << enabled << std::endl;
-        std::cout << "LuaCommander:     arrayMaxItemsDisplayed=" << arrayMaxItemsDisplayed << std::endl;
-        std::cout << "LuaCommander:     stringLongLimit=" << stringLongLimit << std::endl;
-        std::cout << "LuaCommander:     mapShadowBufferStrings=" << mapShadowBufferStrings << std::endl;
-        std::cout << "LuaCommander:     mapShadowSpecialStrings=" << mapShadowSpecialStrings << std::endl;
-        std::cout << "LuaCommander:     mapShadowLongStrings=" << mapShadowLongStrings << std::endl;
-        std::cout << "LuaCommander:     mapSortKeysByName=" << mapSortKeysByName << std::endl;
-        std::cout << "LuaCommander:     mapSortKeysByType=" << mapSortKeysByType << std::endl;
-    }
-
-    bool load()
-    {
-#ifdef DEBUG_PERSISTENT_OPTIONS
-        std::cout << "LuaCommander: Loading persistent options..." << std::endl;
-#endif
-        simInt dataLength;
-        simChar *pdata = simPersistentDataRead(dataTag(), &dataLength);
-        if(!pdata)
-        {
-#ifdef DEBUG_PERSISTENT_OPTIONS
-            std::cout << "LuaCommander: Could not load persistent options: null pointer error" << std::endl;
-#endif
-            return false;
-        }
-        bool ok = dataLength == sizeof(*this);
-        if(ok)
-        {
-            memcpy(this, pdata, sizeof(*this));
-            UIFunctions::getInstance()->onSetArrayMaxItemsDisplayed(arrayMaxItemsDisplayed);
-            UIFunctions::getInstance()->onSetStringLongLimit(stringLongLimit);
-            UIFunctions::getInstance()->onSetMapSortKeysByName(mapSortKeysByName);
-            UIFunctions::getInstance()->onSetMapSortKeysByType(mapSortKeysByType);
-            UIFunctions::getInstance()->onSetMapShadowLongStrings(mapShadowLongStrings);
-            UIFunctions::getInstance()->onSetMapShadowBufferStrings(mapShadowBufferStrings);
-            UIFunctions::getInstance()->onSetMapShadowSpecialStrings(mapShadowSpecialStrings);
-#ifdef DEBUG_PERSISTENT_OPTIONS
-            std::cout << "LuaCommander: Loaded persistent options:" << std::endl;
-            dump();
-#endif
-        }
-        else
-        {
-#ifdef DEBUG_PERSISTENT_OPTIONS
-            std::cout << "LuaCommander: Could not load persistent options: incorrect data length " << dataLength << ", should be " << sizeof(*this) << std::endl;
-#endif
-        }
-        simReleaseBuffer(pdata);
-        return ok;
-    }
-
-    bool save()
-    {
-#ifdef DEBUG_PERSISTENT_OPTIONS
-        std::cout << "LuaCommander: Saving persistent options:" << std::endl;
-        dump();
-#endif
-        return simPersistentDataWrite(dataTag(), (simChar*)this, sizeof(*this), 1) != -1;
-    }
-};
 
 std::atomic<bool> optionsChangedFromGui;
 std::atomic<bool> optionsChangedFromData;
@@ -104,57 +27,57 @@ PersistentOptions options;
 
 void setArrayMaxItemsDisplayed(SScriptCallBack *p, const char *cmd, setArrayMaxItemsDisplayed_in *in, setArrayMaxItemsDisplayed_out *out)
 {
-    UIFunctions::getInstance()->onSetArrayMaxItemsDisplayed(in->n);
     options.arrayMaxItemsDisplayed = in->n;
     options.save();
+    UIFunctions::getInstance()->setOptions(options);
     optionsChangedFromData.store(true);
 }
 
 void setStringLongLimit(SScriptCallBack *p, const char *cmd, setStringLongLimit_in *in, setStringLongLimit_out *out)
 {
-    UIFunctions::getInstance()->onSetStringLongLimit(in->n);
     options.stringLongLimit = in->n;
     options.save();
+    UIFunctions::getInstance()->setOptions(options);
     optionsChangedFromData.store(true);
 }
 
 void setMapSortKeysByName(SScriptCallBack *p, const char *cmd, setMapSortKeysByName_in *in, setMapSortKeysByName_out *out)
 {
-    UIFunctions::getInstance()->onSetMapSortKeysByName(in->b);
     options.mapSortKeysByName = in->b;
     options.save();
+    UIFunctions::getInstance()->setOptions(options);
     optionsChangedFromData.store(true);
 }
 
 void setMapSortKeysByType(SScriptCallBack *p, const char *cmd, setMapSortKeysByType_in *in, setMapSortKeysByType_out *out)
 {
-    UIFunctions::getInstance()->onSetMapSortKeysByType(in->b);
     options.mapSortKeysByType = in->b;
     options.save();
+    UIFunctions::getInstance()->setOptions(options);
     optionsChangedFromData.store(true);
 }
 
 void setMapShadowLongStrings(SScriptCallBack *p, const char *cmd, setMapShadowLongStrings_in *in, setMapShadowLongStrings_out *out)
 {
-    UIFunctions::getInstance()->onSetMapShadowLongStrings(in->b);
     options.mapShadowLongStrings = in->b;
     options.save();
+    UIFunctions::getInstance()->setOptions(options);
     optionsChangedFromData.store(true);
 }
 
 void setMapShadowBufferStrings(SScriptCallBack *p, const char *cmd, setMapShadowBufferStrings_in *in, setMapShadowBufferStrings_out *out)
 {
-    UIFunctions::getInstance()->onSetMapShadowBufferStrings(in->b);
     options.mapShadowBufferStrings = in->b;
     options.save();
+    UIFunctions::getInstance()->setOptions(options);
     optionsChangedFromData.store(true);
 }
 
 void setMapShadowSpecialStrings(SScriptCallBack *p, const char *cmd, setMapShadowSpecialStrings_in *in, setMapShadowSpecialStrings_out *out)
 {
-    UIFunctions::getInstance()->onSetMapShadowSpecialStrings(in->b);
     options.mapShadowSpecialStrings = in->b;
     options.save();
+    UIFunctions::getInstance()->setOptions(options);
     optionsChangedFromData.store(true);
 }
 
@@ -279,29 +202,25 @@ public:
         else if(itemHandle == menuHandles[MENUITEM_MAP_SORT_KEYS_BY_NAME])
         {
             options.mapSortKeysByName = !options.mapSortKeysByName;
-            UIProxy::getInstance()->setMapSortKeysByName(options.mapSortKeysByName);
         }
         else if(itemHandle == menuHandles[MENUITEM_MAP_SORT_KEYS_BY_TYPE])
         {
             options.mapSortKeysByType = !options.mapSortKeysByType;
-            UIProxy::getInstance()->setMapSortKeysByType(options.mapSortKeysByType);
         }
         else if(itemHandle == menuHandles[MENUITEM_MAP_SHADOW_LONG_STRINGS])
         {
             options.mapShadowLongStrings = !options.mapShadowLongStrings;
-            UIProxy::getInstance()->setMapShadowLongStrings(options.mapShadowLongStrings);
         }
         else if(itemHandle == menuHandles[MENUITEM_MAP_SHADOW_BUFFER_STRINGS])
         {
             options.mapShadowBufferStrings = !options.mapShadowBufferStrings;
-            UIProxy::getInstance()->setMapShadowBufferStrings(options.mapShadowBufferStrings);
         }
         else if(itemHandle == menuHandles[MENUITEM_MAP_SHADOW_SPECIAL_STRINGS])
         {
             options.mapShadowSpecialStrings = !options.mapShadowSpecialStrings;
-            UIProxy::getInstance()->setMapShadowSpecialStrings(options.mapShadowSpecialStrings);
         }
         else return;
+
         optionsChangedFromGui.store(true);
         updateUI();
     }
@@ -360,14 +279,8 @@ public:
             QObject::connect(UIFunctions::getInstance(), &UIFunctions::setCompletion, editor, &QCommanderEditor::setCompletion);
             QObject::connect(editor, &QCommanderEditor::askCallTip, UIFunctions::getInstance(), &UIFunctions::onAskCallTip);
             QObject::connect(UIFunctions::getInstance(), &UIFunctions::setCallTip, editor, &QCommanderEditor::setCallTip);
-            QObject::connect(UIProxy::getInstance(), &UIProxy::setArrayMaxItemsDisplayed, UIFunctions::getInstance(), &UIFunctions::onSetArrayMaxItemsDisplayed);
-            QObject::connect(UIProxy::getInstance(), &UIProxy::setStringLongLimit, UIFunctions::getInstance(), &UIFunctions::onSetStringLongLimit);
-            QObject::connect(UIProxy::getInstance(), &UIProxy::setMapSortKeysByName, UIFunctions::getInstance(), &UIFunctions::onSetMapSortKeysByName);
-            QObject::connect(UIProxy::getInstance(), &UIProxy::setMapSortKeysByType, UIFunctions::getInstance(), &UIFunctions::onSetMapSortKeysByType);
-            QObject::connect(UIProxy::getInstance(), &UIProxy::setMapShadowLongStrings, UIFunctions::getInstance(), &UIFunctions::onSetMapShadowLongStrings);
-            QObject::connect(UIProxy::getInstance(), &UIProxy::setMapShadowBufferStrings, UIFunctions::getInstance(), &UIFunctions::onSetMapShadowBufferStrings);
-            QObject::connect(UIProxy::getInstance(), &UIProxy::setMapShadowSpecialStrings, UIFunctions::getInstance(), &UIFunctions::onSetMapShadowSpecialStrings);
             options.load();
+            UIFunctions::getInstance()->setOptions(options);
             optionsChangedFromData.store(true);
         }
 
@@ -383,6 +296,7 @@ public:
         {
             optionsChangedFromGui.store(false);
             options.save();
+            UIFunctions::getInstance()->setOptions(options);
             updateUI();
         }
 
