@@ -59,7 +59,7 @@ static inline bool isSpecialChar(char c)
     if(c >= 'a' && c <= 'z') return false;
     if(c >= 'A' && c <= 'Z') return false;
     if(c >= '0' && c <= '9') return false;
-    static const char *allowed = "!@#$%^&*()_-+=[]{}\\|:;\"'<>,./?`~";
+    static const char *allowed = " !@#$%^&*()_-+=[]{}\\|:;\"'<>,./?`~";
     for(int i = 0; i < strlen(allowed); i++)
         if(c == allowed[i]) return false;
     return true;
