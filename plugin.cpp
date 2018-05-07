@@ -116,6 +116,7 @@ public:
         // add menu items to V-REP main window
         MENUITEM_TOGGLE_VISIBILITY = menuLabels.size();
         menuLabels.push_back("Enable");
+        menuLabels.push_back("");
         MENUITEM_MAP_SORT_KEYS_BY_NAME = menuLabels.size();
         menuLabels.push_back("Map/array rendering: sort keys by name");
         MENUITEM_MAP_SORT_KEYS_BY_TYPE = menuLabels.size();
