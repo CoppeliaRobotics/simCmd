@@ -4,6 +4,7 @@
 #include "stubs.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <QRegExp>
 
 // UIFunctions is a singleton
@@ -60,7 +61,7 @@ static inline bool isSpecialChar(char c)
     if(c >= 'a' && c <= 'z') return false;
     if(c >= 'A' && c <= 'Z') return false;
     if(c >= '0' && c <= '9') return false;
-    static const char *allowed = " !@#$%^&*()_-+=[]{}\\|:;\"'<>,./?`~";
+    static const char *allowed = " !@#$%^&*()_-+=[]{}\\|:;\"'<>,./?`~\n\r\t";
     for(int i = 0; i < strlen(allowed); i++)
         if(c == allowed[i]) return false;
     return true;
@@ -245,7 +246,12 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
                 else if(isSpecial)
                     ss << "<string contains special chars>";
                 else
+                {
+                    boost::replace_all(s, "\n", "\\n");
+                    boost::replace_all(s, "\r", "\\r");
+                    boost::replace_all(s, "\t", "\\t");
                     ss << s;
+                }
             }
         }
         else ss << s;
