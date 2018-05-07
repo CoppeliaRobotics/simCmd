@@ -3,4 +3,74 @@
 
 <plugin name="LuaCommander" short-name="LuaComm" author="federico.ferri.it@gmail.com">
     <description>API functions for LuaCommander plugin.</description>
+    <command name="setArrayMaxItemsDisplayed">
+        <description>Set the maximum number of items displayed when rendering an array</description>
+        <params>
+            <param name="n" type="int">
+                <description>the maximum number of items</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="setStringLongLimit">
+        <description>Set the length threshold for strings</description>
+        <params>
+            <param name="n" type="int">
+                <description>the string length threshold</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="setMapSortKeysByName">
+        <description>Sort map keys by name</description>
+        <params>
+            <param name="b" type="bool">
+                <description>if true, map keys will be sorted by name</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="setMapSortKeysByType">
+        <description>Sort map keys by type</description>
+        <params>
+            <param name="b" type="bool">
+                <description>if true, map keys will be sorted by type</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="setMapShadowLongStrings">
+        <description>Long strings will be replaced by a placeholder</description>
+        <params>
+            <param name="b" type="bool">
+                <description>if true, long strings will be replaced by a placeholder</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="setMapShadowBufferStrings">
+        <description>Buffer strings (containing null chars) will be replaced by a placeholder</description>
+        <params>
+            <param name="b" type="bool">
+                <description>if true, buffer strings will be replaced by a placeholder</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="setMapShadowSpecialStrings">
+        <description>Strings containing special characters will be replaced by a placeholder</description>
+        <params>
+            <param name="b" type="bool">
+                <description>if true, strings containing special characters will be replaced by a placeholder</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
 </plugin>

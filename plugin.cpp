@@ -98,6 +98,66 @@ struct PersistentOptions
     }
 };
 
+std::atomic<bool> optionsChangedFromGui;
+std::atomic<bool> optionsChangedFromData;
+PersistentOptions options;
+
+void setArrayMaxItemsDisplayed(SScriptCallBack *p, const char *cmd, setArrayMaxItemsDisplayed_in *in, setArrayMaxItemsDisplayed_out *out)
+{
+    UIFunctions::getInstance()->onSetArrayMaxItemsDisplayed(in->n);
+    options.arrayMaxItemsDisplayed = in->n;
+    options.save();
+    optionsChangedFromData.store(true);
+}
+
+void setStringLongLimit(SScriptCallBack *p, const char *cmd, setStringLongLimit_in *in, setStringLongLimit_out *out)
+{
+    UIFunctions::getInstance()->onSetStringLongLimit(in->n);
+    options.stringLongLimit = in->n;
+    options.save();
+    optionsChangedFromData.store(true);
+}
+
+void setMapSortKeysByName(SScriptCallBack *p, const char *cmd, setMapSortKeysByName_in *in, setMapSortKeysByName_out *out)
+{
+    UIFunctions::getInstance()->onSetMapSortKeysByName(in->b);
+    options.mapSortKeysByName = in->b;
+    options.save();
+    optionsChangedFromData.store(true);
+}
+
+void setMapSortKeysByType(SScriptCallBack *p, const char *cmd, setMapSortKeysByType_in *in, setMapSortKeysByType_out *out)
+{
+    UIFunctions::getInstance()->onSetMapSortKeysByType(in->b);
+    options.mapSortKeysByType = in->b;
+    options.save();
+    optionsChangedFromData.store(true);
+}
+
+void setMapShadowLongStrings(SScriptCallBack *p, const char *cmd, setMapShadowLongStrings_in *in, setMapShadowLongStrings_out *out)
+{
+    UIFunctions::getInstance()->onSetMapShadowLongStrings(in->b);
+    options.mapShadowLongStrings = in->b;
+    options.save();
+    optionsChangedFromData.store(true);
+}
+
+void setMapShadowBufferStrings(SScriptCallBack *p, const char *cmd, setMapShadowBufferStrings_in *in, setMapShadowBufferStrings_out *out)
+{
+    UIFunctions::getInstance()->onSetMapShadowBufferStrings(in->b);
+    options.mapShadowBufferStrings = in->b;
+    options.save();
+    optionsChangedFromData.store(true);
+}
+
+void setMapShadowSpecialStrings(SScriptCallBack *p, const char *cmd, setMapShadowSpecialStrings_in *in, setMapShadowSpecialStrings_out *out)
+{
+    UIFunctions::getInstance()->onSetMapShadowSpecialStrings(in->b);
+    options.mapShadowSpecialStrings = in->b;
+    options.save();
+    optionsChangedFromData.store(true);
+}
+
 class Plugin : public vrep::Plugin
 {
 public:
@@ -215,39 +275,35 @@ public:
         if(itemHandle == menuHandles[MENUITEM_TOGGLE_VISIBILITY])
         {
             options.enabled = !options.enabled;
-            optionsChangedFromGui.store(true);
-            updateUI();
         }
         else if(itemHandle == menuHandles[MENUITEM_MAP_SORT_KEYS_BY_NAME])
         {
             options.mapSortKeysByName = !options.mapSortKeysByName;
             UIProxy::getInstance()->setMapSortKeysByName(options.mapSortKeysByName);
-            updateUI();
         }
         else if(itemHandle == menuHandles[MENUITEM_MAP_SORT_KEYS_BY_TYPE])
         {
             options.mapSortKeysByType = !options.mapSortKeysByType;
             UIProxy::getInstance()->setMapSortKeysByType(options.mapSortKeysByType);
-            updateUI();
         }
         else if(itemHandle == menuHandles[MENUITEM_MAP_SHADOW_LONG_STRINGS])
         {
             options.mapShadowLongStrings = !options.mapShadowLongStrings;
             UIProxy::getInstance()->setMapShadowLongStrings(options.mapShadowLongStrings);
-            updateUI();
         }
         else if(itemHandle == menuHandles[MENUITEM_MAP_SHADOW_BUFFER_STRINGS])
         {
             options.mapShadowBufferStrings = !options.mapShadowBufferStrings;
             UIProxy::getInstance()->setMapShadowBufferStrings(options.mapShadowBufferStrings);
-            updateUI();
         }
         else if(itemHandle == menuHandles[MENUITEM_MAP_SHADOW_SPECIAL_STRINGS])
         {
             options.mapShadowSpecialStrings = !options.mapShadowSpecialStrings;
             UIProxy::getInstance()->setMapShadowSpecialStrings(options.mapShadowSpecialStrings);
-            updateUI();
         }
+        else return;
+        optionsChangedFromGui.store(true);
+        updateUI();
     }
 
     virtual void onGuiPass()
@@ -352,9 +408,6 @@ private:
     int MENUITEM_MAP_SHADOW_BUFFER_STRINGS;
     int MENUITEM_MAP_SHADOW_SPECIAL_STRINGS;
     static const int itemEnabled = 1, itemChecked = 2;
-    std::atomic<bool> optionsChangedFromGui;
-    std::atomic<bool> optionsChangedFromData;
-    PersistentOptions options;
 };
 
 VREP_PLUGIN(PLUGIN_NAME, PLUGIN_VERSION, Plugin)
