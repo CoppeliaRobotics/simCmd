@@ -109,9 +109,9 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
 
                 if(n > 0)
                 {
-                    if(i >= options.arrayMaxItemsDisplayed)
+                    if(options.arrayMaxItemsDisplayed >= 0 && i >= options.arrayMaxItemsDisplayed)
                     {
-                        ss << " ... (" << numItems << " items)";
+                        ss << (i ? " " : "") << "... (" << numItems << " items)";
                         break;
                     }
                     ss << (i ? ", " : "") << value;
