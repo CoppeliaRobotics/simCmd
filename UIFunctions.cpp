@@ -17,6 +17,7 @@ UIFunctions::UIFunctions(QObject *parent)
     : QObject(parent)
 {
     connectSignals();
+    initStringRenderingFlags();
 }
 
 UIFunctions::~UIFunctions()
@@ -292,6 +293,24 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
     }
 }
 
+void UIFunctions::initStringRenderingFlags()
+{
+    stringRenderingFlags.clear();
+    stringRenderingFlags << "sort";
+    stringRenderingFlags << "precision";
+}
+
+QStringList UIFunctions::getMatchingStringRenderingFlags(QString shortFlag)
+{
+    QStringList ret;
+    foreach(const QString &flag, stringRenderingFlags)
+    {
+        if(flag.startsWith(shortFlag))
+            ret << flag;
+    }
+    return ret;
+}
+
 void UIFunctions::parseStringRenderingFlags(PersistentOptions *popts, const QString &code)
 {
     int index = code.lastIndexOf("--");
@@ -302,6 +321,16 @@ void UIFunctions::parseStringRenderingFlags(PersistentOptions *popts, const QStr
         QString t = s.trimmed().toString();
         QString optName = t.section('=', 0, 0);
         QString optVal = t.section('=', 1);
+
+        QStringList matchingOptions = getMatchingStringRenderingFlags(optName);
+        if(matchingOptions.size() > 1)
+        {
+            QString matches = matchingOptions.join(", ");
+            throw std::runtime_error((boost::format("short option '%s' is ambiguous (would match: %s)") % optName.toStdString() % matches.toStdString()).str());
+        }
+        if(matchingOptions.size() == 1)
+            optName = matchingOptions[0];
+
         if(optName == "sort")
         {
             if(optVal != "tk" && optVal != "t" && optVal != "k" && optVal != "off")
@@ -309,7 +338,7 @@ void UIFunctions::parseStringRenderingFlags(PersistentOptions *popts, const QStr
             popts->mapSortKeysByType = optVal == "tk" || optVal == "t";
             popts->mapSortKeysByName = optVal == "tk" || optVal == "k";
         }
-        if(optName == "precision")
+        else if(optName == "precision")
         {
             int p = boost::lexical_cast<int>(optVal.toStdString());
             if(p < 0 || p > 20)
@@ -318,7 +347,7 @@ void UIFunctions::parseStringRenderingFlags(PersistentOptions *popts, const QStr
         }
         else
         {
-            throw std::runtime_error((boost::format("unrecognized string rendering option: '%s' (valid options are: sort, precision)") % optName.toStdString()).str());
+            throw std::runtime_error((boost::format("unrecognized string rendering option: '%s' (valid options are: %s)") % optName.toStdString() % stringRenderingFlags.join(", ").toStdString()).str());
         }
     }
 }

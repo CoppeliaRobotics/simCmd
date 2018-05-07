@@ -30,6 +30,8 @@ private:
 
     std::string getStackTopAsString(int stackHandle, const PersistentOptions &opts, int depth = 0, bool quoteStrings = true, bool insideTable = false, std::string *strType = nullptr);
 
+    void initStringRenderingFlags();
+    QStringList getMatchingStringRenderingFlags(QString shortFlag);
     void parseStringRenderingFlags(PersistentOptions *popts, const QString &code);
 
 public slots:
@@ -45,6 +47,7 @@ signals:
 
 private:
     PersistentOptions options;
+    QStringList stringRenderingFlags;
 };
 
 #endif // UIFUNCTIONS_H_INCLUDED
