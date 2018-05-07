@@ -136,6 +136,14 @@ void QCommanderEditor::keyPressEvent(QKeyEvent *event)
 
         emit askCallTip(type, symbol);
     }
+    else if(event->key() == Qt::Key_Period)
+    {
+        // if there is completion, accept it:
+        if(hasSelectedText())
+        {
+            setCursorPosition(selectionStart() + selectedText().length());
+        }
+    }
     else if(event->key() == Qt::Key_Comma)
     {
         // reshow last tooltip when comma is pressed
