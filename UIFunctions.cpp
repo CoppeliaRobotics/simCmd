@@ -294,9 +294,9 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
 
 void UIFunctions::parseStringRenderingFlags(PersistentOptions *popts, const QString &code)
 {
-    int index = code.lastIndexOf("--@");
+    int index = code.lastIndexOf("--");
     if(index == -1) return;
-    QVector<QStringRef> flagList = code.midRef(index + 3).split(",");
+    QVector<QStringRef> flagList = code.midRef(index + 2).split(",");
     foreach(const QStringRef &s, flagList)
     {
         QString t = s.trimmed().toString();
