@@ -6,7 +6,6 @@
 #include <iostream>
 #include <boost/format.hpp>
 #include <boost/foreach.hpp>
-#include <boost/regex.hpp>
 #include <boost/bind.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include "UIFunctions.h"
@@ -24,7 +23,13 @@
 struct PersistentOptions
 {
     bool enabled = true;
-    //bool autoReturn = true;
+    int arrayMaxItemsDisplayed = 20;
+    int stringLongLimit = 160;
+    bool mapSortKeysByName = true;
+    bool mapSortKeysByType = true;
+    bool mapShadowLongStrings = true;
+    bool mapShadowBufferStrings = true;
+    bool mapShadowSpecialStrings = true;
 
     const char * dataTag()
     {
@@ -34,7 +39,13 @@ struct PersistentOptions
     void dump()
     {
         std::cout << "LuaCommander:     enabled=" << enabled << std::endl;
-        //std::cout << "LuaCommander:     autoReturn=" << autoReturn << std::endl;
+        std::cout << "LuaCommander:     arrayMaxItemsDisplayed=" << arrayMaxItemsDisplayed << std::endl;
+        std::cout << "LuaCommander:     stringLongLimit=" << stringLongLimit << std::endl;
+        std::cout << "LuaCommander:     mapShadowBufferStrings=" << mapShadowBufferStrings << std::endl;
+        std::cout << "LuaCommander:     mapShadowSpecialStrings=" << mapShadowSpecialStrings << std::endl;
+        std::cout << "LuaCommander:     mapShadowLongStrings=" << mapShadowLongStrings << std::endl;
+        std::cout << "LuaCommander:     mapSortKeysByName=" << mapSortKeysByName << std::endl;
+        std::cout << "LuaCommander:     mapSortKeysByType=" << mapSortKeysByType << std::endl;
     }
 
     bool load()
@@ -55,7 +66,13 @@ struct PersistentOptions
         if(ok)
         {
             memcpy(this, pdata, sizeof(*this));
-            //UIFunctions::getInstance()->autoReturn.store(autoReturn);
+            UIFunctions::getInstance()->onSetArrayMaxItemsDisplayed(arrayMaxItemsDisplayed);
+            UIFunctions::getInstance()->onSetStringLongLimit(stringLongLimit);
+            UIFunctions::getInstance()->onSetMapSortKeysByName(mapSortKeysByName);
+            UIFunctions::getInstance()->onSetMapSortKeysByType(mapSortKeysByType);
+            UIFunctions::getInstance()->onSetMapShadowLongStrings(mapShadowLongStrings);
+            UIFunctions::getInstance()->onSetMapShadowBufferStrings(mapShadowBufferStrings);
+            UIFunctions::getInstance()->onSetMapShadowSpecialStrings(mapShadowSpecialStrings);
 #ifdef DEBUG_PERSISTENT_OPTIONS
             std::cout << "LuaCommander: Loaded persistent options:" << std::endl;
             dump();
@@ -116,8 +133,17 @@ public:
         // add menu items to V-REP main window
         MENUITEM_TOGGLE_VISIBILITY = menuLabels.size();
         menuLabels.push_back("Enable");
-        //MENUITEM_AUTO_RETURN = menuLabels.size();
-        //menuLabels.push_back("Automatically return input statement");
+        MENUITEM_MAP_SORT_KEYS_BY_NAME = menuLabels.size();
+        menuLabels.push_back("Map/array rendering: sort keys by name");
+        MENUITEM_MAP_SORT_KEYS_BY_TYPE = menuLabels.size();
+        menuLabels.push_back("Map/array rendering: sort keys by type");
+        MENUITEM_MAP_SHADOW_LONG_STRINGS = menuLabels.size();
+        menuLabels.push_back("Map/array rendering: shadow long strings");
+        MENUITEM_MAP_SHADOW_BUFFER_STRINGS = menuLabels.size();
+        menuLabels.push_back("Map/array rendering: shadow buffer strings");
+        MENUITEM_MAP_SHADOW_SPECIAL_STRINGS = menuLabels.size();
+        menuLabels.push_back("Map/array rendering: shadow strings with special characters");
+
         menuState.resize(menuLabels.size());
         menuHandles.resize(menuLabels.size());
         if(simAddModuleMenuEntry("Lua Commander", menuHandles.size(), &menuHandles[0]) == -1)
@@ -153,7 +179,12 @@ public:
     void updateMenuItems()
     {
         menuState[MENUITEM_TOGGLE_VISIBILITY] = (options.enabled ? itemChecked : 0) + itemEnabled;
-        //menuState[MENUITEM_AUTO_RETURN] = (options.enabled ? itemEnabled : 0) + (options.autoReturn ? itemChecked : 0);
+        menuState[MENUITEM_MAP_SORT_KEYS_BY_NAME] = (options.enabled ? itemEnabled : 0) + (options.mapSortKeysByName ? itemChecked : 0);
+        menuState[MENUITEM_MAP_SORT_KEYS_BY_TYPE] = (options.enabled ? itemEnabled : 0) + (options.mapSortKeysByType ? itemChecked : 0);
+        menuState[MENUITEM_MAP_SHADOW_LONG_STRINGS] = (options.enabled ? itemEnabled : 0) + (options.mapShadowLongStrings ? itemChecked : 0);
+        menuState[MENUITEM_MAP_SHADOW_BUFFER_STRINGS] = (options.enabled ? itemEnabled : 0) + (options.mapShadowBufferStrings ? itemChecked : 0);
+        menuState[MENUITEM_MAP_SHADOW_SPECIAL_STRINGS] = (options.enabled ? itemEnabled : 0) + (options.mapShadowSpecialStrings ? itemChecked : 0);
+
         for(int i = 0; i < menuHandles.size(); i++)
             simSetModuleMenuItemState(menuHandles[i], menuState[i], menuLabels[i].c_str());
     }
@@ -183,19 +214,40 @@ public:
     {
         if(itemHandle == menuHandles[MENUITEM_TOGGLE_VISIBILITY])
         {
-            const int i = MENUITEM_TOGGLE_VISIBILITY;
             options.enabled = !options.enabled;
             optionsChangedFromGui.store(true);
             updateUI();
         }
-        /*else if(itemHandle == menuHandles[MENUITEM_AUTO_RETURN])
+        else if(itemHandle == menuHandles[MENUITEM_MAP_SORT_KEYS_BY_NAME])
         {
-            const int i = MENUITEM_AUTO_RETURN;
-            options.autoReturn = !options.autoReturn;
-            UIFunctions::getInstance()->autoReturn = options.autoReturn;
-            optionsChangedFromGui.store(true);
+            options.mapSortKeysByName = !options.mapSortKeysByName;
+            UIProxy::getInstance()->setMapSortKeysByName(options.mapSortKeysByName);
             updateUI();
-        }*/
+        }
+        else if(itemHandle == menuHandles[MENUITEM_MAP_SORT_KEYS_BY_TYPE])
+        {
+            options.mapSortKeysByType = !options.mapSortKeysByType;
+            UIProxy::getInstance()->setMapSortKeysByType(options.mapSortKeysByType);
+            updateUI();
+        }
+        else if(itemHandle == menuHandles[MENUITEM_MAP_SHADOW_LONG_STRINGS])
+        {
+            options.mapShadowLongStrings = !options.mapShadowLongStrings;
+            UIProxy::getInstance()->setMapShadowLongStrings(options.mapShadowLongStrings);
+            updateUI();
+        }
+        else if(itemHandle == menuHandles[MENUITEM_MAP_SHADOW_BUFFER_STRINGS])
+        {
+            options.mapShadowBufferStrings = !options.mapShadowBufferStrings;
+            UIProxy::getInstance()->setMapShadowBufferStrings(options.mapShadowBufferStrings);
+            updateUI();
+        }
+        else if(itemHandle == menuHandles[MENUITEM_MAP_SHADOW_SPECIAL_STRINGS])
+        {
+            options.mapShadowSpecialStrings = !options.mapShadowSpecialStrings;
+            UIProxy::getInstance()->setMapShadowSpecialStrings(options.mapShadowSpecialStrings);
+            updateUI();
+        }
     }
 
     virtual void onGuiPass()
@@ -252,6 +304,13 @@ public:
             QObject::connect(UIFunctions::getInstance(), &UIFunctions::setCompletion, editor, &QCommanderEditor::setCompletion);
             QObject::connect(editor, &QCommanderEditor::askCallTip, UIFunctions::getInstance(), &UIFunctions::onAskCallTip);
             QObject::connect(UIFunctions::getInstance(), &UIFunctions::setCallTip, editor, &QCommanderEditor::setCallTip);
+            QObject::connect(UIProxy::getInstance(), &UIProxy::setArrayMaxItemsDisplayed, UIFunctions::getInstance(), &UIFunctions::onSetArrayMaxItemsDisplayed);
+            QObject::connect(UIProxy::getInstance(), &UIProxy::setStringLongLimit, UIFunctions::getInstance(), &UIFunctions::onSetStringLongLimit);
+            QObject::connect(UIProxy::getInstance(), &UIProxy::setMapSortKeysByName, UIFunctions::getInstance(), &UIFunctions::onSetMapSortKeysByName);
+            QObject::connect(UIProxy::getInstance(), &UIProxy::setMapSortKeysByType, UIFunctions::getInstance(), &UIFunctions::onSetMapSortKeysByType);
+            QObject::connect(UIProxy::getInstance(), &UIProxy::setMapShadowLongStrings, UIFunctions::getInstance(), &UIFunctions::onSetMapShadowLongStrings);
+            QObject::connect(UIProxy::getInstance(), &UIProxy::setMapShadowBufferStrings, UIFunctions::getInstance(), &UIFunctions::onSetMapShadowBufferStrings);
+            QObject::connect(UIProxy::getInstance(), &UIProxy::setMapShadowSpecialStrings, UIFunctions::getInstance(), &UIFunctions::onSetMapShadowSpecialStrings);
             options.load();
             optionsChangedFromData.store(true);
         }
@@ -287,7 +346,11 @@ private:
     std::vector<simInt> menuState;
     std::vector<std::string> menuLabels;
     int MENUITEM_TOGGLE_VISIBILITY;
-    //int MENUITEM_AUTO_RETURN;
+    int MENUITEM_MAP_SORT_KEYS_BY_NAME;
+    int MENUITEM_MAP_SORT_KEYS_BY_TYPE;
+    int MENUITEM_MAP_SHADOW_LONG_STRINGS;
+    int MENUITEM_MAP_SHADOW_BUFFER_STRINGS;
+    int MENUITEM_MAP_SHADOW_SPECIAL_STRINGS;
     static const int itemEnabled = 1, itemChecked = 2;
     std::atomic<bool> optionsChangedFromGui;
     std::atomic<bool> optionsChangedFromData;

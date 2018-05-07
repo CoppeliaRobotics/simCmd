@@ -33,6 +33,13 @@ public slots:
 
 signals:
     void execCode(QString code, int scriptHandleOrType, QString scriptName);
+    void setArrayMaxItemsDisplayed(int n);
+    void setStringLongLimit(int n);
+    void setMapSortKeysByName(bool b);
+    void setMapSortKeysByType(bool b);
+    void setMapShadowLongStrings(bool b);
+    void setMapShadowBufferStrings(bool b);
+    void setMapShadowSpecialStrings(bool b);
 };
 
 #endif // UIPROXY_H_INCLUDED
