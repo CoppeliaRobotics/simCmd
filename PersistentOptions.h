@@ -7,7 +7,7 @@ struct PersistentOptions
     int arrayMaxItemsDisplayed = 20;
     int stringLongLimit = 160;
     bool mapSortKeysByName = true;
-    bool mapSortKeysByType = true;
+    bool mapSortKeysByType = false;
     bool mapShadowLongStrings = true;
     bool mapShadowBufferStrings = true;
     bool mapShadowSpecialStrings = true;

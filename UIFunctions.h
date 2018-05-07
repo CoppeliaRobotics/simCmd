@@ -28,7 +28,9 @@ private:
 
     static UIFunctions *instance;
 
-    std::string getStackTopAsString(int stackHandle, int depth = 0, bool quoteStrings = true, bool insideTable = false, std::string *strType = nullptr);
+    std::string getStackTopAsString(int stackHandle, const PersistentOptions &opts, int depth = 0, bool quoteStrings = true, bool insideTable = false, std::string *strType = nullptr);
+
+    void parseStringRenderingFlags(PersistentOptions *popts, const QString &code);
 
 public slots:
     void onExecCode(QString code, int scriptHandleOrType, QString scriptName);

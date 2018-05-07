@@ -2,6 +2,8 @@
 #include "debug.h"
 #include "UIProxy.h"
 #include "stubs.h"
+#include <stdexcept>
+#include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
@@ -72,7 +74,7 @@ static inline bool isSpecialChar(char c)
     return true;
 }
 
-std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool quoteStrings, bool insideTable, std::string *strType)
+std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOptions &opts, int depth, bool quoteStrings, bool insideTable, std::string *strType)
 {
     simBool boolValue;
     simInt intValue;
@@ -102,14 +104,14 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
                 std::string type;
 
                 simMoveStackItemToTop(stackHandle, oldSize - 1);
-                std::string key = getStackTopAsString(stackHandle, depth + 1, false, true);
+                std::string key = getStackTopAsString(stackHandle, opts, depth + 1, false, true);
 
                 simMoveStackItemToTop(stackHandle, oldSize - 1);
-                std::string value = getStackTopAsString(stackHandle, depth + 1, true, true, &type);
+                std::string value = getStackTopAsString(stackHandle, opts, depth + 1, true, true, &type);
 
                 if(n > 0)
                 {
-                    if(options.arrayMaxItemsDisplayed >= 0 && i >= options.arrayMaxItemsDisplayed)
+                    if(opts.arrayMaxItemsDisplayed >= 0 && i >= opts.arrayMaxItemsDisplayed)
                     {
                         ss << (i ? " " : "") << "... (" << numItems << " items)";
                         break;
@@ -128,17 +130,17 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
 
             if(lines.size())
             {
-                if(options.mapSortKeysByName || options.mapSortKeysByType)
+                if(opts.mapSortKeysByName || opts.mapSortKeysByType)
                 {
-                    std::sort(lines.begin(), lines.end(), [this](const std::vector<std::string>& a, const std::vector<std::string>& b)
+                    std::sort(lines.begin(), lines.end(), [opts](const std::vector<std::string>& a, const std::vector<std::string>& b)
                     {
                         std::string sa, sb;
-                        if(options.mapSortKeysByType)
+                        if(opts.mapSortKeysByType)
                         {
                             sa += a[0];
                             sb += b[0];
                         }
-                        if(options.mapSortKeysByName)
+                        if(opts.mapSortKeysByName)
                         {
                             sa += a[1];
                             sb += b[1];
@@ -234,21 +236,21 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
 
         if(insideTable)
         {
-            if(options.mapShadowLongStrings && stringSize >= options.stringLongLimit)
+            if(opts.mapShadowLongStrings && stringSize >= opts.stringLongLimit)
             {
                 ss << "<long string>";
             }
             else
             {
                 bool isBuffer = false, isSpecial = false;
-                for(int i = 0; i < std::min(stringSize, options.stringLongLimit); i++)
+                for(int i = 0; i < std::min(stringSize, opts.stringLongLimit); i++)
                 {
-                    if(options.mapShadowBufferStrings && stringValue[i] == 0)
+                    if(opts.mapShadowBufferStrings && stringValue[i] == 0)
                     {
                         isBuffer = true;
                         break;
                     }
-                    if(options.mapShadowSpecialStrings && isSpecialChar(stringValue[i]))
+                    if(opts.mapShadowSpecialStrings && isSpecialChar(stringValue[i]))
                     {
                         isSpecial = true;
                         continue;
@@ -288,6 +290,30 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, int depth, bool qu
     }
 }
 
+void UIFunctions::parseStringRenderingFlags(PersistentOptions *popts, const QString &code)
+{
+    int index = code.lastIndexOf("--@");
+    if(index == -1) return;
+    QVector<QStringRef> flagList = code.midRef(index + 3).split(",");
+    foreach(const QStringRef &s, flagList)
+    {
+        QString t = s.trimmed().toString();
+        QString optName = t.section('=', 0, 0);
+        QString optVal = t.section('=', 1);
+        if(optName == "sort")
+        {
+            if(optVal != "tk" && optVal != "t" && optVal != "k" && optVal != "off")
+                throw std::runtime_error((boost::format("unrecognized 'sort' option: '%s' (valid values are: k, t, tk, off)") % optVal.toStdString()).str());
+            popts->mapSortKeysByType = optVal == "tk" || optVal == "t";
+            popts->mapSortKeysByName = optVal == "tk" || optVal == "k";
+        }
+        else
+        {
+            throw std::runtime_error((boost::format("unrecognized string rendering option: '%s' (valid options are: sort)") % optName.toStdString()).str());
+        }
+    }
+}
+
 void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scriptName)
 {
     ASSERT_THREAD(!UI);
@@ -306,17 +332,27 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     std::string echo = "> " + code.toStdString();
     simAddStatusbarMessage(echo.c_str());
 
+    PersistentOptions opts = options;
+    try
+    {
+        parseStringRenderingFlags(&opts, code);
+    }
+    catch(std::exception &ex)
+    {
+        simAddStatusbarMessage((boost::format("LuaCommander: warning: %s") % ex.what()).str().c_str());
+    }
+
     simInt ret = simExecuteScriptString(scriptHandleOrType, s1.data(), stackHandle);
     if(ret != 0)
     {
-        simAddStatusbarMessage(getStackTopAsString(stackHandle).c_str());
+        simAddStatusbarMessage(getStackTopAsString(stackHandle, opts).c_str());
     }
     else
     {
         simInt size = simGetStackSize(stackHandle);
         if(size > 0)
         {
-            simAddStatusbarMessage(getStackTopAsString(stackHandle).c_str());
+            simAddStatusbarMessage(getStackTopAsString(stackHandle, opts).c_str());
         }
     }
 
