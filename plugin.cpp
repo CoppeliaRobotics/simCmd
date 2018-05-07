@@ -81,6 +81,14 @@ void setMapShadowSpecialStrings(SScriptCallBack *p, const char *cmd, setMapShado
     optionsChangedFromData.store(true);
 }
 
+void setFloatPrecision(SScriptCallBack *p, const char *cmd, setFloatPrecision_in *in, setFloatPrecision_out *out)
+{
+    options.floatPrecision = in->n;
+    options.save();
+    UIFunctions::getInstance()->setOptions(options);
+    optionsChangedFromData.store(true);
+}
+
 class Plugin : public vrep::Plugin
 {
 public:

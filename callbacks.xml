@@ -73,4 +73,14 @@
         <return>
         </return>
     </command>
+    <command name="setFloatPrecision">
+        <description>Number of floating point digits to show</description>
+        <params>
+            <param name="n" type="int">
+                <description>number of digits</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
 </plugin>
