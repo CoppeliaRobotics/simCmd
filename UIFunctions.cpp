@@ -194,7 +194,8 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
             *strType = "30|number";
 
         simPopStackItem(stackHandle, 1);
-        return boost::lexical_cast<std::string>(doubleValue);
+        std::string fmt = (boost::format("%%.%df") % opts.floatPrecision).str();
+        return (boost::format(fmt) % doubleValue).str();
     }
     else if(simGetStackFloatValue(stackHandle, &floatValue) == 1)
     {
@@ -202,7 +203,8 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
             *strType = "30|number";
 
         simPopStackItem(stackHandle, 1);
-        return boost::lexical_cast<std::string>(floatValue);
+        std::string fmt = (boost::format("%%.%df") % opts.floatPrecision).str();
+        return (boost::format(fmt) % floatValue).str();
     }
     else if(simGetStackInt32Value(stackHandle, &intValue) == 1)
     {
@@ -303,13 +305,20 @@ void UIFunctions::parseStringRenderingFlags(PersistentOptions *popts, const QStr
         if(optName == "sort")
         {
             if(optVal != "tk" && optVal != "t" && optVal != "k" && optVal != "off")
-                throw std::runtime_error((boost::format("unrecognized 'sort' option: '%s' (valid values are: k, t, tk, off)") % optVal.toStdString()).str());
+                throw std::runtime_error((boost::format("invalid 'sort' option: '%s' (valid values are: k, t, tk, off)") % optVal.toStdString()).str());
             popts->mapSortKeysByType = optVal == "tk" || optVal == "t";
             popts->mapSortKeysByName = optVal == "tk" || optVal == "k";
         }
+        if(optName == "precision")
+        {
+            int p = boost::lexical_cast<int>(optVal.toStdString());
+            if(p < 0 || p > 20)
+                throw std::runtime_error((boost::format("invalid 'precision' option: '%d' (should be between 0 and 20)") % optVal.toStdString()).str());
+            popts->floatPrecision = p;
+        }
         else
         {
-            throw std::runtime_error((boost::format("unrecognized string rendering option: '%s' (valid options are: sort)") % optName.toStdString()).str());
+            throw std::runtime_error((boost::format("unrecognized string rendering option: '%s' (valid options are: sort, precision)") % optName.toStdString()).str());
         }
     }
 }

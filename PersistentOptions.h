@@ -11,6 +11,7 @@ struct PersistentOptions
     bool mapShadowLongStrings = true;
     bool mapShadowBufferStrings = true;
     bool mapShadowSpecialStrings = true;
+    int floatPrecision = 6;
 
     const char * dataTag();
     void dump();
