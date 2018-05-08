@@ -77,6 +77,9 @@ static inline bool isSpecialChar(char c)
 
 std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOptions &opts, int depth, bool quoteStrings, bool insideTable, std::string *strType)
 {
+    if(opts.mapMaxDepth >= 0 && depth > opts.mapMaxDepth)
+        return "<...>";
+
     simBool boolValue;
     simInt intValue;
     simFloat floatValue;
@@ -298,6 +301,7 @@ void UIFunctions::initStringRenderingFlags()
     stringRenderingFlags.clear();
     stringRenderingFlags << "sort";
     stringRenderingFlags << "precision";
+    stringRenderingFlags << "depth";
 }
 
 QStringList UIFunctions::getMatchingStringRenderingFlags(QString shortFlag)
@@ -342,6 +346,11 @@ void UIFunctions::parseStringRenderingFlags(PersistentOptions *popts, const QStr
             if(p < 0 || p > 20)
                 throw std::runtime_error((boost::format("invalid 'precision' option: '%d' (should be between 0 and 20)") % optVal.toStdString()).str());
             popts->floatPrecision = p;
+        }
+        if(optName == "depth")
+        {
+            int d = boost::lexical_cast<int>(optVal.toStdString());
+            popts->mapMaxDepth = d;
         }
     }
 }
