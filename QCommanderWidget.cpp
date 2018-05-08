@@ -221,7 +221,7 @@ QCommanderWidget::QCommanderWidget(QWidget *parent)
 {
     closeFlag.store(false);
     editor = new QCommanderEditor(this);
-    editor->setPlaceholderText("Input Lua code here (use TAB for auto-completion)");
+    editor->setPlaceholderText("Input Lua code here, or type \"help()\" (use TAB for auto-completion)");
     editor->setFont(QFont("Courier", 12));
     scriptCombo = new QComboBox(this);
     scriptCombo->setSizeAdjustPolicy(QComboBox::AdjustToContents);
