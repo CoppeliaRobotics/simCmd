@@ -24,8 +24,15 @@ html_help = [[
         </ul>
 ]]
 
+function helpclose()
+    if ui then
+        simUI.destroy(ui)
+        ui = nil
+    end
+end
+
 function help()
-    ui = simUI.create([[<ui title="LuaCommander Plugin" closeable="true" size="400,500">
+    ui = simUI.create([[<ui title="LuaCommander Plugin" closeable="true" on-close="helpclose" modal="true" size="400,500">
         <text-browser text="]]..string.gsub(html_help,'"','&quot;')..[[" />
     </ui>]])
 end
