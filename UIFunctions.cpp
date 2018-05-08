@@ -438,6 +438,8 @@ void UIFunctions::onGetNextCompletion(int scriptHandleOrType, QString prefix, QS
     QStringList cl = getCompletion(scriptHandleOrType, prefix);
     if(cl.isEmpty()) return;
     int i = selection == "" ? 0 : (findInsertionPoint(cl, prefix + selection) + 1);
+    if(i >= 0 && i < cl.size() && cl[i] == prefix)
+        i++;
     if(i >= 0 && i < cl.size())
         emit setCompletion(cl[i]);
 }
