@@ -355,14 +355,16 @@ void QCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QMap<
         if(data == old) selectedIndex = index;
         index++;
     }
-    if(simRunning) {
+    if(simRunning)
+    {
         QVariantList data;
         data << sim_scripttype_mainscript << 0 << QString();
         scriptCombo->addItem("Main script", data);
         if(data == old) selectedIndex = index;
         index++;
     }
-    if(simRunning) {
+    if(simRunning)
+    {
         QMapIterator<int,QString> i(childScripts);
         while(i.hasNext())
         {
