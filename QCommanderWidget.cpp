@@ -393,3 +393,9 @@ void QCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QMap<
         scriptCombo->setCurrentIndex(0);
 }
 
+void QCommanderWidget::setHistory(QStringList hist)
+{
+    history = hist;
+    historyIndex = history.size();
+}
+

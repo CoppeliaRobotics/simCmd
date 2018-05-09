@@ -83,4 +83,11 @@
         <return>
         </return>
     </command>
+    <command name="clearHistory">
+        <description>Clear command history</description>
+        <params>
+        </params>
+        <return>
+        </return>
+    </command>
 </plugin>

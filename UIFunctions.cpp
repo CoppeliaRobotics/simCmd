@@ -2,6 +2,7 @@
 #include "debug.h"
 #include "UIProxy.h"
 #include "stubs.h"
+#include "v_repLib.h"
 #include <stdexcept>
 #include <iomanip>
 #include <boost/format.hpp>
@@ -58,6 +59,45 @@ void UIFunctions::connectSignals()
     UIProxy *uiproxy = UIProxy::getInstance();
     // connect signals/slots from UIProxy to UIFunctions and vice-versa
     connect(uiproxy, &UIProxy::execCode, this, &UIFunctions::onExecCode);
+}
+
+QStringList loadHistoryData()
+{
+    simInt histSize;
+    simChar *pdata = simPersistentDataRead("LuaCommanderHistory", &histSize);
+    QStringList hist;
+    if(pdata)
+    {
+        QString s = QString::fromUtf8(pdata);
+        hist = s.split(QRegExp("(\\r\\n)|(\\n\\r)|\\r|\\n"), QString::SkipEmptyParts);
+    }
+    return hist;
+}
+
+void saveHistoryData(QStringList hist)
+{
+    QString histStr = hist.join("\n");
+    simPersistentDataWrite("LuaCommanderHistory", histStr.toUtf8(), histStr.length() + 1, 1);
+}
+
+void UIFunctions::loadHistory()
+{
+    QStringList hist = loadHistoryData();
+    emit setHistory(hist);
+}
+
+void UIFunctions::clearHistory()
+{
+    QStringList hist;
+    saveHistoryData(hist);
+    emit setHistory(hist);
+}
+
+void UIFunctions::saveHistory(QString cmd)
+{
+    QStringList hist = loadHistoryData();
+    hist << cmd;
+    saveHistoryData(hist);
 }
 
 void UIFunctions::setOptions(const PersistentOptions &options)
@@ -342,6 +382,8 @@ void UIFunctions::parseStringRenderingFlags(PersistentOptions *popts, const QStr
 void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scriptName)
 {
     ASSERT_THREAD(!UI);
+
+    saveHistory(code);
 
     simInt stackHandle = simCreateStack();
     if(stackHandle == -1)

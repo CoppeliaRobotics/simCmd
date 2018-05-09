@@ -89,6 +89,11 @@ void setFloatPrecision(SScriptCallBack *p, const char *cmd, setFloatPrecision_in
     optionsChangedFromData.store(true);
 }
 
+void clearHistory(SScriptCallBack *p, const char *cmd, clearHistory_in *in, clearHistory_out *out)
+{
+    UIFunctions::getInstance()->clearHistory();
+}
+
 class Plugin : public vrep::Plugin
 {
 public:
@@ -288,8 +293,10 @@ public:
             QObject::connect(UIFunctions::getInstance(), &UIFunctions::setCompletion, editor, &QCommanderEditor::setCompletion);
             QObject::connect(editor, &QCommanderEditor::askCallTip, UIFunctions::getInstance(), &UIFunctions::onAskCallTip);
             QObject::connect(UIFunctions::getInstance(), &UIFunctions::setCallTip, editor, &QCommanderEditor::setCallTip);
+            QObject::connect(UIFunctions::getInstance(), &UIFunctions::setHistory, commanderWidget, &QCommanderWidget::setHistory);
             options.load();
             UIFunctions::getInstance()->setOptions(options);
+            UIFunctions::getInstance()->loadHistory();
             optionsChangedFromData.store(true);
         }
 

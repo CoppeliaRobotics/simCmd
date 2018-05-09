@@ -94,6 +94,7 @@ private slots:
 
 public slots:
     void onScriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning);
+    void setHistory(QStringList history);
 
 signals:
     void execCode(QString code, int scriptHandleOrType, QString scriptName);
