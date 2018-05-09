@@ -1,6 +1,7 @@
 #include "QCommanderWidget.h"
 #include "UIProxy.h"
 #include "UIFunctions.h"
+#include "debug.h"
 #include <boost/format.hpp>
 #include <QHBoxLayout>
 #include <QKeyEvent>
@@ -241,6 +242,7 @@ QCommanderWidget::QCommanderWidget(QWidget *parent)
     connect(editor, &QCommanderEditor::upPressed, this, &QCommanderWidget::onUpPressed);
     connect(editor, &QCommanderEditor::downPressed, this, &QCommanderWidget::onDownPressed);
     connect(editor, &QCommanderEditor::clear, this, &QCommanderWidget::onClear);
+    connect(editor, &QCommanderEditor::textEdited, this, &QCommanderWidget::onTextEdited);
     connect(closeButton, &QPushButton::clicked, this, &QCommanderWidget::onClose);
 }
 
@@ -250,7 +252,11 @@ QCommanderWidget::~QCommanderWidget()
 
 void QCommanderWidget::setHistoryIndex(int index)
 {
-    if(history.size() == 0) return;
+    if(history.size() == 0)
+    {
+        DBG << "history is empty" << std::endl;
+        return;
+    }
 
     historyIndex = index;
 
@@ -259,6 +265,9 @@ void QCommanderWidget::setHistoryIndex(int index)
 
     if(historyIndex > history.size() - 1)
         historyIndex = history.size() - 1;
+
+    DBG << "setting historyIndex=" << historyIndex
+        << " \"" << history[historyIndex].toStdString() << "\"" << std::endl;
 
     editor->setText(history[historyIndex]);
     editor->setCallTip("");
@@ -290,6 +299,7 @@ void QCommanderWidget::execute()
     historyIndex = history.size();
     editor->setText("");
     editor->setCallTip("");
+    historyPrefixFilter = "";
 }
 
 void QCommanderWidget::acceptCompletion()
@@ -314,16 +324,52 @@ void QCommanderWidget::onEscapePressed()
     historyIndex = history.size();
     editor->setText("");
     editor->setCallTip("");
+    historyPrefixFilter = "";
+    DBG << "historyPrefixFilter=" << historyPrefixFilter.toStdString() << std::endl;
 }
 
 void QCommanderWidget::onUpPressed()
 {
-    setHistoryIndex(--historyIndex);
+    if(!historyPrefixFilter.isEmpty())
+    {
+        DBG << "historyPrefixFilter=" << historyPrefixFilter.toStdString()
+            << ", old historyIndex=" << historyIndex << std::endl;
+
+        // find previous history entry matching historyPrefixFilter
+        int i = historyIndex - 1;
+        while(i >= 0 && i < history.size() && !history[i].startsWith(historyPrefixFilter))
+            --i;
+        if(i >= 0 && i < history.size() && history[i].startsWith(historyPrefixFilter))
+            setHistoryIndex(i);
+
+        DBG << "new historyIndex=" << historyIndex << std::endl;
+    }
+    else
+    {
+        setHistoryIndex(--historyIndex);
+    }
 }
 
 void QCommanderWidget::onDownPressed()
 {
-    setHistoryIndex(++historyIndex);
+    if(!historyPrefixFilter.isEmpty())
+    {
+        DBG << "historyPrefixFilter=" << historyPrefixFilter.toStdString()
+            << ", old historyIndex=" << historyIndex << std::endl;
+
+        // find next history entry matching historyPrefixFilter
+        int i = historyIndex + 1;
+        while(i >= 0 && i < history.size() && !history[i].startsWith(historyPrefixFilter))
+            ++i;
+        if(i >= 0 && i < history.size() && history[i].startsWith(historyPrefixFilter))
+            setHistoryIndex(i);
+
+        DBG << "new historyIndex=" << historyIndex << std::endl;
+    }
+    else
+    {
+        setHistoryIndex(++historyIndex);
+    }
 }
 
 void QCommanderWidget::onClose()
@@ -334,6 +380,12 @@ void QCommanderWidget::onClose()
 void QCommanderWidget::onClear()
 {
     simAddStatusbarMessage(NULL);
+}
+
+void QCommanderWidget::onTextEdited()
+{
+    historyPrefixFilter = editor->text();
+    DBG << "historyPrefixFilter=" << historyPrefixFilter.toStdString() << std::endl;
 }
 
 void QCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning)

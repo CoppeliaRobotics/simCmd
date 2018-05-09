@@ -77,6 +77,8 @@ protected:
     QStringList history;
     int historyIndex;
 
+    QString historyPrefixFilter;
+
     void setHistoryIndex(int index);
 
 public:
@@ -91,6 +93,7 @@ private slots:
     void onDownPressed();
     void onClose();
     void onClear();
+    void onTextEdited();
 
 public slots:
     void onScriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning);

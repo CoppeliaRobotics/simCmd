@@ -14,7 +14,7 @@ html_help = [[
         <b>Shift+TAB</b>: cycle to previous completion.<br/>
         <b>Enter</b>: accept completion (also works with '(' and '.').<br/>
         <b>Esc</b>: clear text field.<br/>
-        <b>Up/Down</b> arrows: navigate through command history.<br/>
+        <b>Up/Down</b> arrows: navigate/search through command history.<br/>
         <b>Ctrl+L</b>: clear statusbar.
         </p>
 
