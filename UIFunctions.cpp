@@ -3,6 +3,7 @@
 #include "UIProxy.h"
 #include "stubs.h"
 #include <stdexcept>
+#include <iomanip>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -81,8 +82,6 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
         return "<...>";
 
     simBool boolValue;
-    simInt intValue;
-    simFloat floatValue;
     simDouble doubleValue;
     simChar *stringValue;
     simInt stringSize;
@@ -182,6 +181,7 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
         if(strType)
             *strType = "90|table";
 
+        simPopStackItem(stackHandle, 1);
         return "<...>";
     }
     else if(simGetStackBoolValue(stackHandle, &boolValue) == 1)
@@ -198,25 +198,9 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
             *strType = "30|number";
 
         simPopStackItem(stackHandle, 1);
-        std::string fmt = (boost::format("%%.%df") % opts.floatPrecision).str();
-        return (boost::format(fmt) % doubleValue).str();
-    }
-    else if(simGetStackFloatValue(stackHandle, &floatValue) == 1)
-    {
-        if(strType)
-            *strType = "30|number";
-
-        simPopStackItem(stackHandle, 1);
-        std::string fmt = (boost::format("%%.%df") % opts.floatPrecision).str();
-        return (boost::format(fmt) % floatValue).str();
-    }
-    else if(simGetStackInt32Value(stackHandle, &intValue) == 1)
-    {
-        if(strType)
-            *strType = "30|number";
-
-        simPopStackItem(stackHandle, 1);
-        return boost::lexical_cast<std::string>(intValue);
+        std::ostringstream ss;
+        ss << std::setprecision(opts.floatPrecision) << doubleValue;
+        return ss.str();
     }
     else if((stringValue = simGetStackStringValue(stackHandle, &stringSize)) != NULL)
     {

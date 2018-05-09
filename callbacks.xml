@@ -74,10 +74,10 @@
         </return>
     </command>
     <command name="setFloatPrecision">
-        <description>Number of floating point digits to show</description>
+        <description>Number of significative digits to show</description>
         <params>
             <param name="n" type="int">
-                <description>number of digits</description>
+                <description>number of significative digits</description>
             </param>
         </params>
         <return>
