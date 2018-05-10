@@ -333,9 +333,11 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
         simReleaseBuffer(stringValue);
 
         if(quoteStrings)
+        {
+            boost::replace_all(s, "\"", "\\\"");
             return "\"" + s + "\"";
-        else
-            return s;
+        }
+        else return s;
     }
     else
     {
