@@ -94,6 +94,30 @@ void clearHistory(SScriptCallBack *p, const char *cmd, clearHistory_in *in, clea
     UIFunctions::getInstance()->clearHistory();
 }
 
+void setHistorySize(SScriptCallBack *p, const char *cmd, setHistorySize_in *in, setHistorySize_out *out)
+{
+    options.historySize = in->n;
+    options.save();
+    UIFunctions::getInstance()->setOptions(options);
+    optionsChangedFromData.store(true);
+}
+
+void setHistorySkipRepeated(SScriptCallBack *p, const char *cmd, setHistorySkipRepeated_in *in, setHistorySkipRepeated_out *out)
+{
+    options.historySkipRepeated = in->b;
+    options.save();
+    UIFunctions::getInstance()->setOptions(options);
+    optionsChangedFromData.store(true);
+}
+
+void setHistoryRemoveDups(SScriptCallBack *p, const char *cmd, setHistoryRemoveDups_in *in, setHistoryRemoveDups_out *out)
+{
+    options.historyRemoveDups = in->b;
+    options.save();
+    UIFunctions::getInstance()->setOptions(options);
+    optionsChangedFromData.store(true);
+}
+
 class Plugin : public vrep::Plugin
 {
 public:
@@ -140,6 +164,10 @@ public:
         menuLabels.push_back("Map/array rendering: shadow buffer strings");
         MENUITEM_MAP_SHADOW_SPECIAL_STRINGS = menuLabels.size();
         menuLabels.push_back("Map/array rendering: shadow strings with special characters");
+        MENUITEM_HISTORY_SKIP_REPEATED = menuLabels.size();
+        menuLabels.push_back("History: skip repeated commands");
+        MENUITEM_HISTORY_REMOVE_DUPS = menuLabels.size();
+        menuLabels.push_back("History: remove duplicates");
 
         menuState.resize(menuLabels.size());
         menuHandles.resize(menuLabels.size());
@@ -181,6 +209,8 @@ public:
         menuState[MENUITEM_MAP_SHADOW_LONG_STRINGS] = (options.enabled ? itemEnabled : 0) + (options.mapShadowLongStrings ? itemChecked : 0);
         menuState[MENUITEM_MAP_SHADOW_BUFFER_STRINGS] = (options.enabled ? itemEnabled : 0) + (options.mapShadowBufferStrings ? itemChecked : 0);
         menuState[MENUITEM_MAP_SHADOW_SPECIAL_STRINGS] = (options.enabled ? itemEnabled : 0) + (options.mapShadowSpecialStrings ? itemChecked : 0);
+        menuState[MENUITEM_HISTORY_SKIP_REPEATED] = (options.enabled ? itemEnabled : 0) + (options.historySkipRepeated ? itemChecked : 0);
+        menuState[MENUITEM_HISTORY_REMOVE_DUPS] = (options.enabled ? itemEnabled : 0) + (options.historyRemoveDups ? itemChecked : 0);
 
         for(int i = 0; i < menuHandles.size(); i++)
             simSetModuleMenuItemState(menuHandles[i], menuState[i], menuLabels[i].c_str());
@@ -232,6 +262,14 @@ public:
         else if(itemHandle == menuHandles[MENUITEM_MAP_SHADOW_SPECIAL_STRINGS])
         {
             options.mapShadowSpecialStrings = !options.mapShadowSpecialStrings;
+        }
+        else if(itemHandle == menuHandles[MENUITEM_HISTORY_SKIP_REPEATED])
+        {
+            options.historySkipRepeated = !options.historySkipRepeated;
+        }
+        else if(itemHandle == menuHandles[MENUITEM_HISTORY_REMOVE_DUPS])
+        {
+            options.historyRemoveDups = !options.historyRemoveDups;
         }
         else return;
 
@@ -293,7 +331,7 @@ public:
             QObject::connect(UIFunctions::getInstance(), &UIFunctions::setCompletion, editor, &QCommanderEditor::setCompletion);
             QObject::connect(editor, &QCommanderEditor::askCallTip, UIFunctions::getInstance(), &UIFunctions::onAskCallTip);
             QObject::connect(UIFunctions::getInstance(), &UIFunctions::setCallTip, editor, &QCommanderEditor::setCallTip);
-            QObject::connect(UIFunctions::getInstance(), &UIFunctions::setHistory, commanderWidget, &QCommanderWidget::setHistory);
+            QObject::connect(UIFunctions::getInstance(), &UIFunctions::historyChanged, commanderWidget, &QCommanderWidget::setHistory);
             options.load();
             UIFunctions::getInstance()->setOptions(options);
             UIFunctions::getInstance()->loadHistory();
@@ -337,6 +375,8 @@ private:
     int MENUITEM_MAP_SHADOW_LONG_STRINGS;
     int MENUITEM_MAP_SHADOW_BUFFER_STRINGS;
     int MENUITEM_MAP_SHADOW_SPECIAL_STRINGS;
+    int MENUITEM_HISTORY_SKIP_REPEATED;
+    int MENUITEM_HISTORY_REMOVE_DUPS;
     static const int itemEnabled = 1, itemChecked = 2;
 };
 

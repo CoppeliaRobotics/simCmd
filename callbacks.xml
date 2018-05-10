@@ -90,4 +90,34 @@
         <return>
         </return>
     </command>
+    <command name="setHistorySize">
+        <description>Maximum number of items to store in command history</description>
+        <params>
+            <param name="n" type="int">
+                <description>number of items</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="setHistorySkipRepeated">
+        <description>Skip saving repeated entries in command history</description>
+        <params>
+            <param name="b" type="bool">
+                <description>if true, more than one identical consecutive entries will not be saved</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="setHistoryRemoveDups">
+        <description>Skip saving duplicate entries in command history</description>
+        <params>
+            <param name="b" type="bool">
+                <description>if true, no duplicate entries will be saved</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
 </plugin>

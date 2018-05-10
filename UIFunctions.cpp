@@ -83,21 +83,46 @@ void saveHistoryData(QStringList hist)
 void UIFunctions::loadHistory()
 {
     QStringList hist = loadHistoryData();
-    emit setHistory(hist);
+    emit historyChanged(hist);
 }
 
 void UIFunctions::clearHistory()
 {
     QStringList hist;
     saveHistoryData(hist);
-    emit setHistory(hist);
+    emit historyChanged(hist);
 }
 
-void UIFunctions::saveHistory(QString cmd)
+inline void reverse(QStringList &lst)
+{
+    for(size_t i = 0; i < lst.size() / 2; ++i)
+        std::swap(lst[i], lst[lst.size() - i - 1]);
+}
+
+void UIFunctions::appendHistory(QString cmd)
 {
     QStringList hist = loadHistoryData();
-    hist << cmd;
+
+    if(!options.historySkipRepeated || hist[hist.size() - 1] != cmd)
+        hist << cmd;
+
+    if(options.historyRemoveDups)
+    {
+        reverse(hist);
+        hist.removeDuplicates();
+        reverse(hist);
+    }
+
+    if(options.historySize >= 0)
+    {
+        int numToRemove = hist.size() - options.historySize;
+        if(numToRemove > 0)
+            hist.erase(hist.begin(), hist.begin() + numToRemove);
+    }
+
     saveHistoryData(hist);
+
+    emit historyChanged(hist);
 }
 
 void UIFunctions::setOptions(const PersistentOptions &options)
@@ -383,7 +408,7 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
 {
     ASSERT_THREAD(!UI);
 
-    saveHistory(code);
+    appendHistory(code);
 
     simInt stackHandle = simCreateStack();
     if(stackHandle == -1)

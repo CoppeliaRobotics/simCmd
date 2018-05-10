@@ -13,6 +13,9 @@ struct PersistentOptions
     bool mapShadowSpecialStrings = true;
     int floatPrecision = 6;
     int mapMaxDepth = -1;
+    int historySize = 200;
+    bool historySkipRepeated = true;
+    bool historyRemoveDups = false;
 
     const char * dataTag();
     void dump();

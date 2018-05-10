@@ -25,9 +25,9 @@ public:
 
     void loadHistory();
     void clearHistory();
+    void appendHistory(QString code);
 
 private:
-    void saveHistory(QString cmd);
 
     UIFunctions(QObject *parent = 0);
 
@@ -49,7 +49,7 @@ signals:
     void scriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning);
     void setCompletion(QString s);
     void setCallTip(QString s);
-    void setHistory(QStringList history);
+    void historyChanged(QStringList history);
 
 private:
     PersistentOptions options;
