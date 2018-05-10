@@ -104,7 +104,7 @@ void UIFunctions::appendHistory(QString cmd)
 {
     QStringList hist = loadHistoryData();
 
-    if(!options.historySkipRepeated || hist[hist.size() - 1] != cmd)
+    if(!options.historySkipRepeated || hist.isEmpty() || hist[hist.size() - 1] != cmd)
         hist << cmd;
 
     if(options.historyRemoveDups)
