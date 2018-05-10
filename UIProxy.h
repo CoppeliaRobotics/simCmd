@@ -33,6 +33,7 @@ public slots:
 
 signals:
     void execCode(QString code, int scriptHandleOrType, QString scriptName);
+    void clearHistory();
 };
 
 #endif // UIPROXY_H_INCLUDED

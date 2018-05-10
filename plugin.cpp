@@ -164,6 +164,8 @@ public:
         menuLabels.push_back("Map/array rendering: shadow buffer strings");
         MENUITEM_MAP_SHADOW_SPECIAL_STRINGS = menuLabels.size();
         menuLabels.push_back("Map/array rendering: shadow strings with special characters");
+        MENUITEM_HISTORY_CLEAR = menuLabels.size();
+        menuLabels.push_back("Clear History");
         MENUITEM_HISTORY_SKIP_REPEATED = menuLabels.size();
         menuLabels.push_back("History: skip repeated commands");
         MENUITEM_HISTORY_REMOVE_DUPS = menuLabels.size();
@@ -209,6 +211,7 @@ public:
         menuState[MENUITEM_MAP_SHADOW_LONG_STRINGS] = (options.enabled ? itemEnabled : 0) + (options.mapShadowLongStrings ? itemChecked : 0);
         menuState[MENUITEM_MAP_SHADOW_BUFFER_STRINGS] = (options.enabled ? itemEnabled : 0) + (options.mapShadowBufferStrings ? itemChecked : 0);
         menuState[MENUITEM_MAP_SHADOW_SPECIAL_STRINGS] = (options.enabled ? itemEnabled : 0) + (options.mapShadowSpecialStrings ? itemChecked : 0);
+        menuState[MENUITEM_HISTORY_CLEAR] = (options.enabled ? itemEnabled : 0);
         menuState[MENUITEM_HISTORY_SKIP_REPEATED] = (options.enabled ? itemEnabled : 0) + (options.historySkipRepeated ? itemChecked : 0);
         menuState[MENUITEM_HISTORY_REMOVE_DUPS] = (options.enabled ? itemEnabled : 0) + (options.historyRemoveDups ? itemChecked : 0);
 
@@ -262,6 +265,10 @@ public:
         else if(itemHandle == menuHandles[MENUITEM_MAP_SHADOW_SPECIAL_STRINGS])
         {
             options.mapShadowSpecialStrings = !options.mapShadowSpecialStrings;
+        }
+        else if(itemHandle == menuHandles[MENUITEM_HISTORY_CLEAR])
+        {
+            UIProxy::getInstance()->clearHistory();
         }
         else if(itemHandle == menuHandles[MENUITEM_HISTORY_SKIP_REPEATED])
         {
@@ -375,6 +382,7 @@ private:
     int MENUITEM_MAP_SHADOW_LONG_STRINGS;
     int MENUITEM_MAP_SHADOW_BUFFER_STRINGS;
     int MENUITEM_MAP_SHADOW_SPECIAL_STRINGS;
+    int MENUITEM_HISTORY_CLEAR;
     int MENUITEM_HISTORY_SKIP_REPEATED;
     int MENUITEM_HISTORY_REMOVE_DUPS;
     static const int itemEnabled = 1, itemChecked = 2;

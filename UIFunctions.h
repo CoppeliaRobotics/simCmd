@@ -24,8 +24,10 @@ public:
     void setOptions(const PersistentOptions &options);
 
     void loadHistory();
-    void clearHistory();
     void appendHistory(QString code);
+
+public slots:
+    void clearHistory();
 
 private:
 
