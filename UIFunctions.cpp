@@ -286,54 +286,56 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
         }
 
         simPopStackItem(stackHandle, 1);
-        std::stringstream ss;
-
-        if(quoteStrings)
-            ss << "\"";
 
         if(insideTable)
         {
-            if(opts.mapShadowLongStrings && stringSize >= opts.stringLongLimit)
+            bool isBuffer = false, isSpecial = false, isLong = false;
+            for(size_t i = 0; i < s.length(); i++)
             {
-                ss << "<long string>";
+                if(opts.mapShadowLongStrings && i >= opts.stringLongLimit && opts.stringLongLimit >= 0)
+                    isLong = true;
+                if(opts.mapShadowBufferStrings && s[i] == 0)
+                    isBuffer = true;
+                if(opts.mapShadowSpecialStrings && isSpecialChar(s[i]))
+                    isSpecial = true;
+                if(isLong || isBuffer) break;
             }
-            else
-            {
-                bool isBuffer = false, isSpecial = false;
-                for(int i = 0; i < std::min(stringSize, opts.stringLongLimit); i++)
-                {
-                    if(opts.mapShadowBufferStrings && stringValue[i] == 0)
-                    {
-                        isBuffer = true;
-                        break;
-                    }
-                    if(opts.mapShadowSpecialStrings && isSpecialChar(stringValue[i]))
-                    {
-                        isSpecial = true;
-                        continue;
-                    }
-                }
-
-                if(isBuffer)
-                    ss << "<buffer string>";
-                else if(isSpecial)
-                    ss << "<string contains special chars>";
-                else
-                {
-                    boost::replace_all(s, "\n", "\\n");
-                    boost::replace_all(s, "\r", "\\r");
-                    boost::replace_all(s, "\t", "\\t");
-                    ss << s;
-                }
-            }
+            if(isBuffer) s = "<buffer string>";
+            else if(isLong) s = "<long string>";
+            else if(isSpecial) s = "<string contains special chars>";
         }
-        else ss << s;
 
-        if(quoteStrings)
-            ss << "\"";
+        if(opts.stringEscapeSpecials || insideTable)
+        {
+            std::stringstream ss;
+            for(size_t i = 0; i < s.length(); i++)
+            {
+                char c = s[i];
+                if(c == '\0')
+                    ss << "\\0";
+                else if(c == '\n')
+                    ss << "\\n";
+                else if(c == '\r')
+                    ss << "\\r";
+                else if(c == '\t')
+                    ss << "\\t";
+                else if(c < 32 || c > 126)
+                    //ss << "\\x" << std::setfill('0') << std::setw(2) << std::hex << static_cast<int>(c);
+                    ss << '?';
+                else if(c == '\\')
+                    ss << "\\\\";
+                else
+                    ss << c;
+            }
+            s = ss.str();
+        }
 
         simReleaseBuffer(stringValue);
-        return ss.str();
+
+        if(quoteStrings)
+            return "\"" + s + "\"";
+        else
+            return s;
     }
     else
     {
@@ -353,6 +355,7 @@ void UIFunctions::initStringRenderingFlags()
     stringRenderingFlags << "sort";
     stringRenderingFlags << "precision";
     stringRenderingFlags << "depth";
+    stringRenderingFlags << "escape";
 }
 
 QStringList UIFunctions::getMatchingStringRenderingFlags(QString shortFlag)
@@ -402,6 +405,11 @@ void UIFunctions::parseStringRenderingFlags(PersistentOptions *popts, const QStr
         {
             int d = boost::lexical_cast<int>(optVal.toStdString());
             popts->mapMaxDepth = d;
+        }
+        if(optName == "escape")
+        {
+            int d = boost::lexical_cast<int>(optVal.toStdString());
+            popts->stringEscapeSpecials = d;
         }
     }
 }

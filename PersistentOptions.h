@@ -6,6 +6,7 @@ struct PersistentOptions
     bool enabled = true;
     int arrayMaxItemsDisplayed = 20;
     int stringLongLimit = 160;
+    bool stringEscapeSpecials = true;
     bool mapSortKeysByName = true;
     bool mapSortKeysByType = false;
     bool mapShadowLongStrings = true;

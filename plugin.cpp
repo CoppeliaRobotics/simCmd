@@ -154,6 +154,8 @@ public:
         MENUITEM_TOGGLE_VISIBILITY = menuLabels.size();
         menuLabels.push_back("Enable");
         menuLabels.push_back("");
+        MENUITEM_STRING_ESCAPE_SPECIALS = menuLabels.size();
+        menuLabels.push_back("String rendering: escape special characters");
         MENUITEM_MAP_SORT_KEYS_BY_NAME = menuLabels.size();
         menuLabels.push_back("Map/array rendering: sort keys by name");
         MENUITEM_MAP_SORT_KEYS_BY_TYPE = menuLabels.size();
@@ -206,6 +208,7 @@ public:
     void updateMenuItems()
     {
         menuState[MENUITEM_TOGGLE_VISIBILITY] = (options.enabled ? itemChecked : 0) + itemEnabled;
+        menuState[MENUITEM_STRING_ESCAPE_SPECIALS] = (options.enabled ? itemEnabled : 0) + (options.stringEscapeSpecials ? itemChecked : 0);
         menuState[MENUITEM_MAP_SORT_KEYS_BY_NAME] = (options.enabled ? itemEnabled : 0) + (options.mapSortKeysByName ? itemChecked : 0);
         menuState[MENUITEM_MAP_SORT_KEYS_BY_TYPE] = (options.enabled ? itemEnabled : 0) + (options.mapSortKeysByType ? itemChecked : 0);
         menuState[MENUITEM_MAP_SHADOW_LONG_STRINGS] = (options.enabled ? itemEnabled : 0) + (options.mapShadowLongStrings ? itemChecked : 0);
@@ -245,6 +248,10 @@ public:
         if(itemHandle == menuHandles[MENUITEM_TOGGLE_VISIBILITY])
         {
             options.enabled = !options.enabled;
+        }
+        else if(itemHandle == menuHandles[MENUITEM_STRING_ESCAPE_SPECIALS])
+        {
+            options.stringEscapeSpecials = !options.stringEscapeSpecials;
         }
         else if(itemHandle == menuHandles[MENUITEM_MAP_SORT_KEYS_BY_NAME])
         {
@@ -377,6 +384,7 @@ private:
     std::vector<simInt> menuState;
     std::vector<std::string> menuLabels;
     int MENUITEM_TOGGLE_VISIBILITY;
+    int MENUITEM_STRING_ESCAPE_SPECIALS;
     int MENUITEM_MAP_SORT_KEYS_BY_NAME;
     int MENUITEM_MAP_SORT_KEYS_BY_TYPE;
     int MENUITEM_MAP_SHADOW_LONG_STRINGS;
