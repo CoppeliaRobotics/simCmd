@@ -134,13 +134,32 @@ void UIFunctions::setOptions(const PersistentOptions &options)
 
 static inline bool isSpecialChar(char c)
 {
-    if(c >= 'a' && c <= 'z') return false;
-    if(c >= 'A' && c <= 'Z') return false;
-    if(c >= '0' && c <= '9') return false;
-    static const char *allowed = " !@#$%^&*()_-+=[]{}\\|:;\"'<>,./?`~\n\r\t";
-    for(int i = 0; i < strlen(allowed); i++)
-        if(c == allowed[i]) return false;
-    return true;
+    if(c == '\n' || c == '\r' || c == '\t') return false;
+    return c < 32 || c > 126;
+}
+
+std::string escapeSpecialChars(std::string s)
+{
+    std::stringstream ss;
+    for(size_t i = 0; i < s.length(); i++)
+    {
+        char c = s[i];
+        if(c == '\0')
+            ss << "\\0";
+        else if(c == '\n')
+            ss << "\\n";
+        else if(c == '\r')
+            ss << "\\r";
+        else if(c == '\t')
+            ss << "\\t";
+        else if(c == '\\')
+            ss << "\\\\";
+        else if(isSpecialChar(c))
+            ss << '?';
+        else
+            ss << c;
+    }
+    return ss.str();
 }
 
 std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOptions &opts, int depth, bool quoteStrings, bool insideTable, std::string *strType)
@@ -306,38 +325,17 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
         }
 
         if(opts.stringEscapeSpecials || insideTable)
-        {
-            std::stringstream ss;
-            for(size_t i = 0; i < s.length(); i++)
-            {
-                char c = s[i];
-                if(c == '\0')
-                    ss << "\\0";
-                else if(c == '\n')
-                    ss << "\\n";
-                else if(c == '\r')
-                    ss << "\\r";
-                else if(c == '\t')
-                    ss << "\\t";
-                else if(c < 32 || c > 126)
-                    //ss << "\\x" << std::setfill('0') << std::setw(2) << std::hex << static_cast<int>(c);
-                    ss << '?';
-                else if(c == '\\')
-                    ss << "\\\\";
-                else
-                    ss << c;
-            }
-            s = ss.str();
-        }
-
-        simReleaseBuffer(stringValue);
+            s = escapeSpecialChars(s);
 
         if(quoteStrings)
         {
             boost::replace_all(s, "\"", "\\\"");
-            return "\"" + s + "\"";
+            s = "\"" + s + "\"";
         }
-        else return s;
+
+        simReleaseBuffer(stringValue);
+
+        return s;
     }
     else
     {
