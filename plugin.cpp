@@ -154,6 +154,9 @@ public:
         MENUITEM_TOGGLE_VISIBILITY = menuLabels.size();
         menuLabels.push_back("Enable");
         menuLabels.push_back("");
+        MENUITEM_HISTORY_CLEAR = menuLabels.size();
+        menuLabels.push_back("Clear command history");
+        menuLabels.push_back("");
         MENUITEM_STRING_ESCAPE_SPECIALS = menuLabels.size();
         menuLabels.push_back("String rendering: escape special characters");
         MENUITEM_MAP_SORT_KEYS_BY_NAME = menuLabels.size();
@@ -166,8 +169,6 @@ public:
         menuLabels.push_back("Map/array rendering: shadow buffer strings");
         MENUITEM_MAP_SHADOW_SPECIAL_STRINGS = menuLabels.size();
         menuLabels.push_back("Map/array rendering: shadow strings with special characters");
-        MENUITEM_HISTORY_CLEAR = menuLabels.size();
-        menuLabels.push_back("Clear History");
         MENUITEM_HISTORY_SKIP_REPEATED = menuLabels.size();
         menuLabels.push_back("History: skip repeated commands");
         MENUITEM_HISTORY_REMOVE_DUPS = menuLabels.size();
@@ -208,13 +209,13 @@ public:
     void updateMenuItems()
     {
         menuState[MENUITEM_TOGGLE_VISIBILITY] = (options.enabled ? itemChecked : 0) + itemEnabled;
+        menuState[MENUITEM_HISTORY_CLEAR] = (options.enabled ? itemEnabled : 0);
         menuState[MENUITEM_STRING_ESCAPE_SPECIALS] = (options.enabled ? itemEnabled : 0) + (options.stringEscapeSpecials ? itemChecked : 0);
         menuState[MENUITEM_MAP_SORT_KEYS_BY_NAME] = (options.enabled ? itemEnabled : 0) + (options.mapSortKeysByName ? itemChecked : 0);
         menuState[MENUITEM_MAP_SORT_KEYS_BY_TYPE] = (options.enabled ? itemEnabled : 0) + (options.mapSortKeysByType ? itemChecked : 0);
         menuState[MENUITEM_MAP_SHADOW_LONG_STRINGS] = (options.enabled ? itemEnabled : 0) + (options.mapShadowLongStrings ? itemChecked : 0);
         menuState[MENUITEM_MAP_SHADOW_BUFFER_STRINGS] = (options.enabled ? itemEnabled : 0) + (options.mapShadowBufferStrings ? itemChecked : 0);
         menuState[MENUITEM_MAP_SHADOW_SPECIAL_STRINGS] = (options.enabled ? itemEnabled : 0) + (options.mapShadowSpecialStrings ? itemChecked : 0);
-        menuState[MENUITEM_HISTORY_CLEAR] = (options.enabled ? itemEnabled : 0);
         menuState[MENUITEM_HISTORY_SKIP_REPEATED] = (options.enabled ? itemEnabled : 0) + (options.historySkipRepeated ? itemChecked : 0);
         menuState[MENUITEM_HISTORY_REMOVE_DUPS] = (options.enabled ? itemEnabled : 0) + (options.historyRemoveDups ? itemChecked : 0);
 
@@ -249,6 +250,10 @@ public:
         {
             options.enabled = !options.enabled;
         }
+        else if(itemHandle == menuHandles[MENUITEM_HISTORY_CLEAR])
+        {
+            UIProxy::getInstance()->clearHistory();
+        }
         else if(itemHandle == menuHandles[MENUITEM_STRING_ESCAPE_SPECIALS])
         {
             options.stringEscapeSpecials = !options.stringEscapeSpecials;
@@ -272,10 +277,6 @@ public:
         else if(itemHandle == menuHandles[MENUITEM_MAP_SHADOW_SPECIAL_STRINGS])
         {
             options.mapShadowSpecialStrings = !options.mapShadowSpecialStrings;
-        }
-        else if(itemHandle == menuHandles[MENUITEM_HISTORY_CLEAR])
-        {
-            UIProxy::getInstance()->clearHistory();
         }
         else if(itemHandle == menuHandles[MENUITEM_HISTORY_SKIP_REPEATED])
         {
@@ -384,13 +385,13 @@ private:
     std::vector<simInt> menuState;
     std::vector<std::string> menuLabels;
     int MENUITEM_TOGGLE_VISIBILITY;
+    int MENUITEM_HISTORY_CLEAR;
     int MENUITEM_STRING_ESCAPE_SPECIALS;
     int MENUITEM_MAP_SORT_KEYS_BY_NAME;
     int MENUITEM_MAP_SORT_KEYS_BY_TYPE;
     int MENUITEM_MAP_SHADOW_LONG_STRINGS;
     int MENUITEM_MAP_SHADOW_BUFFER_STRINGS;
     int MENUITEM_MAP_SHADOW_SPECIAL_STRINGS;
-    int MENUITEM_HISTORY_CLEAR;
     int MENUITEM_HISTORY_SKIP_REPEATED;
     int MENUITEM_HISTORY_REMOVE_DUPS;
     static const int itemEnabled = 1, itemChecked = 2;
