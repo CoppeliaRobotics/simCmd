@@ -70,6 +70,7 @@ QStringList loadHistoryData()
     {
         QString s = QString::fromUtf8(pdata);
         hist = s.split(QRegExp("(\\r\\n)|(\\n\\r)|\\r|\\n"), QString::SkipEmptyParts);
+        simReleaseBuffer(pdata);
     }
     return hist;
 }
