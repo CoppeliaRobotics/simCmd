@@ -252,7 +252,7 @@ QCommanderWidget::~QCommanderWidget()
 
 void QCommanderWidget::setHistoryIndex(int index)
 {
-    if(history.size() == 0)
+    if(history.isEmpty())
     {
         DBG << "history is empty" << std::endl;
         return;
@@ -330,6 +330,8 @@ void QCommanderWidget::onEscapePressed()
 
 void QCommanderWidget::onUpPressed()
 {
+    if(history.isEmpty()) return;
+
     if(!historyPrefixFilter.isEmpty())
     {
         DBG << "historyPrefixFilter=" << historyPrefixFilter.toStdString()
@@ -352,6 +354,8 @@ void QCommanderWidget::onUpPressed()
 
 void QCommanderWidget::onDownPressed()
 {
+    if(history.isEmpty()) return;
+
     if(!historyPrefixFilter.isEmpty())
     {
         DBG << "historyPrefixFilter=" << historyPrefixFilter.toStdString()
