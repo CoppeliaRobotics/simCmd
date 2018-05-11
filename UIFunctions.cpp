@@ -164,9 +164,6 @@ std::string escapeSpecialChars(std::string s)
 
 std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOptions &opts, int depth, bool quoteStrings, bool insideTable, std::string *strType)
 {
-    if(opts.mapMaxDepth >= 0 && depth > opts.mapMaxDepth)
-        return "<...>";
-
     simBool boolValue;
     simDouble doubleValue;
     simChar *stringValue;
@@ -180,6 +177,9 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
         int oldSize = simGetStackSize(stackHandle);
         if(simUnfoldStackTable(stackHandle) != -1)
         {
+            if(opts.mapMaxDepth >= 0 && depth > opts.mapMaxDepth)
+                return "<...>";
+
             int newSize = simGetStackSize(stackHandle);
             int numItems = (newSize - oldSize + 1) / 2;
 
