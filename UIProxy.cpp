@@ -66,3 +66,19 @@ void UIProxy::destroyInstance()
     DBG << "[leave]" << std::endl;
 }
 
+void UIProxy::setStatusBar(QPlainTextEdit *statusBar_)
+{
+    statusBar = statusBar_;
+}
+
+void UIProxy::addStatusbarMessage(const QString &s, bool html)
+{
+    if(statusBar)
+    {
+        if(html)
+            statusBar->appendHtml(s);
+        else
+            statusBar->appendPlainText(s);
+    }
+}
+

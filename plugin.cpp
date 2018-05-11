@@ -126,9 +126,10 @@ public:
         UIProxy::getInstance(); // construct UIProxy here (UI thread)
 
         // find the StatusBar widget (QPlainTextEdit)
-        QPlainTextEdit *statusBar = findStatusBar();
+        statusBar = UIProxy::vrepMainWindow->findChild<QPlainTextEdit*>("statusBar");
         if(!statusBar)
             throw std::runtime_error("cannot find the statusbar widget");
+        UIProxy::getInstance()->setStatusBar(statusBar);
 
         if(!registerScriptStuff())
             throw std::runtime_error("failed to register script stuff");
@@ -193,17 +194,9 @@ public:
 #ifdef __APPLE__
         delete commanderWidget;
 #else
-        QPlainTextEdit *statusBar = findStatusBar();
-        if(statusBar)
-            splitter->addWidget(statusBar);
+        splitter->addWidget(statusBar);
         delete splitterChild;
 #endif
-    }
-
-    QPlainTextEdit * findStatusBar()
-    {
-        QPlainTextEdit *statusBar = UIProxy::vrepMainWindow->findChild<QPlainTextEdit*>("statusBar");
-        return statusBar;
     }
 
     void updateMenuItems()
@@ -237,9 +230,7 @@ public:
             if(oldVis && !newVis)
             {
                 // when commander is hidden, focus the statusbar
-                QPlainTextEdit *statusBar = findStatusBar();
-                if(statusBar)
-                    statusBar->setFocus();
+                statusBar->setFocus();
             }
         }
     }
@@ -378,6 +369,7 @@ public:
 private:
     bool firstInstancePass = true;
     bool pluginEnabled = true;
+    QPlainTextEdit *statusBar;
     QSplitter *splitter = 0L;
     QWidget *splitterChild = 0L;
     QCommanderWidget *commanderWidget = 0L;

@@ -60,6 +60,7 @@ void UIFunctions::connectSignals()
     // connect signals/slots from UIProxy to UIFunctions and vice-versa
     connect(uiproxy, &UIProxy::execCode, this, &UIFunctions::onExecCode);
     connect(uiproxy, &UIProxy::clearHistory, this, &UIFunctions::clearHistory);
+    connect(this, &UIFunctions::addStatusbarMessage, uiproxy, &UIProxy::addStatusbarMessage);
 }
 
 QStringList loadHistoryData()

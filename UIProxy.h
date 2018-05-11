@@ -8,6 +8,7 @@
 #include <QObject>
 #include <QString>
 #include <QWidget>
+#include <QPlainTextEdit>
 
 #include "stubs.h"
 
@@ -25,11 +26,15 @@ private:
     UIProxy(QObject *parent = 0);
 
     static UIProxy *instance;
+    QPlainTextEdit *statusBar = nullptr;
 
 public:
     static QWidget *vrepMainWindow;
 
+    void setStatusBar(QPlainTextEdit *statusBar);
+
 public slots:
+    void addStatusbarMessage(const QString &s, bool html = false);
 
 signals:
     void execCode(QString code, int scriptHandleOrType, QString scriptName);
