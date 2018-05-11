@@ -442,20 +442,25 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     }
     catch(std::exception &ex)
     {
-        simAddStatusbarMessage((boost::format("LuaCommander: warning: %s") % ex.what()).str().c_str());
+        QString m = QString("<font color='#c60'>LuaCommander: warning: %1</font>").arg(ex.what());
+        emit addStatusbarMessage(m, true);
     }
 
     simInt ret = simExecuteScriptString(scriptHandleOrType, s1.data(), stackHandle);
     if(ret != 0)
     {
-        simAddStatusbarMessage(getStackTopAsString(stackHandle, opts).c_str());
+        std::string s = getStackTopAsString(stackHandle, opts);
+        QString m = QString("<font color='#c00'>%1</font>").arg(QString::fromStdString(s));
+        emit addStatusbarMessage(m, true);
     }
     else
     {
         simInt size = simGetStackSize(stackHandle);
         if(size > 0)
         {
-            simAddStatusbarMessage(getStackTopAsString(stackHandle, opts).c_str());
+            std::string s = getStackTopAsString(stackHandle, opts);
+            QString m = QString::fromStdString(s);
+            emit addStatusbarMessage(m, false);
         }
     }
 
