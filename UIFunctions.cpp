@@ -398,8 +398,8 @@ void UIFunctions::parseStringRenderingFlags(PersistentOptions *popts, const QStr
         if(optName == "precision")
         {
             int p = boost::lexical_cast<int>(optVal.toStdString());
-            if(p < 0 || p > 20)
-                throw std::runtime_error((boost::format("invalid 'precision' option: '%d' (should be between 0 and 20)") % optVal.toStdString()).str());
+            if(p < 0 || p > 400)
+                throw std::runtime_error((boost::format("invalid 'precision' option: '%d' (should be between 0 and 400)") % optVal.toStdString()).str());
             popts->floatPrecision = p;
         }
         if(optName == "depth")
