@@ -76,13 +76,15 @@ void UIProxy::addStatusbarMessage(const QString &s, bool html)
 {
     if(statusBar)
     {
+        QScrollBar *sb = statusBar->verticalScrollBar();
+        bool scrollToBottom = sb->value() == sb->maximum();
+
         if(html)
             statusBar->appendHtml(s);
         else
             statusBar->appendPlainText(s);
 
-        QScrollBar *sb = statusBar->verticalScrollBar();
-        sb->setValue(sb->maximum());
+        if(scrollToBottom) sb->setValue(sb->maximum());
     }
 }
 
