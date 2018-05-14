@@ -167,6 +167,14 @@ std::string escapeSpecialChars(std::string s)
 
 std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOptions &opts, int depth, bool quoteStrings, bool insideTable, std::string *strType)
 {
+    if(simIsStackValueNull(stackHandle) == 1)
+    {
+        if(strType)
+            *strType = "99|nil";
+
+        return "nil";
+    }
+
     simBool boolValue;
     simDouble doubleValue;
     simChar *stringValue;
