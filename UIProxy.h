@@ -34,9 +34,6 @@ public:
     void setStatusBar(QPlainTextEdit *statusBar);
 
 public slots:
-    void addStatusbarMessage(const QString &s, bool html = false);
-    void addStatusbarWarning(const QString &s, bool html = false);
-    void addStatusbarError(const QString &s, bool html = false);
 
 signals:
     void execCode(QString code, int scriptHandleOrType, QString scriptName);

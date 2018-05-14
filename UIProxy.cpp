@@ -72,29 +72,3 @@ void UIProxy::setStatusBar(QPlainTextEdit *statusBar_)
     statusBar = statusBar_;
 }
 
-void UIProxy::addStatusbarMessage(const QString &s, bool html)
-{
-    if(statusBar)
-    {
-        QScrollBar *sb = statusBar->verticalScrollBar();
-        bool scrollToBottom = sb->value() == sb->maximum();
-
-        if(html)
-            statusBar->appendHtml(s);
-        else
-            statusBar->appendPlainText(s);
-
-        if(scrollToBottom) sb->setValue(sb->maximum());
-    }
-}
-
-void UIProxy::addStatusbarWarning(const QString &s, bool html)
-{
-    addStatusbarMessage(QString("<font color='#c60'>%1</font>").arg(s), true);
-}
-
-void UIProxy::addStatusbarError(const QString &s, bool html)
-{
-    addStatusbarMessage(QString("<font color='#c00'>%1</font>").arg(s), true);
-}
-

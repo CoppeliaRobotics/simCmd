@@ -60,9 +60,6 @@ void UIFunctions::connectSignals()
     // connect signals/slots from UIProxy to UIFunctions and vice-versa
     connect(uiproxy, &UIProxy::execCode, this, &UIFunctions::onExecCode);
     connect(uiproxy, &UIProxy::clearHistory, this, &UIFunctions::clearHistory);
-    connect(this, &UIFunctions::addStatusbarMessage, uiproxy, &UIProxy::addStatusbarMessage);
-    connect(this, &UIFunctions::addStatusbarWarning, uiproxy, &UIProxy::addStatusbarWarning);
-    connect(this, &UIFunctions::addStatusbarError, uiproxy, &UIProxy::addStatusbarError);
 }
 
 QStringList loadHistoryData()
@@ -425,6 +422,25 @@ void UIFunctions::parseStringRenderingFlags(PersistentOptions *popts, const QStr
     }
 }
 
+void UIFunctions::showMessage(QString s, bool html)
+{
+    if(!html) s = s.toHtmlEscaped();
+    s += "@html";
+    simAddStatusbarMessage(s.toLatin1().data());
+}
+
+void UIFunctions::showWarning(QString s, bool html)
+{
+    if(!html) s = s.toHtmlEscaped();
+    showMessage(QString("<font color='#c60'>%1</font>").arg(s), true);
+}
+
+void UIFunctions::showError(QString s, bool html)
+{
+    if(!html) s = s.toHtmlEscaped();
+    showMessage(QString("<font color='#c00'>%1</font>").arg(s), true);
+}
+
 void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scriptName)
 {
     ASSERT_THREAD(!UI);
@@ -434,16 +450,11 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     simInt stackHandle = simCreateStack();
     if(stackHandle == -1)
     {
-        emit addStatusbarError("LuaCommander: error: failed to create a stack", false);
+        showError("LuaCommander: error: failed to create a stack");
         return;
     }
 
-    QString s = code;
-    s += "@" + scriptName;
-    QByteArray s1 = s.toLatin1();
-
-    std::string echo = "> " + code.toStdString();
-    emit addStatusbarMessage(echo.c_str(), false);
+    showMessage("> " + code);
 
     PersistentOptions opts = options;
     try
@@ -453,15 +464,16 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     catch(std::exception &ex)
     {
         QString m = QString("LuaCommander: warning: %1").arg(ex.what());
-        emit addStatusbarWarning(m, false);
+        showWarning(m);
     }
 
-    simInt ret = simExecuteScriptString(scriptHandleOrType, s1.data(), stackHandle);
+    QString s = QString("%1@%2").arg(code, scriptName);
+    simInt ret = simExecuteScriptString(scriptHandleOrType, s.toLatin1().data(), stackHandle);
     if(ret != 0)
     {
         std::string s = getStackTopAsString(stackHandle, opts, 0, false);
         QString m = QString::fromStdString(s);
-        emit addStatusbarError(m, false);
+        showError(m);
     }
     else
     {
@@ -470,7 +482,7 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
         {
             std::string s = getStackTopAsString(stackHandle, opts);
             QString m = QString::fromStdString(s);
-            emit addStatusbarMessage(m, false);
+            showMessage(m, false);
         }
     }
 

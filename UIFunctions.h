@@ -26,6 +26,10 @@ public:
     void loadHistory();
     void appendHistory(QString code);
 
+    void showMessage(QString s, bool html = false);
+    void showWarning(QString s, bool html = false);
+    void showError(QString s, bool html = false);
+
 public slots:
     void clearHistory();
 
