@@ -8,7 +8,7 @@ struct PersistentOptions
     int stringLongLimit = 160;
     bool stringEscapeSpecials = true;
     bool mapSortKeysByName = true;
-    bool mapSortKeysByType = false;
+    bool mapSortKeysByType = true;
     bool mapShadowLongStrings = true;
     bool mapShadowBufferStrings = true;
     bool mapShadowSpecialStrings = true;
