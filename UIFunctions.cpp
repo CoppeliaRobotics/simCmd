@@ -439,7 +439,7 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     }
 
     QString s = code;
-    if(!scriptName.isEmpty()) s += "@" + scriptName;
+    s += "@" + scriptName;
     QByteArray s1 = s.toLatin1();
 
     std::string echo = "> " + code.toStdString();
