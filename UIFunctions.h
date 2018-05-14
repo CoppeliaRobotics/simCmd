@@ -53,6 +53,8 @@ signals:
     void setCallTip(QString s);
     void historyChanged(QStringList history);
     void addStatusbarMessage(const QString &s, bool html);
+    void addStatusbarWarning(const QString &s, bool html);
+    void addStatusbarError(const QString &s, bool html);
 
 private:
     PersistentOptions options;

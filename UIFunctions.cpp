@@ -61,6 +61,8 @@ void UIFunctions::connectSignals()
     connect(uiproxy, &UIProxy::execCode, this, &UIFunctions::onExecCode);
     connect(uiproxy, &UIProxy::clearHistory, this, &UIFunctions::clearHistory);
     connect(this, &UIFunctions::addStatusbarMessage, uiproxy, &UIProxy::addStatusbarMessage);
+    connect(this, &UIFunctions::addStatusbarWarning, uiproxy, &UIProxy::addStatusbarWarning);
+    connect(this, &UIFunctions::addStatusbarError, uiproxy, &UIProxy::addStatusbarError);
 }
 
 QStringList loadHistoryData()
@@ -424,7 +426,7 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     simInt stackHandle = simCreateStack();
     if(stackHandle == -1)
     {
-        simAddStatusbarMessage("LuaCommander: error: failed to create a stack");
+        emit addStatusbarError("LuaCommander: error: failed to create a stack", false);
         return;
     }
 
@@ -433,7 +435,7 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     QByteArray s1 = s.toLatin1();
 
     std::string echo = "> " + code.toStdString();
-    simAddStatusbarMessage(echo.c_str());
+    emit addStatusbarMessage(echo.c_str(), false);
 
     PersistentOptions opts = options;
     try
@@ -442,16 +444,16 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     }
     catch(std::exception &ex)
     {
-        QString m = QString("<font color='#c60'>LuaCommander: warning: %1</font>").arg(ex.what());
-        emit addStatusbarMessage(m, true);
+        QString m = QString("LuaCommander: warning: %1").arg(ex.what());
+        emit addStatusbarWarning(m, false);
     }
 
     simInt ret = simExecuteScriptString(scriptHandleOrType, s1.data(), stackHandle);
     if(ret != 0)
     {
         std::string s = getStackTopAsString(stackHandle, opts);
-        QString m = QString("<font color='#c00'>%1</font>").arg(QString::fromStdString(s));
-        emit addStatusbarMessage(m, true);
+        QString m = QString::fromStdString(s);
+        emit addStatusbarError(m, false);
     }
     else
     {

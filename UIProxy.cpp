@@ -19,6 +19,7 @@
 #include <QDialog>
 #include <QTreeWidget>
 #include <QTextBrowser>
+#include <QScrollBar>
 
 #include "stubs.h"
 
@@ -79,6 +80,19 @@ void UIProxy::addStatusbarMessage(const QString &s, bool html)
             statusBar->appendHtml(s);
         else
             statusBar->appendPlainText(s);
+
+        QScrollBar *sb = statusBar->verticalScrollBar();
+        sb->setValue(sb->maximum());
     }
+}
+
+void UIProxy::addStatusbarWarning(const QString &s, bool html)
+{
+    addStatusbarMessage(QString("<font color='#c60'>%1</font>").arg(s), true);
+}
+
+void UIProxy::addStatusbarError(const QString &s, bool html)
+{
+    addStatusbarMessage(QString("<font color='#c00'>%1</font>").arg(s), true);
 }
 
