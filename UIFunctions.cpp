@@ -422,22 +422,27 @@ void UIFunctions::parseStringRenderingFlags(PersistentOptions *popts, const QStr
     }
 }
 
+QString escapeHtml(QString s)
+{
+    return s.toHtmlEscaped().replace("\n", "<br/>").replace(" ", "&nbsp;");
+}
+
 void UIFunctions::showMessage(QString s, bool html)
 {
-    if(!html) s = s.toHtmlEscaped();
+    if(!html) s = escapeHtml(s);
     s += "@html";
     simAddStatusbarMessage(s.toLatin1().data());
 }
 
 void UIFunctions::showWarning(QString s, bool html)
 {
-    if(!html) s = s.toHtmlEscaped();
+    if(!html) s = escapeHtml(s);
     showMessage(QString("<font color='#c60'>%1</font>").arg(s), true);
 }
 
 void UIFunctions::showError(QString s, bool html)
 {
-    if(!html) s = s.toHtmlEscaped();
+    if(!html) s = escapeHtml(s);
     showMessage(QString("<font color='#c00'>%1</font>").arg(s), true);
 }
 
