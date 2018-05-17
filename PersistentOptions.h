@@ -12,7 +12,7 @@ struct PersistentOptions
     bool mapShadowLongStrings = true;
     bool mapShadowBufferStrings = true;
     bool mapShadowSpecialStrings = true;
-    int floatPrecision = 6;
+    int floatPrecision = 10;
     int mapMaxDepth = -1;
     int historySize = 200;
     bool historySkipRepeated = true;
