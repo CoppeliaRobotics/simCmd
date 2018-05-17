@@ -10,8 +10,10 @@
 #include "plugin.h"
 
 #ifdef QT_DEBUG
+#ifndef DEBUG
 #define DEBUG
-#endif
+#endif // DEBUG
+#endif // QT_DEBUG
 
 extern Qt::HANDLE UI_THREAD;
 extern Qt::HANDLE SIM_THREAD;
