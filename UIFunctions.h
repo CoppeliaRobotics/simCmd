@@ -47,8 +47,8 @@ private:
 
 public slots:
     void onExecCode(QString code, int scriptHandleOrType, QString scriptName);
-    void onGetPrevCompletion(int scriptHandleOrType, QString prefix, QString selection);
-    void onGetNextCompletion(int scriptHandleOrType, QString prefix, QString selection);
+    void onGetPrevCompletion(int scriptHandleOrType, QString scriptName, QString prefix, QString selection);
+    void onGetNextCompletion(int scriptHandleOrType, QString scriptName, QString prefix, QString selection);
     void onAskCallTip(int scriptHandleOrType, QString symbol);
 
 signals:

@@ -494,7 +494,7 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     simReleaseStack(stackHandle);
 }
 
-static QStringList getCompletion(int scriptHandleOrType, QString word)
+static QStringList getCompletion(int scriptHandleOrType, QString scriptName, QString word)
 {
     simChar *buf = simGetApiFunc(scriptHandleOrType, word.toStdString().c_str());
     QString bufStr = QString::fromUtf8(buf);
@@ -518,18 +518,18 @@ static int findInsertionPoint(QStringList &l, QString w)
     return lo; // not found, would be inserted at position lo
 }
 
-void UIFunctions::onGetPrevCompletion(int scriptHandleOrType, QString prefix, QString selection)
+void UIFunctions::onGetPrevCompletion(int scriptHandleOrType, QString scriptName, QString prefix, QString selection)
 {
-    QStringList cl = getCompletion(scriptHandleOrType, prefix);
+    QStringList cl = getCompletion(scriptHandleOrType, scriptName, prefix);
     if(cl.isEmpty()) return;
     int i = findInsertionPoint(cl, prefix + selection) - 1;
     if(i >= 0 && i < cl.size())
         emit setCompletion(cl[i]);
 }
 
-void UIFunctions::onGetNextCompletion(int scriptHandleOrType, QString prefix, QString selection)
+void UIFunctions::onGetNextCompletion(int scriptHandleOrType, QString scriptName, QString prefix, QString selection)
 {
-    QStringList cl = getCompletion(scriptHandleOrType, prefix);
+    QStringList cl = getCompletion(scriptHandleOrType, scriptName, prefix);
     if(cl.isEmpty()) return;
     int i = selection == "" ? 0 : (findInsertionPoint(cl, prefix + selection) + 1);
     if(i >= 0 && i < cl.size() && cl[i] == prefix)

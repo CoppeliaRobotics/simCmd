@@ -44,8 +44,8 @@ signals:
     void escapePressed();
     void upPressed();
     void downPressed();
-    void getPrevCompletion(int scriptHandleOrType, QString prefix, QString selection);
-    void getNextCompletion(int scriptHandleOrType, QString prefix, QString selection);
+    void getPrevCompletion(int scriptHandleOrType, QString scriptName, QString prefix, QString selection);
+    void getNextCompletion(int scriptHandleOrType, QString scriptName, QString prefix, QString selection);
     void askCallTip(int scriptHandleOrType, QString symbol);
     void clear();
 

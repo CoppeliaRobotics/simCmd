@@ -175,7 +175,7 @@ bool QCommanderEditor::eventFilter(QObject *obj, QEvent *event)
             commander->getSelectedScriptInfo(type, handle, name);
             QString t = tokenBehindCursor();
             if(t.length() > 0)
-                emit getNextCompletion(type, t, selectedText());
+                emit getNextCompletion(type, name, t, selectedText());
             return true;
         }
         if(keyEvent->key() == Qt::Key_Backtab)
@@ -183,7 +183,7 @@ bool QCommanderEditor::eventFilter(QObject *obj, QEvent *event)
             commander->getSelectedScriptInfo(type, handle, name);
             QString t = tokenBehindCursor();
             if(t.length() > 0)
-                emit getPrevCompletion(type, t, selectedText());
+                emit getPrevCompletion(type, name, t, selectedText());
             return true;
         }
     }
