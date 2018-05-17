@@ -494,7 +494,7 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     simReleaseStack(stackHandle);
 }
 
-static QStringList getCompletion(int scriptHandleOrType, QString scriptName, QString word)
+QStringList UIFunctions::getCompletion(int scriptHandleOrType, QString scriptName, QString word)
 {
     simChar *buf = simGetApiFunc(scriptHandleOrType, word.toStdString().c_str());
     QString bufStr = QString::fromUtf8(buf);

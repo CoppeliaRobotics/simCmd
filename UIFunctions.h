@@ -45,6 +45,8 @@ private:
     QStringList getMatchingStringRenderingFlags(QString shortFlag);
     void parseStringRenderingFlags(PersistentOptions *popts, const QString &code);
 
+    QStringList getCompletion(int scriptHandleOrType, QString scriptName, QString word);
+
 public slots:
     void onExecCode(QString code, int scriptHandleOrType, QString scriptName);
     void onGetPrevCompletion(int scriptHandleOrType, QString scriptName, QString prefix, QString selection);
