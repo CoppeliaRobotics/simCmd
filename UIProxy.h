@@ -36,6 +36,7 @@ public:
     void setStatusBar(QPlainTextEdit *statusBar, QSplitter *splitter);
     QList<int> getStatusbarSize();
     void setStatusbarSize(const QList<int> &sizes);
+    void setStatusbarFocus();
 
 public slots:
 

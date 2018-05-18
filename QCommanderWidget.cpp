@@ -341,6 +341,13 @@ void QCommanderWidget::onReturnPressed()
 
 void QCommanderWidget::onEscapePressed()
 {
+    if(editor->text().isEmpty())
+    {
+        // if text is already empty, defocus widget
+        UIProxy::getInstance()->setStatusbarFocus();
+        return;
+    }
+
     historyIndex = history.size();
     editor->setText("");
     editor->setCallTip("");

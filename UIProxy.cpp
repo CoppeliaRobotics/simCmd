@@ -83,3 +83,8 @@ void UIProxy::setStatusbarSize(const QList<int> &sizes)
     splitter->setSizes(sizes);
 }
 
+void UIProxy::setStatusbarFocus()
+{
+    statusBar->setFocus();
+}
+
