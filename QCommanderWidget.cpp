@@ -17,8 +17,8 @@
 
 QGlobalEventFilter * QGlobalEventFilter::instance_ = NULL;
 
-QGlobalEventFilter::QGlobalEventFilter(QWidget *widget)
-    : widget_(widget)
+QGlobalEventFilter::QGlobalEventFilter(QCommanderWidget *commander, QCommanderEditor *widget)
+    : commander_(commander), widget_(widget)
 {
 }
 
@@ -37,9 +37,9 @@ bool QGlobalEventFilter::eventFilter(QObject *object, QEvent *event)
     return QObject::eventFilter(object, event);
 }
 
-void QGlobalEventFilter::install(QWidget *widget)
+void QGlobalEventFilter::install(QCommanderWidget *commander, QCommanderEditor *widget)
 {
-    instance_ = new QGlobalEventFilter(widget);
+    instance_ = new QGlobalEventFilter(commander, widget);
     QCoreApplication::instance()->installEventFilter(instance_);
 }
 
@@ -52,13 +52,8 @@ QCommanderEditor::QCommanderEditor(QCommanderWidget *parent)
     : QLineEdit(parent),
       commander(parent)
 {
-    statusbarSize = UIProxy::getInstance()->getStatusbarSize();
-    const int k = 100;
-    statusbarSizeFocused.push_back(statusbarSize[0] - k);
-    statusbarSizeFocused.push_back(statusbarSize[1] + k);
-
     installEventFilter(this);
-    QGlobalEventFilter::install(this);
+    QGlobalEventFilter::install(parent, this);
 }
 
 QCommanderEditor::~QCommanderEditor()
@@ -192,16 +187,6 @@ bool QCommanderEditor::eventFilter(QObject *obj, QEvent *event)
             return true;
         }
     }
-    else if(event->type() == QEvent::FocusIn && commander->options.resizeStatusbarWhenFocused)
-    {
-        statusbarSize = UIProxy::getInstance()->getStatusbarSize();
-        UIProxy::getInstance()->setStatusbarSize(statusbarSizeFocused);
-    }
-    else if(event->type() == QEvent::FocusOut && commander->options.resizeStatusbarWhenFocused)
-    {
-        statusbarSizeFocused = UIProxy::getInstance()->getStatusbarSize();
-        UIProxy::getInstance()->setStatusbarSize(statusbarSize);
-    }
     return QObject::eventFilter(obj, event);
 }
 
@@ -235,6 +220,11 @@ QCommanderWidget::QCommanderWidget(QWidget *parent)
     : QWidget(parent),
       historyIndex(0)
 {
+    statusbarSize = UIProxy::getInstance()->getStatusbarSize();
+    const int k = 100;
+    statusbarSizeFocused.push_back(statusbarSize[0] - k);
+    statusbarSizeFocused.push_back(statusbarSize[1] + k);
+
     closeFlag.store(false);
     editor = new QCommanderEditor(this);
     editor->setPlaceholderText("Input Lua code here, or type \"help()\" (use TAB for auto-completion)");
@@ -259,6 +249,7 @@ QCommanderWidget::QCommanderWidget(QWidget *parent)
     connect(editor, &QCommanderEditor::clear, this, &QCommanderWidget::onClear);
     connect(editor, &QCommanderEditor::textEdited, this, &QCommanderWidget::onTextEdited);
     connect(closeButton, &QPushButton::clicked, this, &QCommanderWidget::onClose);
+    connect(QApplication::instance(), SIGNAL(focusChanged(QWidget*,QWidget*)), this, SLOT(onGlobalFocusChanged(QWidget*,QWidget*)));
 }
 
 QCommanderWidget::~QCommanderWidget()
@@ -343,8 +334,8 @@ void QCommanderWidget::onEscapePressed()
 {
     if(editor->text().isEmpty())
     {
-        // if text is already empty, defocus widget
-        UIProxy::getInstance()->setStatusbarFocus();
+        // if text is already empty, clear widget focus
+        editor->clearFocus();
         return;
     }
 
@@ -417,6 +408,65 @@ void QCommanderWidget::onTextEdited()
 {
     historyPrefixFilter = editor->text();
     DBG << "historyPrefixFilter=" << historyPrefixFilter.toStdString() << std::endl;
+}
+
+void QCommanderWidget::onFocusIn()
+{
+    if(options.resizeStatusbarWhenFocused)
+        expandStatusbar();
+}
+
+void QCommanderWidget::onFocusOut()
+{
+    if(options.resizeStatusbarWhenFocused)
+        contractStatusbar();
+}
+
+void QCommanderWidget::expandStatusbar()
+{
+    if(!statusbarExpanded)
+    {
+        statusbarSize = UIProxy::getInstance()->getStatusbarSize();
+        UIProxy::getInstance()->setStatusbarSize(statusbarSizeFocused);
+        statusbarExpanded = true;
+    }
+}
+
+void QCommanderWidget::contractStatusbar()
+{
+    if(statusbarExpanded)
+    {
+        statusbarSizeFocused = UIProxy::getInstance()->getStatusbarSize();
+        UIProxy::getInstance()->setStatusbarSize(statusbarSize);
+        statusbarExpanded = false;
+    }
+}
+
+void QCommanderWidget::onGlobalFocusChanged(QWidget *old, QWidget *now)
+{
+    /* treat the statusbar focus as our own focus
+     * why:
+     * when options.resizeStatusbarWhenFocused is active, and we want to copy
+     * text from the statusbar, we don't want to resize the statusbar as if
+     * the widget has lost focus. */
+
+    DBG << "focusChanged: old=" << (old ? old->metaObject()->className() : "null")
+        << ", new=" << (now ? now->metaObject()->className() : "null") << std::endl;
+
+    QPlainTextEdit *statusBar = UIProxy::getInstance()->getStatusBar();
+
+    if(old == editor && now == statusBar)
+    {
+        // do nothing
+    }
+    else if(now == editor)
+    {
+        onFocusIn();
+    }
+    else if(old == editor || old == statusBar)
+    {
+        onFocusOut();
+    }
 }
 
 void QCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning)

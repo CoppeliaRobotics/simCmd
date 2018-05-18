@@ -12,18 +12,22 @@
 
 #include "PersistentOptions.h"
 
+class QCommanderWidget;
+class QCommanderEditor;
+
 class QGlobalEventFilter : public QObject
 {
     Q_OBJECT
 
 private:
-    QGlobalEventFilter(QWidget *widget);
-    QWidget *widget_;
+    QGlobalEventFilter(QCommanderWidget *commander, QCommanderEditor *widget);
+    QCommanderWidget *commander_;
+    QCommanderEditor *widget_;
     static QGlobalEventFilter *instance_;
 
 public:
     bool eventFilter(QObject *object, QEvent *event);
-    static void install(QWidget *widget);
+    static void install(QCommanderWidget *commander, QCommanderEditor *widget);
     static void uninstall();
 };
 
@@ -59,8 +63,6 @@ protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
     QCommanderWidget *commander;
-    QList<int> statusbarSize;
-    QList<int> statusbarSizeFocused;
 };
 
 class QCommanderWidget : public QWidget
@@ -100,6 +102,11 @@ private slots:
     void onClose();
     void onClear();
     void onTextEdited();
+    void onFocusIn();
+    void onFocusOut();
+    void expandStatusbar();
+    void contractStatusbar();
+    void onGlobalFocusChanged(QWidget *old, QWidget *now);
 
 public slots:
     void onScriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning);
@@ -113,8 +120,12 @@ public:
 
 private:
     PersistentOptions options;
+    QList<int> statusbarSize;
+    QList<int> statusbarSizeFocused;
+    bool statusbarExpanded = false;
 
     friend class QCommanderEditor;
+    friend class QGlobalEventFilter;
 };
 
 #endif // QCOMMANDERWIDGET_H_INCLUDED

@@ -34,6 +34,7 @@ public:
     static QWidget *vrepMainWindow;
 
     void setStatusBar(QPlainTextEdit *statusBar, QSplitter *splitter);
+    inline QPlainTextEdit *getStatusBar() {return statusBar;}
     QList<int> getStatusbarSize();
     void setStatusbarSize(const QList<int> &sizes);
     void setStatusbarFocus();
