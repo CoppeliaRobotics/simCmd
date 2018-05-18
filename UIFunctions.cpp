@@ -532,6 +532,8 @@ QStringList UIFunctions::getCompletion(int scriptHandleOrType, QString scriptNam
 
                         if(key.startsWith(child))
                         {
+                            if(key.startsWith("_") && child.isEmpty())
+                                continue;
                             if(!global)
                                 key = parent + "." + key;
                             result << key;
