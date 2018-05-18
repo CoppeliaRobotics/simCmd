@@ -296,6 +296,7 @@ public:
 
         optionsChangedFromGui.store(true);
         updateUI();
+        commanderWidget->setOptions(options);
     }
 
     virtual void onGuiPass()
@@ -304,6 +305,7 @@ public:
         {
             optionsChangedFromData.store(false);
             updateUI();
+            commanderWidget->setOptions(options);
         }
     }
 

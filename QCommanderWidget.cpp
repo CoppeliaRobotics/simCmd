@@ -250,6 +250,11 @@ QCommanderWidget::~QCommanderWidget()
 {
 }
 
+void QCommanderWidget::setOptions(const PersistentOptions &options_)
+{
+    options = options_;
+}
+
 void QCommanderWidget::setHistoryIndex(int index)
 {
     if(history.isEmpty())

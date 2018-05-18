@@ -10,6 +10,8 @@
 #include <QComboBox>
 #include <QPushButton>
 
+#include "PersistentOptions.h"
+
 class QGlobalEventFilter : public QObject
 {
     Q_OBJECT
@@ -69,6 +71,8 @@ public:
 
     inline QCommanderEditor * editorWidget() { return editor; }
 
+    void setOptions(const PersistentOptions &options);
+
 protected:
     QCommanderEditor *editor;
     QComboBox *scriptCombo;
@@ -104,6 +108,9 @@ signals:
 
 public:
     std::atomic<bool> closeFlag;
+
+private:
+    PersistentOptions options;
 };
 
 #endif // QCOMMANDERWIDGET_H_INCLUDED
