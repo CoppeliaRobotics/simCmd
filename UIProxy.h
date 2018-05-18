@@ -9,6 +9,7 @@
 #include <QString>
 #include <QWidget>
 #include <QPlainTextEdit>
+#include <QSplitter>
 
 #include "stubs.h"
 
@@ -27,11 +28,14 @@ private:
 
     static UIProxy *instance;
     QPlainTextEdit *statusBar = nullptr;
+    QSplitter *splitter = nullptr;
 
 public:
     static QWidget *vrepMainWindow;
 
-    void setStatusBar(QPlainTextEdit *statusBar);
+    void setStatusBar(QPlainTextEdit *statusBar, QSplitter *splitter);
+    QList<int> getStatusbarSize();
+    void setStatusbarSize(const QList<int> &sizes);
 
 public slots:
 

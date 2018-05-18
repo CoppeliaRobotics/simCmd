@@ -18,6 +18,7 @@ struct PersistentOptions
     bool historySkipRepeated = true;
     bool historyRemoveDups = false;
     bool dynamicCompletion = false;
+    bool resizeStatusbarWhenFocused = false;
 
     const char * dataTag();
     void dump();

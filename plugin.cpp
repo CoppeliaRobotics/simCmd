@@ -126,6 +126,14 @@ void setDynamicCompletion(SScriptCallBack *p, const char *cmd, setDynamicComplet
     optionsChangedFromData.store(true);
 }
 
+void resizeStatusbarWhenFocused(SScriptCallBack *p, const char *cmd, resizeStatusbarWhenFocused_in *in, resizeStatusbarWhenFocused_out *out)
+{
+    options.resizeStatusbarWhenFocused = in->b;
+    options.save();
+    UIFunctions::getInstance()->setOptions(options);
+    optionsChangedFromData.store(true);
+}
+
 class Plugin : public vrep::Plugin
 {
 public:
@@ -137,7 +145,6 @@ public:
         statusBar = UIProxy::vrepMainWindow->findChild<QPlainTextEdit*>("statusBar");
         if(!statusBar)
             throw std::runtime_error("cannot find the statusbar widget");
-        UIProxy::getInstance()->setStatusBar(statusBar);
 
         if(!registerScriptStuff())
             throw std::runtime_error("failed to register script stuff");
@@ -147,6 +154,7 @@ public:
 
         // attach widget to V-REP main window
         splitter = (QSplitter*)statusBar->parentWidget();
+        UIProxy::getInstance()->setStatusBar(statusBar, splitter);
         splitterChild = new QWidget();
         splitter->addWidget(splitterChild);
         QVBoxLayout *layout = new QVBoxLayout();
@@ -184,6 +192,8 @@ public:
         menuLabels.push_back("History: remove duplicates");
         MENUITEM_DYNAMIC_COMPLETION = menuLabels.size();
         menuLabels.push_back("Dynamic completion");
+        MENUITEM_RESIZE_STATUSBAR_WHEN_FOCUSED = menuLabels.size();
+        menuLabels.push_back("Resize statusbar when focused");
 
         menuState.resize(menuLabels.size());
         menuHandles.resize(menuLabels.size());
@@ -222,6 +232,7 @@ public:
         menuState[MENUITEM_HISTORY_SKIP_REPEATED] = (options.enabled ? itemEnabled : 0) + (options.historySkipRepeated ? itemChecked : 0);
         menuState[MENUITEM_HISTORY_REMOVE_DUPS] = (options.enabled ? itemEnabled : 0) + (options.historyRemoveDups ? itemChecked : 0);
         menuState[MENUITEM_DYNAMIC_COMPLETION] = (options.enabled ? itemEnabled : 0) + (options.dynamicCompletion ? itemChecked : 0);
+        menuState[MENUITEM_RESIZE_STATUSBAR_WHEN_FOCUSED] = (options.enabled ? itemEnabled : 0) + (options.resizeStatusbarWhenFocused ? itemChecked : 0);
 
         for(int i = 0; i < menuHandles.size(); i++)
             simSetModuleMenuItemState(menuHandles[i], menuState[i], menuLabels[i].c_str());
@@ -291,6 +302,10 @@ public:
         else if(itemHandle == menuHandles[MENUITEM_DYNAMIC_COMPLETION])
         {
             options.dynamicCompletion = !options.dynamicCompletion;
+        }
+        else if(itemHandle == menuHandles[MENUITEM_RESIZE_STATUSBAR_WHEN_FOCUSED])
+        {
+            options.resizeStatusbarWhenFocused = !options.resizeStatusbarWhenFocused;
         }
         else return;
 
@@ -404,6 +419,7 @@ private:
     int MENUITEM_HISTORY_SKIP_REPEATED;
     int MENUITEM_HISTORY_REMOVE_DUPS;
     int MENUITEM_DYNAMIC_COMPLETION;
+    int MENUITEM_RESIZE_STATUSBAR_WHEN_FOCUSED;
     static const int itemEnabled = 1, itemChecked = 2;
 };
 

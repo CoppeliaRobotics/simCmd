@@ -130,4 +130,14 @@
         <return>
         </return>
     </command>
+    <command name="resizeStatusbarWhenFocused">
+        <description>Save alternative statusbar size for when the commander has the focus</description>
+        <params>
+            <param name="b" type="bool">
+                <description>if true, alternate size will be used when widget has focus</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
 </plugin>

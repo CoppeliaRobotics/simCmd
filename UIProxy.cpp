@@ -67,8 +67,19 @@ void UIProxy::destroyInstance()
     DBG << "[leave]" << std::endl;
 }
 
-void UIProxy::setStatusBar(QPlainTextEdit *statusBar_)
+void UIProxy::setStatusBar(QPlainTextEdit *statusBar_, QSplitter *splitter_)
 {
     statusBar = statusBar_;
+    splitter = splitter_;
+}
+
+QList<int> UIProxy::getStatusbarSize()
+{
+    return splitter->sizes();
+}
+
+void UIProxy::setStatusbarSize(const QList<int> &sizes)
+{
+    splitter->setSizes(sizes);
 }
 

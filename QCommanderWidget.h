@@ -59,6 +59,8 @@ protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
     QCommanderWidget *commander;
+    QList<int> statusbarSize;
+    QList<int> statusbarSizeFocused;
 };
 
 class QCommanderWidget : public QWidget
@@ -111,6 +113,8 @@ public:
 
 private:
     PersistentOptions options;
+
+    friend class QCommanderEditor;
 };
 
 #endif // QCOMMANDERWIDGET_H_INCLUDED

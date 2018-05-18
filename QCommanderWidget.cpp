@@ -52,6 +52,11 @@ QCommanderEditor::QCommanderEditor(QCommanderWidget *parent)
     : QLineEdit(parent),
       commander(parent)
 {
+    statusbarSize = UIProxy::getInstance()->getStatusbarSize();
+    const int k = 100;
+    statusbarSizeFocused.push_back(statusbarSize[0] - k);
+    statusbarSizeFocused.push_back(statusbarSize[1] + k);
+
     installEventFilter(this);
     QGlobalEventFilter::install(this);
 }
@@ -186,6 +191,16 @@ bool QCommanderEditor::eventFilter(QObject *obj, QEvent *event)
                 emit getPrevCompletion(type, name, t, selectedText());
             return true;
         }
+    }
+    else if(event->type() == QEvent::FocusIn && commander->options.resizeStatusbarWhenFocused)
+    {
+        statusbarSize = UIProxy::getInstance()->getStatusbarSize();
+        UIProxy::getInstance()->setStatusbarSize(statusbarSizeFocused);
+    }
+    else if(event->type() == QEvent::FocusOut && commander->options.resizeStatusbarWhenFocused)
+    {
+        statusbarSizeFocused = UIProxy::getInstance()->getStatusbarSize();
+        UIProxy::getInstance()->setStatusbarSize(statusbarSize);
     }
     return QObject::eventFilter(obj, event);
 }
