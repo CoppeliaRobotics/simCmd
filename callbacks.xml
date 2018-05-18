@@ -120,4 +120,14 @@
         <return>
         </return>
     </command>
+    <command name="setDynamicCompletion">
+        <description>Complete words using the selected script</description>
+        <params>
+            <param name="b" type="bool">
+                <description>if true, dynamic completion will be used</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
 </plugin>

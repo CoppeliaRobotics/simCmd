@@ -118,6 +118,14 @@ void setHistoryRemoveDups(SScriptCallBack *p, const char *cmd, setHistoryRemoveD
     optionsChangedFromData.store(true);
 }
 
+void setDynamicCompletion(SScriptCallBack *p, const char *cmd, setDynamicCompletion_in *in, setDynamicCompletion_out *out)
+{
+    options.dynamicCompletion = in->b;
+    options.save();
+    UIFunctions::getInstance()->setOptions(options);
+    optionsChangedFromData.store(true);
+}
+
 class Plugin : public vrep::Plugin
 {
 public:
@@ -174,6 +182,8 @@ public:
         menuLabels.push_back("History: skip repeated commands");
         MENUITEM_HISTORY_REMOVE_DUPS = menuLabels.size();
         menuLabels.push_back("History: remove duplicates");
+        MENUITEM_DYNAMIC_COMPLETION = menuLabels.size();
+        menuLabels.push_back("Dynamic completion");
 
         menuState.resize(menuLabels.size());
         menuHandles.resize(menuLabels.size());
@@ -211,6 +221,7 @@ public:
         menuState[MENUITEM_MAP_SHADOW_SPECIAL_STRINGS] = (options.enabled ? itemEnabled : 0) + (options.mapShadowSpecialStrings ? itemChecked : 0);
         menuState[MENUITEM_HISTORY_SKIP_REPEATED] = (options.enabled ? itemEnabled : 0) + (options.historySkipRepeated ? itemChecked : 0);
         menuState[MENUITEM_HISTORY_REMOVE_DUPS] = (options.enabled ? itemEnabled : 0) + (options.historyRemoveDups ? itemChecked : 0);
+        menuState[MENUITEM_DYNAMIC_COMPLETION] = (options.enabled ? itemEnabled : 0) + (options.dynamicCompletion ? itemChecked : 0);
 
         for(int i = 0; i < menuHandles.size(); i++)
             simSetModuleMenuItemState(menuHandles[i], menuState[i], menuLabels[i].c_str());
@@ -276,6 +287,10 @@ public:
         else if(itemHandle == menuHandles[MENUITEM_HISTORY_REMOVE_DUPS])
         {
             options.historyRemoveDups = !options.historyRemoveDups;
+        }
+        else if(itemHandle == menuHandles[MENUITEM_DYNAMIC_COMPLETION])
+        {
+            options.dynamicCompletion = !options.dynamicCompletion;
         }
         else return;
 
@@ -386,6 +401,7 @@ private:
     int MENUITEM_MAP_SHADOW_SPECIAL_STRINGS;
     int MENUITEM_HISTORY_SKIP_REPEATED;
     int MENUITEM_HISTORY_REMOVE_DUPS;
+    int MENUITEM_DYNAMIC_COMPLETION;
     static const int itemEnabled = 1, itemChecked = 2;
 };
 

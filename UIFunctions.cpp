@@ -496,10 +496,69 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
 
 QStringList UIFunctions::getCompletion(int scriptHandleOrType, QString scriptName, QString word)
 {
-    simChar *buf = simGetApiFunc(scriptHandleOrType, word.toStdString().c_str());
-    QString bufStr = QString::fromUtf8(buf);
-    simReleaseBuffer(buf);
-    return bufStr.split(QRegExp("\\s+"), QString::SkipEmptyParts);
+    ASSERT_THREAD(!UI);
+
+    QStringList result;
+
+    if(options.dynamicCompletion)
+    {
+        simInt stackHandle = simCreateStack();
+        if(stackHandle == -1) return {};
+
+        int dotIdx = word.lastIndexOf('.');
+        bool global = dotIdx == -1;
+        QString parent = global ? "_G" : word.left(dotIdx);
+        QString child = global ? word : word.mid(dotIdx + 1);
+
+        QString s = QString("%1@%2").arg(parent, scriptName);
+        simInt ret = simExecuteScriptString(scriptHandleOrType, s.toLatin1().data(), stackHandle);
+        if(ret == 0 && simGetStackSize(stackHandle) > 0)
+        {
+            int n = simGetStackTableInfo(stackHandle, 0);
+            if(n == sim_stack_table_map)
+            {
+                int oldSize = simGetStackSize(stackHandle);
+                if(simUnfoldStackTable(stackHandle) != -1)
+                {
+                    int newSize = simGetStackSize(stackHandle);
+                    int numItems = (newSize - oldSize + 1) / 2;
+                    for(int i = 0; i < numItems; i++)
+                    {
+                        simMoveStackItemToTop(stackHandle, oldSize - 1);
+                        QString key = QString::fromStdString(getStackTopAsString(stackHandle, options, 0, false));
+
+                        simMoveStackItemToTop(stackHandle, oldSize - 1);
+                        std::string value = getStackTopAsString(stackHandle, options, 0, false);
+
+                        if(key.startsWith(child))
+                        {
+                            if(!global)
+                                key = parent + "." + key;
+                            result << key;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        simChar *buf = simGetApiFunc(scriptHandleOrType, word.toStdString().c_str());
+        QString bufStr = QString::fromUtf8(buf);
+        simReleaseBuffer(buf);
+        result = bufStr.split(QRegExp("\\s+"), QString::SkipEmptyParts);
+    }
+
+    result.sort();
+
+#ifdef DEBUG
+    DBG << "dynamic=" << options.dynamicCompletion << ", prefix=" << word.toStdString() << ": ";
+    for(int i = 0; i < result.size(); ++i)
+        DEBUG_STREAM << (i ? ", " : "") << result[i].toStdString();
+    DEBUG_STREAM << std::endl;
+#endif
+
+    return result;
 }
 
 static int findInsertionPoint(QStringList &l, QString w)
