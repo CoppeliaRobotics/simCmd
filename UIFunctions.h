@@ -5,6 +5,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QMap>
 
 #include "stubs.h"
 #include "PersistentOptions.h"
