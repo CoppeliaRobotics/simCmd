@@ -3,25 +3,10 @@
 
 struct PersistentOptions
 {
-    bool enabled = true;
-    int arrayMaxItemsDisplayed = 20;
-    int stringLongLimit = 160;
-    bool stringEscapeSpecials = true;
-    bool mapSortKeysByName = true;
-    bool mapSortKeysByType = true;
-    bool mapShadowLongStrings = true;
-    bool mapShadowBufferStrings = true;
-    bool mapShadowSpecialStrings = true;
-    int floatPrecision = 10;
-    int mapMaxDepth = -1;
-    int historySize = 200;
-    bool historySkipRepeated = true;
-    bool historyRemoveDups = false;
-    bool showMatchingHistory = false;
-    bool dynamicCompletion = false;
-    bool resizeStatusbarWhenFocused = false;
+#define OPTION(name, type, def) type name = def;
+#include "PersistentOptions.list"
+#undef OPTION
 
-    const char * dataTag();
     void dump();
     bool load();
     bool save();

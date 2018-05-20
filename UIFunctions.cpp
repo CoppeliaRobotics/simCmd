@@ -65,7 +65,7 @@ void UIFunctions::connectSignals()
 QStringList loadHistoryData()
 {
     simInt histSize;
-    simChar *pdata = simPersistentDataRead("LuaCommanderHistory", &histSize);
+    simChar *pdata = simPersistentDataRead("LuaCommander.history", &histSize);
     QStringList hist;
     if(pdata)
     {
@@ -79,7 +79,7 @@ QStringList loadHistoryData()
 void saveHistoryData(QStringList hist)
 {
     QString histStr = hist.join("\n");
-    simPersistentDataWrite("LuaCommanderHistory", histStr.toUtf8(), histStr.length() + 1, 1);
+    simPersistentDataWrite("LuaCommander.history", histStr.toUtf8(), histStr.length() + 1, 1);
 }
 
 void UIFunctions::loadHistory()

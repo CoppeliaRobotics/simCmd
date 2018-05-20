@@ -1,6 +1,7 @@
 #include "PersistentOptions.h"
 
 #include <iostream>
+#include <boost/format.hpp>
 
 #include "v_repLib.h"
 #include "plugin.h"
@@ -8,21 +9,45 @@
 #include "config.h"
 #include "debug.h"
 
-const char * PersistentOptions::dataTag()
-{
-    return "LuaCommanderOptions";
-}
-
 void PersistentOptions::dump()
 {
-    std::cout << "LuaCommander:     enabled=" << enabled << std::endl;
-    std::cout << "LuaCommander:     arrayMaxItemsDisplayed=" << arrayMaxItemsDisplayed << std::endl;
-    std::cout << "LuaCommander:     stringLongLimit=" << stringLongLimit << std::endl;
-    std::cout << "LuaCommander:     mapShadowBufferStrings=" << mapShadowBufferStrings << std::endl;
-    std::cout << "LuaCommander:     mapShadowSpecialStrings=" << mapShadowSpecialStrings << std::endl;
-    std::cout << "LuaCommander:     mapShadowLongStrings=" << mapShadowLongStrings << std::endl;
-    std::cout << "LuaCommander:     mapSortKeysByName=" << mapSortKeysByName << std::endl;
-    std::cout << "LuaCommander:     mapSortKeysByType=" << mapSortKeysByType << std::endl;
+#define OPTION(name, type, def) \
+    std::cout << "LuaCommander:     " #name "=" << name << std::endl;
+#include "PersistentOptions.list"
+#undef OPTION
+}
+
+static const char *fmt = "LuaCommander.options.%s";
+
+template<typename T>
+inline bool readOption(const char *name, T *value, T def)
+{
+    *value = def;
+    simInt dataLength;
+    simChar *pdata = simPersistentDataRead((boost::format(fmt) % name).str().c_str(), &dataLength);
+    if(!pdata)
+    {
+#ifdef DEBUG_PERSISTENT_OPTIONS
+        std::cout << "LuaCommander: Could not load persistent option '" << name << "': null pointer error" << std::endl;
+#endif
+        return false;
+    }
+    bool ok = dataLength == sizeof(T);
+    if(ok)
+    {
+        memcpy(value, pdata, sizeof(T));
+#ifdef DEBUG_PERSISTENT_OPTIONS
+        std::cout << "LuaCommander: Loaded persistent option '" << name << "': " << *value << std::endl;
+#endif
+    }
+    else
+    {
+#ifdef DEBUG_PERSISTENT_OPTIONS
+        std::cout << "LuaCommander: Could not load persistent option '" << name << "': incorrect data length " << dataLength << ", should be " << sizeof(T) << std::endl;
+#endif
+    }
+    simReleaseBuffer(pdata);
+    return ok;
 }
 
 bool PersistentOptions::load()
@@ -30,31 +55,23 @@ bool PersistentOptions::load()
 #ifdef DEBUG_PERSISTENT_OPTIONS
     std::cout << "LuaCommander: Loading persistent options..." << std::endl;
 #endif
-    simInt dataLength;
-    simChar *pdata = simPersistentDataRead(dataTag(), &dataLength);
-    if(!pdata)
-    {
+    bool ok = true;
+#define OPTION(name, type, def) ok = readOption<type>(#name, &name, def) && ok;
+#include "PersistentOptions.list"
+#undef OPTION
+    return ok;
+}
+
+template<typename T>
+inline bool writeOption(const char *name, T *value)
+{
+    bool ok = simPersistentDataWrite((boost::format(fmt) % name).str().c_str(), reinterpret_cast<const char*>(value), sizeof(T), 1) != -1;
 #ifdef DEBUG_PERSISTENT_OPTIONS
-        std::cout << "LuaCommander: Could not load persistent options: null pointer error" << std::endl;
-#endif
-        return false;
-    }
-    bool ok = dataLength == sizeof(*this);
-    if(ok)
+    if(!ok)
     {
-        memcpy(this, pdata, sizeof(*this));
-#ifdef DEBUG_PERSISTENT_OPTIONS
-        std::cout << "LuaCommander: Loaded persistent options:" << std::endl;
-        dump();
-#endif
+        std::cout << "LuaCommander: Could not save persistent option '" << name << "': error -1" << std::endl;
     }
-    else
-    {
-#ifdef DEBUG_PERSISTENT_OPTIONS
-        std::cout << "LuaCommander: Could not load persistent options: incorrect data length " << dataLength << ", should be " << sizeof(*this) << std::endl;
 #endif
-    }
-    simReleaseBuffer(pdata);
     return ok;
 }
 
@@ -64,6 +81,10 @@ bool PersistentOptions::save()
     std::cout << "LuaCommander: Saving persistent options:" << std::endl;
     dump();
 #endif
-    return simPersistentDataWrite(dataTag(), (simChar*)this, sizeof(*this), 1) != -1;
+    bool ok = true;
+#define OPTION(name, type, def) ok = writeOption<type>(#name, &name) && ok;
+#include "PersistentOptions.list"
+#undef OPTION
+    return ok;
 }
 
