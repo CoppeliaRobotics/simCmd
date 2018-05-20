@@ -446,6 +446,22 @@ void UIFunctions::showError(QString s, bool html)
     showMessage(QString("<font color='#c00'>%1</font>").arg(s), true);
 }
 
+void UIFunctions::onAskCompletion(int scriptHandleOrType, QString scriptName, QString prefix)
+{
+    ASSERT_THREAD(!UI);
+
+    QStringList cl = getCompletion(scriptHandleOrType, scriptName, prefix);
+
+    // the QCommandEdit widget wants completions without the prefix
+    QStringList cl2;
+    for(const QString &s : cl)
+    {
+        if(s.startsWith(prefix))
+            cl2 << s.mid(prefix.length());
+    }
+    emit setCompletion(cl2);
+}
+
 void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scriptName)
 {
     ASSERT_THREAD(!UI);
@@ -577,26 +593,6 @@ static int findInsertionPoint(QStringList &l, QString w)
             return mid; // found at position mid
     }
     return lo; // not found, would be inserted at position lo
-}
-
-void UIFunctions::onGetPrevCompletion(int scriptHandleOrType, QString scriptName, QString prefix, QString selection)
-{
-    QStringList cl = getCompletion(scriptHandleOrType, scriptName, prefix);
-    if(cl.isEmpty()) return;
-    int i = findInsertionPoint(cl, prefix + selection) - 1;
-    if(i >= 0 && i < cl.size())
-        emit setCompletion(cl[i]);
-}
-
-void UIFunctions::onGetNextCompletion(int scriptHandleOrType, QString scriptName, QString prefix, QString selection)
-{
-    QStringList cl = getCompletion(scriptHandleOrType, scriptName, prefix);
-    if(cl.isEmpty()) return;
-    int i = selection == "" ? 0 : (findInsertionPoint(cl, prefix + selection) + 1);
-    if(i >= 0 && i < cl.size() && cl[i] == prefix)
-        i++;
-    if(i >= 0 && i < cl.size())
-        emit setCompletion(cl[i]);
 }
 
 void UIFunctions::onAskCallTip(int scriptHandleOrType, QString symbol)

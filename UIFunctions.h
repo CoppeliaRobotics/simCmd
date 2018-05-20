@@ -50,13 +50,12 @@ private:
 
 public slots:
     void onExecCode(QString code, int scriptHandleOrType, QString scriptName);
-    void onGetPrevCompletion(int scriptHandleOrType, QString scriptName, QString prefix, QString selection);
-    void onGetNextCompletion(int scriptHandleOrType, QString scriptName, QString prefix, QString selection);
+    void onAskCompletion(int scriptHandleOrType, QString scriptName, QString prefix);
     void onAskCallTip(int scriptHandleOrType, QString symbol);
 
 signals:
     void scriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning);
-    void setCompletion(QString s);
+    void setCompletion(QStringList s);
     void setCallTip(QString s);
     void historyChanged(QStringList history);
     void addStatusbarMessage(const QString &s, bool html);

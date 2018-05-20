@@ -32,7 +32,8 @@ set(SOURCES
     debug.cpp
     plugin.cpp
     PersistentOptions.cpp
-    QCommanderWidget.cpp
+    qluacommanderwidget.cpp
+    qcommandedit.cpp
     ${CMAKE_SOURCE_DIR}/external/v_repPlusPlus/Plugin.cpp
     ${CMAKE_BINARY_DIR}/generated/stubs.cpp
     ${VREP_EXPORTED_SOURCES}

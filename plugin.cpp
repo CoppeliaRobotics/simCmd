@@ -19,7 +19,7 @@
 #include <QVBoxLayout>
 #include <QSplitter>
 #include "PersistentOptions.h"
-#include "QCommanderWidget.h"
+#include "qluacommanderwidget.h"
 
 std::atomic<bool> optionsChangedFromGui;
 std::atomic<bool> optionsChangedFromData;
@@ -161,7 +161,7 @@ public:
         layout->setSpacing(0);
         layout->setMargin(0);
         splitterChild->setLayout(layout);
-        commanderWidget = new QCommanderWidget();
+        commanderWidget = new QLuaCommanderWidget();
         commanderWidget->setVisible(false);
         layout->addWidget(statusBar);
         layout->addWidget(commanderWidget);
@@ -190,6 +190,8 @@ public:
         menuLabels.push_back("History: skip repeated commands");
         MENUITEM_HISTORY_REMOVE_DUPS = menuLabels.size();
         menuLabels.push_back("History: remove duplicates");
+        MENUITEM_SHOW_MATCHING_HISTORY = menuLabels.size();
+        menuLabels.push_back("History: show matching entries (select with UP)");
         MENUITEM_DYNAMIC_COMPLETION = menuLabels.size();
         menuLabels.push_back("Dynamic completion");
         MENUITEM_RESIZE_STATUSBAR_WHEN_FOCUSED = menuLabels.size();
@@ -231,6 +233,7 @@ public:
         menuState[MENUITEM_MAP_SHADOW_SPECIAL_STRINGS] = (options.enabled ? itemEnabled : 0) + (options.mapShadowSpecialStrings ? itemChecked : 0);
         menuState[MENUITEM_HISTORY_SKIP_REPEATED] = (options.enabled ? itemEnabled : 0) + (options.historySkipRepeated ? itemChecked : 0);
         menuState[MENUITEM_HISTORY_REMOVE_DUPS] = (options.enabled ? itemEnabled : 0) + (options.historyRemoveDups ? itemChecked : 0);
+        menuState[MENUITEM_SHOW_MATCHING_HISTORY] = (options.enabled ? itemEnabled : 0) + (options.showMatchingHistory ? itemChecked : 0);
         menuState[MENUITEM_DYNAMIC_COMPLETION] = (options.enabled ? itemEnabled : 0) + (options.dynamicCompletion ? itemChecked : 0);
         menuState[MENUITEM_RESIZE_STATUSBAR_WHEN_FOCUSED] = (options.enabled ? itemEnabled : 0) + (options.resizeStatusbarWhenFocused ? itemChecked : 0);
 
@@ -299,6 +302,10 @@ public:
         {
             options.historyRemoveDups = !options.historyRemoveDups;
         }
+        else if(itemHandle == menuHandles[MENUITEM_SHOW_MATCHING_HISTORY])
+        {
+            options.showMatchingHistory = !options.showMatchingHistory;
+        }
         else if(itemHandle == menuHandles[MENUITEM_DYNAMIC_COMPLETION])
         {
             options.dynamicCompletion = !options.dynamicCompletion;
@@ -361,15 +368,13 @@ public:
             int id = qRegisterMetaType< QMap<int,QString> >();
 
             UIFunctions::getInstance(); // construct UIFunctions here (SIM thread)
-            QObject::connect(commanderWidget, &QCommanderWidget::execCode, UIFunctions::getInstance(), &UIFunctions::onExecCode);
-            QObject::connect(UIFunctions::getInstance(), &UIFunctions::scriptListChanged, commanderWidget, &QCommanderWidget::onScriptListChanged);
-            QCommanderEditor *editor = commanderWidget->editorWidget();
-            QObject::connect(editor, &QCommanderEditor::getPrevCompletion, UIFunctions::getInstance(), &UIFunctions::onGetPrevCompletion);
-            QObject::connect(editor, &QCommanderEditor::getNextCompletion, UIFunctions::getInstance(), &UIFunctions::onGetNextCompletion);
-            QObject::connect(UIFunctions::getInstance(), &UIFunctions::setCompletion, editor, &QCommanderEditor::setCompletion);
-            QObject::connect(editor, &QCommanderEditor::askCallTip, UIFunctions::getInstance(), &UIFunctions::onAskCallTip);
-            QObject::connect(UIFunctions::getInstance(), &UIFunctions::setCallTip, editor, &QCommanderEditor::setCallTip);
-            QObject::connect(UIFunctions::getInstance(), &UIFunctions::historyChanged, commanderWidget, &QCommanderWidget::setHistory);
+            QObject::connect(commanderWidget, &QLuaCommanderWidget::execCode, UIFunctions::getInstance(), &UIFunctions::onExecCode);
+            QObject::connect(commanderWidget, &QLuaCommanderWidget::askCompletion, UIFunctions::getInstance(), &UIFunctions::onAskCompletion);
+            QObject::connect(UIFunctions::getInstance(), &UIFunctions::scriptListChanged, commanderWidget, &QLuaCommanderWidget::onScriptListChanged);
+            QObject::connect(UIFunctions::getInstance(), &UIFunctions::setCompletion, commanderWidget, &QLuaCommanderWidget::onSetCompletion);
+            QObject::connect(commanderWidget, &QLuaCommanderWidget::askCallTip, UIFunctions::getInstance(), &UIFunctions::onAskCallTip);
+            QObject::connect(UIFunctions::getInstance(), &UIFunctions::setCallTip, commanderWidget, &QLuaCommanderWidget::onSetCallTip);
+            QObject::connect(UIFunctions::getInstance(), &UIFunctions::historyChanged, commanderWidget, &QLuaCommanderWidget::setHistory);
             options.load();
             UIFunctions::getInstance()->setOptions(options);
             UIFunctions::getInstance()->loadHistory();
@@ -404,7 +409,7 @@ private:
     QPlainTextEdit *statusBar;
     QSplitter *splitter = 0L;
     QWidget *splitterChild = 0L;
-    QCommanderWidget *commanderWidget = 0L;
+    QLuaCommanderWidget *commanderWidget = 0L;
     std::vector<simInt> menuHandles;
     std::vector<simInt> menuState;
     std::vector<std::string> menuLabels;
@@ -418,6 +423,7 @@ private:
     int MENUITEM_MAP_SHADOW_SPECIAL_STRINGS;
     int MENUITEM_HISTORY_SKIP_REPEATED;
     int MENUITEM_HISTORY_REMOVE_DUPS;
+    int MENUITEM_SHOW_MATCHING_HISTORY;
     int MENUITEM_DYNAMIC_COMPLETION;
     int MENUITEM_RESIZE_STATUSBAR_WHEN_FOCUSED;
     static const int itemEnabled = 1, itemChecked = 2;

@@ -17,6 +17,7 @@ struct PersistentOptions
     int historySize = 200;
     bool historySkipRepeated = true;
     bool historyRemoveDups = false;
+    bool showMatchingHistory = false;
     bool dynamicCompletion = false;
     bool resizeStatusbarWhenFocused = false;
 
