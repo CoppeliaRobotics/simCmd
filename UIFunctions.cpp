@@ -567,6 +567,15 @@ QStringList UIFunctions::getCompletion(int scriptHandleOrType, QString scriptNam
         result = bufStr.split(QRegExp("\\s+"), QString::SkipEmptyParts);
     }
 
+    // filter deprecated symbols:
+    for(QStringList::iterator it = result.begin(); it != result.end(); )
+    {
+        if(simIsDeprecated(it->toLatin1().data()) == 1)
+            it = result.erase(it);
+        else
+            ++it;
+    }
+
     result.sort();
 
 #ifdef DEBUG
