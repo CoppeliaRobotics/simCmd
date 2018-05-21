@@ -8,7 +8,8 @@
 
 QCommandEdit::QCommandEdit(QWidget *parent)
     : QLineEdit(parent),
-      showMatchingHistory_(false)
+      showMatchingHistory_(false),
+      autoAcceptLongestCommonCompletionPrefix_(true)
 {
     historyState_.reset();
     completionState_.reset();
@@ -31,6 +32,11 @@ void QCommandEdit::setShowMatchingHistory(bool show)
     showMatchingHistory_ = show;
     if(show)
         searchMatchingHistoryAndShowGhost();
+}
+
+void QCommandEdit::setAutoAcceptLongestCommonCompletionPrefix(bool accept)
+{
+    autoAcceptLongestCommonCompletionPrefix_ = accept;
 }
 
 void QCommandEdit::paintEvent(QPaintEvent *event)
@@ -67,17 +73,17 @@ void QCommandEdit::keyPressEvent(QKeyEvent *event)
 {
     if(event->key() == Qt::Key_Escape)
     {
-        emit escapePressed();
+        Q_EMIT escapePressed();
         return;
     }
     if(event->key() == Qt::Key_Up)
     {
-        emit upPressed();
+        Q_EMIT upPressed();
         return;
     }
     if(event->key() == Qt::Key_Down)
     {
-        emit downPressed();
+        Q_EMIT downPressed();
         return;
     }
     QLineEdit::keyPressEvent(event);
@@ -90,12 +96,12 @@ bool QCommandEdit::eventFilter(QObject *obj, QEvent *event)
         QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
         if(keyEvent->key() == Qt::Key_Tab)
         {
-            emit tabPressed();
+            Q_EMIT tabPressed();
             return true;
         }
         if(keyEvent->key() == Qt::Key_Backtab)
         {
-            emit shiftTabPressed();
+            Q_EMIT shiftTabPressed();
             return true;
         }
     }
@@ -198,6 +204,30 @@ void QCommandEdit::setHistoryIndex(int index)
     setToolTipAtCursor("");
 }
 
+static QString longestCommonPrefix(const QStringList &strs)
+{
+    QString result;
+    if(strs.isEmpty()) return result;
+    result = strs[0];
+    for(int i = 1; i < strs.size(); i++)
+    {
+        for(int j = 0; j < std::min(result.length(), strs[i].length()); j++)
+        {
+            if(j == strs[i].length())
+            {
+                result = strs[i];
+                break;
+            }
+            if(result.at(j) != strs[i].at(j))
+            {
+                result = result.left(j);
+                break;
+            }
+        }
+    }
+    return result;
+}
+
 /*!
  * \brief Set the list of completions for the current cursor position
  * \param completion The list of completions
@@ -205,6 +235,31 @@ void QCommandEdit::setHistoryIndex(int index)
 void QCommandEdit::setCompletion(const QStringList &completion)
 {
     completionState_.completion_ = completion;
+
+    if(autoAcceptLongestCommonCompletionPrefix_)
+    {
+        QString lcp = longestCommonPrefix(completion);
+        if(!lcp.isEmpty() && completionState_.requested_)
+        {
+            QStringList completionTrimmed;
+            for(const QString &s : completion)
+                completionTrimmed << s.mid(lcp.length());
+            int c = hasSelectedText() ? selectionStart() : cursorPosition();
+            QString before = text().left(c);
+            QString after = text().mid(c + selectedText().length());
+            QString newText = before + lcp + after;
+            bool oldBlockSignals = blockSignals(true);
+            setText(newText);
+            setCursorPosition(before.length() + lcp.length());
+            blockSignals(oldBlockSignals);
+            completionState_.completion_ = completionTrimmed;
+            if(completionTrimmed.isEmpty())
+            {
+                completionState_.reset();
+                return;
+            }
+        }
+    }
 
     if(completionState_.requested_)
         navigateCompletion(1);
@@ -335,13 +390,13 @@ void QCommandEdit::onReturnPressed()
     if(hasSelectedText())
         acceptCompletion();
     else
-        emit execute(text());
+        Q_EMIT execute(text());
 }
 
 void QCommandEdit::onEscapePressed()
 {
     if(text().isEmpty())
-        emit escape();
+        Q_EMIT escape();
     if(hasSelectedText())
         cancelCompletion();
     else
@@ -365,7 +420,7 @@ void QCommandEdit::onTabPressed()
         if(completionState_.requested_)
             return;
         completionState_.requested_ = true;
-        emit askCompletion(text(), cursorPosition());
+        Q_EMIT askCompletion(text(), cursorPosition());
         return;
     }
     navigateCompletion(1);

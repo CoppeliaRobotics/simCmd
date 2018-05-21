@@ -194,6 +194,8 @@ public:
         menuLabels.push_back("History: show matching entries (select with UP)");
         MENUITEM_DYNAMIC_COMPLETION = menuLabels.size();
         menuLabels.push_back("Dynamic completion");
+        MENUITEM_AUTO_ACCEPT_COMMON_COMPLETION_PREFIX = menuLabels.size();
+        menuLabels.push_back("Auto-accept common completion prefix");
         MENUITEM_RESIZE_STATUSBAR_WHEN_FOCUSED = menuLabels.size();
         menuLabels.push_back("Resize statusbar when focused");
 
@@ -234,7 +236,8 @@ public:
         menuState[MENUITEM_HISTORY_SKIP_REPEATED] = (options.enabled ? itemEnabled : 0) + (options.historySkipRepeated ? itemChecked : 0);
         menuState[MENUITEM_HISTORY_REMOVE_DUPS] = (options.enabled ? itemEnabled : 0) + (options.historyRemoveDups ? itemChecked : 0);
         menuState[MENUITEM_SHOW_MATCHING_HISTORY] = (options.enabled ? itemEnabled : 0) + (options.showMatchingHistory ? itemChecked : 0);
-        menuState[MENUITEM_DYNAMIC_COMPLETION] = (options.enabled ? itemEnabled : 0) + (options.dynamicCompletion ? itemChecked : 0);
+        menuState[MENUITEM_DYNAMIC_COMPLETION] = (options.enabled ? itemEnabled : 0) + (options.autoAcceptCommonCompletionPrefix ? itemChecked : 0);
+        menuState[MENUITEM_AUTO_ACCEPT_COMMON_COMPLETION_PREFIX] = (options.enabled ? itemEnabled : 0) + (options.dynamicCompletion ? itemChecked : 0);
         menuState[MENUITEM_RESIZE_STATUSBAR_WHEN_FOCUSED] = (options.enabled ? itemEnabled : 0) + (options.resizeStatusbarWhenFocused ? itemChecked : 0);
 
         for(int i = 0; i < menuHandles.size(); i++)
@@ -309,6 +312,10 @@ public:
         else if(itemHandle == menuHandles[MENUITEM_DYNAMIC_COMPLETION])
         {
             options.dynamicCompletion = !options.dynamicCompletion;
+        }
+        else if(itemHandle == menuHandles[MENUITEM_AUTO_ACCEPT_COMMON_COMPLETION_PREFIX])
+        {
+            options.autoAcceptCommonCompletionPrefix = !options.autoAcceptCommonCompletionPrefix;
         }
         else if(itemHandle == menuHandles[MENUITEM_RESIZE_STATUSBAR_WHEN_FOCUSED])
         {
@@ -425,6 +432,7 @@ private:
     int MENUITEM_HISTORY_REMOVE_DUPS;
     int MENUITEM_SHOW_MATCHING_HISTORY;
     int MENUITEM_DYNAMIC_COMPLETION;
+    int MENUITEM_AUTO_ACCEPT_COMMON_COMPLETION_PREFIX;
     int MENUITEM_RESIZE_STATUSBAR_WHEN_FOCUSED;
     static const int itemEnabled = 1, itemChecked = 2;
 };

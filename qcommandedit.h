@@ -11,12 +11,13 @@ public:
     explicit QCommandEdit(QWidget *parent = nullptr);
 
     void setShowMatchingHistory(bool show);
+    void setAutoAcceptLongestCommonCompletionPrefix(bool accept);
 
     void paintEvent(QPaintEvent *event);
     void keyPressEvent(QKeyEvent *event);
     bool eventFilter(QObject *obj, QEvent *event);
 
-public slots:
+public Q_SLOTS:
     void clear();
     void setHistory(const QStringList &history);
     void navigateHistory(int delta);
@@ -30,7 +31,7 @@ public slots:
     void setToolTipAtCursor(const QString &tip);
     void moveCursorToEnd();
 
-signals:
+Q_SIGNALS:
     void execute(const QString &cmd);
     void askCompletion(const QString &cmd, int cursorPos);
     void escape();
@@ -40,7 +41,7 @@ signals:
     void tabPressed();
     void shiftTabPressed();
 
-private slots:
+private Q_SLOTS:
     void onReturnPressed();
     void onEscapePressed();
     void onUpPressed();
@@ -73,6 +74,7 @@ private:
     void searchMatchingHistoryAndShowGhost();
 
     bool showMatchingHistory_;
+    bool autoAcceptLongestCommonCompletionPrefix_;
     QString ghostSuffix_; // for showing matching history
 };
 
