@@ -229,6 +229,28 @@ static QString longestCommonPrefix(const QStringList &strs)
 }
 
 /*!
+ * \brief Insert some text at the cursor position, replacing selection if any
+ * \param text The text to insert
+ * \param selected If true, the new text will be selected
+ *
+ * After inserting the new text, the cursor poisition will be at end of new text.
+ * New text will be selected or selection will be empty depending on the
+ * selected parameter.
+ */
+void QCommandEdit::insertTextAtCursor(const QString &txt, bool selected)
+{
+    int c = hasSelectedText() ? selectionStart() : cursorPosition();
+    QString oldText = text();
+    QString before = oldText.left(c);
+    QString after = oldText.mid(c + selectedText().length());
+    QString newText = before + txt + after;
+    setText(newText);
+    setCursorPosition(before.length() + txt.length());
+    if(selected)
+        setSelection(before.length(), txt.length());
+}
+
+/*!
  * \brief Set the list of completions for the current cursor position
  * \param completion The list of completions
  */
@@ -244,15 +266,13 @@ void QCommandEdit::setCompletion(const QStringList &completion)
             QStringList completionTrimmed;
             for(const QString &s : completion)
                 completionTrimmed << s.mid(lcp.length());
-            int c = hasSelectedText() ? selectionStart() : cursorPosition();
-            QString before = text().left(c);
-            QString after = text().mid(c + selectedText().length());
-            QString newText = before + lcp + after;
+
             bool oldBlockSignals = blockSignals(true);
-            setText(newText);
-            setCursorPosition(before.length() + lcp.length());
+            insertTextAtCursor(lcp, false);
             blockSignals(oldBlockSignals);
+
             completionState_.completion_ = completionTrimmed;
+
             if(completionTrimmed.isEmpty())
             {
                 completionState_.reset();
@@ -286,15 +306,10 @@ void QCommandEdit::resetCompletion()
  */
 void QCommandEdit::setCurrentCompletion(const QString &s)
 {
-    int c = hasSelectedText() ? selectionStart() : cursorPosition();
-    QString before = text().left(c);
-    QString after = text().mid(c + selectedText().length());
-    QString newText = before + s + after;
     bool oldBlockSignals = blockSignals(true);
-    setText(newText);
-    setCursorPosition(before.length());
-    setSelection(before.length(), s.length());
+    insertTextAtCursor(s, true);
     blockSignals(oldBlockSignals);
+
     searchMatchingHistoryAndShowGhost();
 }
 

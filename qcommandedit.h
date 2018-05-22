@@ -22,6 +22,7 @@ public Q_SLOTS:
     void setHistory(const QStringList &history);
     void navigateHistory(int delta);
     void setHistoryIndex(int index);
+    void insertTextAtCursor(const QString &txt, bool selected);
     void setCompletion(const QStringList &completion);
     void resetCompletion();
     void setCurrentCompletion(const QString &s);
