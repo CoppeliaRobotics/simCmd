@@ -588,22 +588,6 @@ QStringList UIFunctions::getCompletion(int scriptHandleOrType, QString scriptNam
     return result;
 }
 
-static int findInsertionPoint(QStringList &l, QString w)
-{
-    int lo = 0, hi = l.size() - 1;
-    while(lo <= hi)
-    {
-        int mid = (lo + hi) / 2;
-        if(l[mid] < w)
-            lo = mid + 1;
-        else if(w < l[mid])
-            hi = mid - 1;
-        else
-            return mid; // found at position mid
-    }
-    return lo; // not found, would be inserted at position lo
-}
-
 void UIFunctions::onAskCallTip(int scriptHandleOrType, QString symbol)
 {
     simChar *buf = simGetApiInfo(scriptHandleOrType, symbol.toStdString().c_str());
