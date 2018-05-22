@@ -46,11 +46,13 @@ private:
     QStringList getMatchingStringRenderingFlags(QString shortFlag);
     void parseStringRenderingFlags(PersistentOptions *popts, const QString &code);
 
-    QStringList getCompletion(int scriptHandleOrType, QString scriptName, QString word);
+    QStringList getCompletion(int scriptHandleOrType, QString scriptName, QString word, QChar context);
+    QStringList getCompletionID(int scriptHandleOrType, QString scriptName, QString word);
+    QStringList getCompletionObjName(QString word);
 
 public slots:
     void onExecCode(QString code, int scriptHandleOrType, QString scriptName);
-    void onAskCompletion(int scriptHandleOrType, QString scriptName, QString prefix);
+    void onAskCompletion(int scriptHandleOrType, QString scriptName, QString token, QChar context);
     void onAskCallTip(int scriptHandleOrType, QString symbol);
 
 signals:

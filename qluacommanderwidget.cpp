@@ -53,16 +53,27 @@ inline bool isID(QChar c)
     return c.isLetterOrNumber() || c == '_' || c == '.';
 }
 
-QString tokenBehindCursor(const QString &cmd, int cursorPos)
+bool tokenBehindCursor(const QString &cmd, int cursorPos, QString *tok, QChar *ctx, int *pos)
 {
     QString before = cmd.left(cursorPos);
     QString after = cmd.mid(cursorPos);
 
-    if(!after.isEmpty() && isID(after[0])) return QString();
+    // will not complete if in the middle of a symbol
+    if(!after.isEmpty() && isID(after[0]))
+        return false;
 
     int j = before.length() - 1;
     while(j >= 0 && isID(before[j])) j--;
-    return before.mid(j + 1);
+    *pos = ++j;
+    *tok = before.mid(j);
+    *ctx = 'i'; // identifier
+    if(j > 0 && (before[j - 1] == '\'' || before[j - 1] == '\"'))
+    {
+        *ctx = 's'; // string
+        if(j > 1 && before[j - 2] == 'H')
+            *ctx = 'H';
+    }
+    return true;
 }
 
 QLuaCommanderEdit::QLuaCommanderEdit(QLuaCommanderWidget *parent)
@@ -175,9 +186,19 @@ void QLuaCommanderWidget::onAskCompletion(const QString &cmd, int cursorPos)
     int handle = -1;
     QString name;
     getSelectedScriptInfo(type, handle, name);
-    QString t = tokenBehindCursor(cmd, cursorPos);
-    if(t.length() > 0)
-        emit askCompletion(type, name, t);
+
+    QString token;
+    QChar context;
+    int startPos;
+    if(tokenBehindCursor(cmd, cursorPos, &token, &context, &startPos))
+    {
+        DBG << "cmd=\"" << cmd.toStdString() << "\", "
+            "pos=" << cursorPos << ", "
+            "tbc=" << token.toStdString() << ", "
+            "ctx=" << context.toLatin1() << std::endl;
+
+        emit askCompletion(type, name, token, context);
+    }
 }
 
 void QLuaCommanderWidget::onAskCallTip(QString symbol)

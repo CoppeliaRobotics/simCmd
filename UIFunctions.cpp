@@ -446,18 +446,18 @@ void UIFunctions::showError(QString s, bool html)
     showMessage(QString("<font color='#c00'>%1</font>").arg(s), true);
 }
 
-void UIFunctions::onAskCompletion(int scriptHandleOrType, QString scriptName, QString prefix)
+void UIFunctions::onAskCompletion(int scriptHandleOrType, QString scriptName, QString token, QChar context)
 {
     ASSERT_THREAD(!UI);
 
-    QStringList cl = getCompletion(scriptHandleOrType, scriptName, prefix);
+    QStringList cl = getCompletion(scriptHandleOrType, scriptName, token, context);
 
-    // the QCommandEdit widget wants completions without the prefix
+    // the QCommandEdit widget wants completions without the initial token part
     QStringList cl2;
     for(const QString &s : cl)
     {
-        if(s.startsWith(prefix))
-            cl2 << s.mid(prefix.length());
+        if(s.startsWith(token))
+            cl2 << s.mid(token.length());
     }
     emit setCompletion(cl2);
 }
@@ -488,6 +488,9 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
         showWarning(m);
     }
 
+    QString H = QString("H=sim.getObjectHandle@%2").arg(scriptName);
+    simExecuteScriptString(scriptHandleOrType, H.toLatin1().data(), stackHandle);
+
     QString s = QString("%1@%2").arg(code, scriptName);
     simInt ret = simExecuteScriptString(scriptHandleOrType, s.toLatin1().data(), stackHandle);
     if(ret != 0)
@@ -510,7 +513,14 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     simReleaseStack(stackHandle);
 }
 
-QStringList UIFunctions::getCompletion(int scriptHandleOrType, QString scriptName, QString word)
+QStringList UIFunctions::getCompletion(int scriptHandleOrType, QString scriptName, QString word, QChar context)
+{
+    if(context == 'i') return getCompletionID(scriptHandleOrType, scriptName, word);
+    else if(context == 'H') return getCompletionObjName(word);
+    else return {};
+}
+
+QStringList UIFunctions::getCompletionID(int scriptHandleOrType, QString scriptName, QString word)
 {
     ASSERT_THREAD(!UI);
 
@@ -584,6 +594,26 @@ QStringList UIFunctions::getCompletion(int scriptHandleOrType, QString scriptNam
         DEBUG_STREAM << (i ? ", " : "") << result[i].toStdString();
     DEBUG_STREAM << std::endl;
 #endif
+
+    return result;
+}
+
+QStringList UIFunctions::getCompletionObjName(QString word)
+{
+    ASSERT_THREAD(!UI);
+
+    QStringList result;
+    int i = 0, handle = -1;
+    while(1)
+    {
+        handle = simGetObjects(i++, sim_handle_all);
+        if(handle == -1) break;
+        simChar *name = simGetObjectName(handle);
+        QString nameStr;
+        nameStr.sprintf("%s", name);
+        result << nameStr;
+        simReleaseBuffer(name);
+    }
 
     return result;
 }
