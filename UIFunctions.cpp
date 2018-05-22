@@ -515,9 +515,14 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
 
 QStringList UIFunctions::getCompletion(int scriptHandleOrType, QString scriptName, QString word, QChar context)
 {
-    if(context == 'i') return getCompletionID(scriptHandleOrType, scriptName, word);
-    else if(context == 'H') return getCompletionObjName(word);
-    else return {};
+    QStringList result;
+
+    if(context == 'i') result = getCompletionID(scriptHandleOrType, scriptName, word);
+    else if(context == 'H') result = getCompletionObjName(word);
+
+    result.sort();
+
+    return result;
 }
 
 QStringList UIFunctions::getCompletionID(int scriptHandleOrType, QString scriptName, QString word)
@@ -585,8 +590,6 @@ QStringList UIFunctions::getCompletionID(int scriptHandleOrType, QString scriptN
         else
             ++it;
     }
-
-    result.sort();
 
 #ifdef DEBUG
     DBG << "dynamic=" << options.dynamicCompletion << ", prefix=" << word.toStdString() << ": ";
