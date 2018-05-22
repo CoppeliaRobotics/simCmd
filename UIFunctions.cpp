@@ -201,7 +201,12 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
                 std::string type;
 
                 simMoveStackItemToTop(stackHandle, oldSize - 1);
-                std::string key = getStackTopAsString(stackHandle, opts, depth + 1, false, true);
+                std::string key = getStackTopAsString(stackHandle, opts, depth + 1, false, true, &type);
+
+                // fix for rendering of numeric string keys:
+                if(type.substr(3) == "string")
+                    try {boost::lexical_cast<int>(key); key = (boost::format("\"%s\"") % key).str();}
+                    catch(std::exception &ex) {}
 
                 simMoveStackItemToTop(stackHandle, oldSize - 1);
                 std::string value = getStackTopAsString(stackHandle, opts, depth + 1, true, true, &type);
