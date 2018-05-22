@@ -462,6 +462,28 @@ void UIFunctions::onAskCompletion(int scriptHandleOrType, QString scriptName, QS
     emit setCompletion(cl2);
 }
 
+void UIFunctions::setConvenienceVars(int scriptHandleOrType, QString scriptName, int stackHandle, bool check)
+{
+    if(check)
+    {
+        QString Hcheck = QString("H==sim.getObjectHandle@%1").arg(scriptName);
+        if(simExecuteScriptString(scriptHandleOrType, Hcheck.toLatin1().data(), stackHandle) != -1)
+        {
+            simBool boolValue;
+            if(simGetStackBoolValue(stackHandle, &boolValue) == 1)
+            {
+                simPopStackItem(stackHandle, 1);
+                if(!boolValue)
+                    showWarning("LuaCommander: warning: cannot change 'H' variable");
+            }
+            else DBG << "non-bool on stack" << std::endl;
+        }
+        else DBG << "failed exec" << std::endl;
+    }
+    QString H = QString("H=sim.getObjectHandle@%1").arg(scriptName);
+    simExecuteScriptString(scriptHandleOrType, H.toLatin1().data(), stackHandle);
+}
+
 void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scriptName)
 {
     ASSERT_THREAD(!UI);
@@ -488,9 +510,7 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
         showWarning(m);
     }
 
-    QString H = QString("H=sim.getObjectHandle@%2").arg(scriptName);
-    simExecuteScriptString(scriptHandleOrType, H.toLatin1().data(), stackHandle);
-
+    setConvenienceVars(scriptHandleOrType, scriptName, stackHandle, false);
     QString s = QString("%1@%2").arg(code, scriptName);
     simInt ret = simExecuteScriptString(scriptHandleOrType, s.toLatin1().data(), stackHandle);
     if(ret != 0)
@@ -502,12 +522,12 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     else
     {
         simInt size = simGetStackSize(stackHandle);
+        std::string stackTopStr;
         if(size > 0)
-        {
-            std::string s = getStackTopAsString(stackHandle, opts);
-            QString m = QString::fromStdString(s);
-            showMessage(m, false);
-        }
+            stackTopStr = getStackTopAsString(stackHandle, opts);
+        setConvenienceVars(scriptHandleOrType, scriptName, stackHandle, true);
+        if(size > 0)
+            showMessage(QString::fromStdString(stackTopStr), false);
     }
 
     simReleaseStack(stackHandle);

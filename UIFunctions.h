@@ -50,6 +50,8 @@ private:
     QStringList getCompletionID(int scriptHandleOrType, QString scriptName, QString word);
     QStringList getCompletionObjName(QString word);
 
+    void setConvenienceVars(int scriptHandleOrType, QString scriptName, int stackHandle, bool check);
+
 public slots:
     void onExecCode(QString code, int scriptHandleOrType, QString scriptName);
     void onAskCompletion(int scriptHandleOrType, QString scriptName, QString token, QChar context);
