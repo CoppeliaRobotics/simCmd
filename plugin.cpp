@@ -263,6 +263,11 @@ public:
                 // when commander is hidden, focus the statusbar
                 statusBar->setFocus();
             }
+            else if(!oldVis && newVis)
+            {
+                // when it is shown, focus it
+                commanderWidget->editor_()->setFocus();
+            }
         }
     }
 

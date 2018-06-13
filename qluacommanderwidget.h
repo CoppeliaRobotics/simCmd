@@ -59,6 +59,7 @@ public:
     explicit QLuaCommanderWidget(QWidget *parent = 0);
     ~QLuaCommanderWidget();
 
+    inline QLuaCommanderEdit * editor_() {return editor;}
     void setOptions(const PersistentOptions &options);
 
 protected:
