@@ -3,6 +3,16 @@
 
 <plugin name="LuaCommander" short-name="LuaCmd" author="federico.ferri.it@gmail.com">
     <description>API functions for LuaCommander plugin.</description>
+    <command name="setEnabled">
+        <description>Enable/disable the plugin (i.e. show or hide the UI)</description>
+        <params>
+            <param name="b" type="bool">
+                <description>if true, plugin is enabled</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
     <command name="setPrintAllReturnedValues">
         <description>Set whether to print all the returned values or only the first</description>
         <params>
@@ -38,6 +48,16 @@
         <params>
             <param name="n" type="int">
                 <description>the string length threshold</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="setStringEscapeSpecials">
+        <description>Escape special characters in strings</description>
+        <params>
+            <param name="b" type="bool">
+                <description>if true, special characters will be escaped</description>
             </param>
         </params>
         <return>
@@ -103,6 +123,16 @@
         <return>
         </return>
     </command>
+    <command name="setMapMaxDepth">
+        <description>Set map maximum rendering depth (use -1 for unlimited)</description>
+        <params>
+            <param name="n" type="int">
+                <description>maximum depth</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
     <command name="clearHistory">
         <description>Clear command history</description>
         <params>
@@ -140,6 +170,16 @@
         <return>
         </return>
     </command>
+    <command name="setShowMatchingHistory">
+        <description>History entries beginning with current buffer will be shown in preview. Use UP arrow to navigate matching entries.</description>
+        <params>
+            <param name="b" type="bool">
+                <description>if true, matching entries are shown</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
     <command name="setDynamicCompletion">
         <description>Complete words using the selected script</description>
         <params>
@@ -150,7 +190,17 @@
         <return>
         </return>
     </command>
-    <command name="resizeStatusbarWhenFocused">
+    <command name="setAutoAcceptCommonCompletionPrefix">
+        <description>If all completions have a common prefix, that is automatically accepted if this option is set to true</description>
+        <params>
+            <param name="b" type="bool">
+                <description>if true, common prefix is accepted</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="setResizeStatusbarWhenFocused">
         <description>Save alternative statusbar size for when the commander has the focus</description>
         <params>
             <param name="b" type="bool">

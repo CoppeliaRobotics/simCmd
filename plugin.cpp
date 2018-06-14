@@ -25,6 +25,14 @@ std::atomic<bool> optionsChangedFromGui;
 std::atomic<bool> optionsChangedFromData;
 PersistentOptions options;
 
+void setEnabled(SScriptCallBack *p, const char *cmd, setEnabled_in *in, setEnabled_out *out)
+{
+    options.enabled = in->b;
+    options.save();
+    UIFunctions::getInstance()->setOptions(options);
+    optionsChangedFromData.store(true);
+}
+
 void setPrintAllReturnedValues(SScriptCallBack *p, const char *cmd, setPrintAllReturnedValues_in *in, setPrintAllReturnedValues_out *out)
 {
     options.printAllReturnedValues = in->b;
@@ -52,6 +60,14 @@ void setArrayMaxItemsDisplayed(SScriptCallBack *p, const char *cmd, setArrayMaxI
 void setStringLongLimit(SScriptCallBack *p, const char *cmd, setStringLongLimit_in *in, setStringLongLimit_out *out)
 {
     options.stringLongLimit = in->n;
+    options.save();
+    UIFunctions::getInstance()->setOptions(options);
+    optionsChangedFromData.store(true);
+}
+
+void setStringEscapeSpecials(SScriptCallBack *p, const char *cmd, setStringEscapeSpecials_in *in, setStringEscapeSpecials_out *out)
+{
+    options.stringEscapeSpecials = in->b;
     options.save();
     UIFunctions::getInstance()->setOptions(options);
     optionsChangedFromData.store(true);
@@ -105,6 +121,14 @@ void setFloatPrecision(SScriptCallBack *p, const char *cmd, setFloatPrecision_in
     optionsChangedFromData.store(true);
 }
 
+void setMapMaxDepth(SScriptCallBack *p, const char *cmd, setMapMaxDepth_in *in, setMapMaxDepth_out *out)
+{
+    options.mapMaxDepth = in->n;
+    options.save();
+    UIFunctions::getInstance()->setOptions(options);
+    optionsChangedFromData.store(true);
+}
+
 void clearHistory(SScriptCallBack *p, const char *cmd, clearHistory_in *in, clearHistory_out *out)
 {
     UIFunctions::getInstance()->clearHistory();
@@ -134,6 +158,14 @@ void setHistoryRemoveDups(SScriptCallBack *p, const char *cmd, setHistoryRemoveD
     optionsChangedFromData.store(true);
 }
 
+void setShowMatchingHistory(SScriptCallBack *p, const char *cmd, setShowMatchingHistory_in *in, setShowMatchingHistory_out *out)
+{
+    options.showMatchingHistory = in->b;
+    options.save();
+    UIFunctions::getInstance()->setOptions(options);
+    optionsChangedFromData.store(true);
+}
+
 void setDynamicCompletion(SScriptCallBack *p, const char *cmd, setDynamicCompletion_in *in, setDynamicCompletion_out *out)
 {
     options.dynamicCompletion = in->b;
@@ -142,7 +174,15 @@ void setDynamicCompletion(SScriptCallBack *p, const char *cmd, setDynamicComplet
     optionsChangedFromData.store(true);
 }
 
-void resizeStatusbarWhenFocused(SScriptCallBack *p, const char *cmd, resizeStatusbarWhenFocused_in *in, resizeStatusbarWhenFocused_out *out)
+void setAutoAcceptCommonCompletionPrefix(SScriptCallBack *p, const char *cmd, setAutoAcceptCommonCompletionPrefix_in *in, setAutoAcceptCommonCompletionPrefix_out *out)
+{
+    options.autoAcceptCommonCompletionPrefix = in->b;
+    options.save();
+    UIFunctions::getInstance()->setOptions(options);
+    optionsChangedFromData.store(true);
+}
+
+void setResizeStatusbarWhenFocused(SScriptCallBack *p, const char *cmd, setResizeStatusbarWhenFocused_in *in, setResizeStatusbarWhenFocused_out *out)
 {
     options.resizeStatusbarWhenFocused = in->b;
     options.save();
@@ -179,6 +219,7 @@ public:
         QVBoxLayout *layout = new QVBoxLayout();
         layout->setSpacing(0);
         layout->setMargin(0);
+        layout->setContentsMargins(0,0,0,0);
         splitterChild->setLayout(layout);
         commanderWidget = new QLuaCommanderWidget();
         commanderWidget->setVisible(false);
