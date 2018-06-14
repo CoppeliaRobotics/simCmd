@@ -365,7 +365,7 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
 void UIFunctions::initStringRenderingFlags()
 {
     stringRenderingFlags.clear();
-    stringRenderingFlags << "args";
+    stringRenderingFlags << "retvals";
     stringRenderingFlags << "sort";
     stringRenderingFlags << "precision";
     stringRenderingFlags << "depth";
@@ -401,10 +401,10 @@ void UIFunctions::parseStringRenderingFlags(PersistentOptions *popts, const QStr
             throw std::runtime_error((boost::format("unrecognized string rendering option: '%s' (valid options are: %s)") % optName.toStdString() % stringRenderingFlags.join(", ").toStdString()).str());
         optName = matchingOptions[0];
 
-        if(optName == "args")
+        if(optName == "retvals")
         {
             if(optVal != "1" && optVal != "*")
-                throw std::runtime_error((boost::format("invalid 'args' option: '%s' (valid values are: 1, *)") % optVal.toStdString()).str());
+                throw std::runtime_error((boost::format("invalid 'retvals' option: '%s' (valid values are: 1, *)") % optVal.toStdString()).str());
             popts->printAllReturnedValues = optVal == "*";
         }
         if(optName == "sort")
