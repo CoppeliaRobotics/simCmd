@@ -1,4 +1,6 @@
 OPTION(enabled, bool, true)
+OPTION(printAllReturnedValues, bool, true)
+OPTION(warnAboutMultipleReturnedValues, bool, true)
 OPTION(arrayMaxItemsDisplayed, int, 20)
 OPTION(stringLongLimit, int, 160)
 OPTION(stringEscapeSpecials, bool, true)

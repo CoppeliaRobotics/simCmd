@@ -365,6 +365,7 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
 void UIFunctions::initStringRenderingFlags()
 {
     stringRenderingFlags.clear();
+    stringRenderingFlags << "args";
     stringRenderingFlags << "sort";
     stringRenderingFlags << "precision";
     stringRenderingFlags << "depth";
@@ -400,6 +401,12 @@ void UIFunctions::parseStringRenderingFlags(PersistentOptions *popts, const QStr
             throw std::runtime_error((boost::format("unrecognized string rendering option: '%s' (valid options are: %s)") % optName.toStdString() % stringRenderingFlags.join(", ").toStdString()).str());
         optName = matchingOptions[0];
 
+        if(optName == "args")
+        {
+            if(optVal != "1" && optVal != "*")
+                throw std::runtime_error((boost::format("invalid 'args' option: '%s' (valid values are: 1, *)") % optVal.toStdString()).str());
+            popts->printAllReturnedValues = optVal == "*";
+        }
         if(optName == "sort")
         {
             if(optVal != "tk" && optVal != "t" && optVal != "k" && optVal != "off")
@@ -527,12 +534,26 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     else
     {
         simInt size = simGetStackSize(stackHandle);
-        std::string stackTopStr;
-        if(size > 0)
-            stackTopStr = getStackTopAsString(stackHandle, opts);
+        if(!opts.printAllReturnedValues && size > 1)
+        {
+            if(opts.warnAboutMultipleReturnedValues)
+                showWarning("LuaCommander: warning: more than one return value");
+            size = 1;
+        }
+
+        QString result;
+        for(int i = 0; i < size; i++)
+        {
+            simMoveStackItemToTop(stackHandle, 0);
+            std::string stackTopStr = getStackTopAsString(stackHandle, opts);
+            if(i) result.append(", ");
+            result.append(QString::fromStdString(stackTopStr));
+        }
+
         setConvenienceVars(scriptHandleOrType, scriptName, stackHandle, true);
+
         if(size > 0)
-            showMessage(QString::fromStdString(stackTopStr), false);
+            showMessage(result, false);
     }
 
     simReleaseStack(stackHandle);

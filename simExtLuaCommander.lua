@@ -21,6 +21,7 @@ html_help = [[
         <h3>String Rendering Flags</h3>
         <p>There are some flags that control how the results are displayed. Those are input by adding a comment at the end of the line, containing as comma separated list of key=value pairs, e.g.: "luaExpression --flag1=10,flag2=test". Flags can be abbreviated by typing only the initial part, e.g. "pre" instead of "precision", down to any length, provided it is not ambiguous.</p>
         <ul>
+            <li><b>args</b>: (1, *) print all the returned values (*) or only the first (1).</li>
             <li><b>depth</b>: (integer) limit the maximum depth when rendering a map-table.</li>
             <li><b>precision</b>: (integer) number of floating point digits.</li>
             <li><b>sort</b>: (k, t, tk, off) how to sort map-table entries:

@@ -3,6 +3,26 @@
 
 <plugin name="LuaCommander" short-name="LuaCmd" author="federico.ferri.it@gmail.com">
     <description>API functions for LuaCommander plugin.</description>
+    <command name="setPrintAllReturnedValues">
+        <description>Set whether to print all the returned values or only the first</description>
+        <params>
+            <param name="b" type="bool">
+                <description>if true, all returned values will be printed</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
+    <command name="setWarnAboutMultipleReturnedValues">
+        <description>Set whether to print a warning is there are multiple returned values, and only one value is displayed</description>
+        <params>
+            <param name="b" type="bool">
+                <description>if true, warning will be emitted</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
     <command name="setArrayMaxItemsDisplayed">
         <description>Set the maximum number of items displayed when rendering an array</description>
         <params>

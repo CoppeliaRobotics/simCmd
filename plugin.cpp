@@ -25,6 +25,22 @@ std::atomic<bool> optionsChangedFromGui;
 std::atomic<bool> optionsChangedFromData;
 PersistentOptions options;
 
+void setPrintAllReturnedValues(SScriptCallBack *p, const char *cmd, setPrintAllReturnedValues_in *in, setPrintAllReturnedValues_out *out)
+{
+    options.printAllReturnedValues = in->b;
+    options.save();
+    UIFunctions::getInstance()->setOptions(options);
+    optionsChangedFromData.store(true);
+}
+
+void setWarnAboutMultipleReturnedValues(SScriptCallBack *p, const char *cmd, setWarnAboutMultipleReturnedValues_in *in, setWarnAboutMultipleReturnedValues_out *out)
+{
+    options.warnAboutMultipleReturnedValues = in->b;
+    options.save();
+    UIFunctions::getInstance()->setOptions(options);
+    optionsChangedFromData.store(true);
+}
+
 void setArrayMaxItemsDisplayed(SScriptCallBack *p, const char *cmd, setArrayMaxItemsDisplayed_in *in, setArrayMaxItemsDisplayed_out *out)
 {
     options.arrayMaxItemsDisplayed = in->n;
@@ -177,6 +193,10 @@ public:
         MENUITEM_HISTORY_CLEAR = menuLabels.size();
         menuLabels.push_back("Clear command history");
         menuLabels.push_back("");
+        MENUITEM_PRINT_ALL_RETURNED_VALUES = menuLabels.size();
+        menuLabels.push_back("Print all returned values");
+        MENUITEM_WARN_ABOUT_MULTIPLE_RETURNED_VALUES = menuLabels.size();
+        menuLabels.push_back("Warn about multiple returned values");
         MENUITEM_STRING_ESCAPE_SPECIALS = menuLabels.size();
         menuLabels.push_back("String rendering: escape special characters");
         MENUITEM_MAP_SORT_KEYS_BY_NAME = menuLabels.size();
@@ -230,6 +250,8 @@ public:
     {
         menuState[MENUITEM_TOGGLE_VISIBILITY] = (options.enabled ? itemChecked : 0) + itemEnabled;
         menuState[MENUITEM_HISTORY_CLEAR] = (options.enabled ? itemEnabled : 0);
+        menuState[MENUITEM_PRINT_ALL_RETURNED_VALUES] = (options.enabled ? itemEnabled : 0) + (options.printAllReturnedValues ? itemChecked : 0);
+        menuState[MENUITEM_WARN_ABOUT_MULTIPLE_RETURNED_VALUES] = (options.enabled ? itemEnabled : 0) + (options.warnAboutMultipleReturnedValues ? itemChecked : 0);
         menuState[MENUITEM_STRING_ESCAPE_SPECIALS] = (options.enabled ? itemEnabled : 0) + (options.stringEscapeSpecials ? itemChecked : 0);
         menuState[MENUITEM_MAP_SORT_KEYS_BY_NAME] = (options.enabled ? itemEnabled : 0) + (options.mapSortKeysByName ? itemChecked : 0);
         menuState[MENUITEM_MAP_SORT_KEYS_BY_TYPE] = (options.enabled ? itemEnabled : 0) + (options.mapSortKeysByType ? itemChecked : 0);
@@ -280,6 +302,14 @@ public:
         else if(itemHandle == menuHandles[MENUITEM_HISTORY_CLEAR])
         {
             UIProxy::getInstance()->clearHistory();
+        }
+        else if(itemHandle == menuHandles[MENUITEM_PRINT_ALL_RETURNED_VALUES])
+        {
+            options.printAllReturnedValues = !options.printAllReturnedValues;
+        }
+        else if(itemHandle == menuHandles[MENUITEM_WARN_ABOUT_MULTIPLE_RETURNED_VALUES])
+        {
+            options.warnAboutMultipleReturnedValues = !options.warnAboutMultipleReturnedValues;
         }
         else if(itemHandle == menuHandles[MENUITEM_STRING_ESCAPE_SPECIALS])
         {
@@ -430,6 +460,8 @@ private:
     std::vector<std::string> menuLabels;
     int MENUITEM_TOGGLE_VISIBILITY;
     int MENUITEM_HISTORY_CLEAR;
+    int MENUITEM_PRINT_ALL_RETURNED_VALUES;
+    int MENUITEM_WARN_ABOUT_MULTIPLE_RETURNED_VALUES;
     int MENUITEM_STRING_ESCAPE_SPECIALS;
     int MENUITEM_MAP_SORT_KEYS_BY_NAME;
     int MENUITEM_MAP_SORT_KEYS_BY_TYPE;
