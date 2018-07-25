@@ -14,17 +14,20 @@ find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5PrintSupport REQUIRED)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
+set(CMAKE_MODULE_PATH
+    ${CMAKE_MODULE_PATH}
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/CoppeliaRobotics-modules)
 find_package(VREP 3.5.0 REQUIRED)
 
 include_directories(${VREP_INCLUDE})
-include_directories(${CMAKE_BINARY_DIR}/generated)
-include_directories(${CMAKE_SOURCE_DIR}/external)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/generated)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external)
 include_directories(${Boost_INCLUDE_DIRS})
 
-vrep_generate_stubs(${CMAKE_BINARY_DIR}/generated XML_FILE ${CMAKE_SOURCE_DIR}/callbacks.xml LUA_FILE ${CMAKE_SOURCE_DIR}/simExtLuaCommander.lua)
+vrep_generate_stubs(${CMAKE_CURRENT_BINARY_DIR}/generated XML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/callbacks.xml LUA_FILE ${CMAKE_CURRENT_SOURCE_DIR}/simExtLuaCommander.lua)
 
-configure_file(${CMAKE_SOURCE_DIR}/config.h.in ${CMAKE_BINARY_DIR}/config.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 set(SOURCES
     UIFunctions.cpp
@@ -34,8 +37,8 @@ set(SOURCES
     PersistentOptions.cpp
     qluacommanderwidget.cpp
     qcommandedit.cpp
-    ${CMAKE_SOURCE_DIR}/external/v_repPlusPlus/Plugin.cpp
-    ${CMAKE_BINARY_DIR}/generated/stubs.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/v_repPlusPlus/Plugin.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/generated/stubs.cpp
     ${VREP_EXPORTED_SOURCES}
 )
 
