@@ -35,23 +35,23 @@ UIFunctions * UIFunctions::getInstance(QObject *parent)
 
         simThread(); // we remember of this currentThreadId as the "SIM" thread
 
-        DBG << "UIFunctions(" << UIFunctions::instance << ") constructed in thread " << QThread::currentThreadId() << std::endl;
+        DEBUG_OUT << "UIFunctions(" << UIFunctions::instance << ") constructed in thread " << QThread::currentThreadId() << std::endl;
     }
     return UIFunctions::instance;
 }
 
 void UIFunctions::destroyInstance()
 {
-    DBG << "[enter]" << std::endl;
+    DEBUG_OUT << "[enter]" << std::endl;
 
     if(UIFunctions::instance)
     {
         delete UIFunctions::instance;
 
-        DBG << "destroyed UIFunctions instance" << std::endl;
+        DEBUG_OUT << "destroyed UIFunctions instance" << std::endl;
     }
 
-    DBG << "[leave]" << std::endl;
+    DEBUG_OUT << "[leave]" << std::endl;
 }
 
 void UIFunctions::connectSignals()
@@ -488,9 +488,9 @@ void UIFunctions::setConvenienceVars(int scriptHandleOrType, QString scriptName,
                 if(!boolValue)
                     showWarning("LuaCommander: warning: cannot change 'H' variable");
             }
-            else DBG << "non-bool on stack" << std::endl;
+            else DEBUG_OUT << "non-bool on stack" << std::endl;
         }
-        else DBG << "failed exec" << std::endl;
+        else DEBUG_OUT << "failed exec" << std::endl;
     }
     QString H = QString("H=sim.getObjectHandle@%1").arg(scriptName);
     simExecuteScriptString(scriptHandleOrType, H.toLatin1().data(), stackHandle);
@@ -638,7 +638,7 @@ QStringList UIFunctions::getCompletionID(int scriptHandleOrType, QString scriptN
     }
 
 #ifdef DEBUG
-    DBG << "dynamic=" << options.dynamicCompletion << ", prefix=" << word.toStdString() << ": ";
+    DEBUG_OUT << "dynamic=" << options.dynamicCompletion << ", prefix=" << word.toStdString() << ": ";
     for(int i = 0; i < result.size(); ++i)
         DEBUG_STREAM << (i ? ", " : "") << result[i].toStdString();
     DEBUG_STREAM << std::endl;

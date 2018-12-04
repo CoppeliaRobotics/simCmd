@@ -192,7 +192,7 @@ void QLuaCommanderWidget::onAskCompletion(const QString &cmd, int cursorPos)
     int startPos;
     if(tokenBehindCursor(cmd, cursorPos, &token, &context, &startPos))
     {
-        DBG << "cmd=\"" << cmd.toStdString() << "\", "
+        DEBUG_OUT << "cmd=\"" << cmd.toStdString() << "\", "
             "pos=" << cursorPos << ", "
             "tbc=" << token.toStdString() << ", "
             "ctx=" << context.toLatin1() << std::endl;
@@ -275,7 +275,7 @@ void QLuaCommanderWidget::onGlobalFocusChanged(QWidget *old, QWidget *now)
      * text from the statusbar, we don't want to resize the statusbar as if
      * the widget has lost focus. */
 
-    DBG << "focusChanged: old=" << (old ? old->metaObject()->className() : "null")
+    DEBUG_OUT << "focusChanged: old=" << (old ? old->metaObject()->className() : "null")
         << ", new=" << (now ? now->metaObject()->className() : "null") << std::endl;
 
     QPlainTextEdit *statusBar = UIProxy::getInstance()->getStatusBar();
