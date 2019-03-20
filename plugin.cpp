@@ -215,8 +215,8 @@ public:
         splitter = (QSplitter*)statusBar->parentWidget();
         UIProxy::getInstance()->setStatusBar(statusBar, splitter);
         splitterChild = new QWidget();
-        splitter->addWidget(splitterChild);
-        QVBoxLayout *layout = new QVBoxLayout();
+        splitter->replaceWidget(1,splitterChild);
+        layout = new QVBoxLayout();
         layout->setSpacing(0);
         layout->setMargin(0);
         layout->setContentsMargins(0,0,0,0);
@@ -277,14 +277,8 @@ public:
     {
         if(!commanderWidget) return;
 
-        // XXX: different platforms crash in some conditions
-        //      this seems to make every platform happy:
-#ifdef __APPLE__
-        delete commanderWidget;
-#else
-        splitter->addWidget(statusBar);
-        delete splitterChild;
-#endif
+        layout->removeWidget(statusBar);
+        delete splitter->replaceWidget(1,statusBar);
     }
 
     void updateMenuItems()
@@ -495,6 +489,7 @@ private:
     QPlainTextEdit *statusBar;
     QSplitter *splitter = 0L;
     QWidget *splitterChild = 0L;
+    QVBoxLayout *layout = 0L;
     QLuaCommanderWidget *commanderWidget = 0L;
     std::vector<simInt> menuHandles;
     std::vector<simInt> menuState;
