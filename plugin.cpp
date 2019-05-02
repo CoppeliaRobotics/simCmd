@@ -275,6 +275,9 @@ public:
 
     void onEnd()
     {
+        UI_THREAD = NULL;
+        SIM_THREAD = NULL;
+
         if(!commanderWidget) return;
 
         layout->removeWidget(statusBar);
