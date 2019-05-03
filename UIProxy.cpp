@@ -60,6 +60,7 @@ void UIProxy::destroyInstance()
     if(UIProxy::instance)
     {
         delete UIProxy::instance;
+        UIProxy::instance = nullptr;
 
         DEBUG_OUT << "destroyed UIProxy instance" << std::endl;
     }
