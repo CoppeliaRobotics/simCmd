@@ -195,8 +195,8 @@ class Plugin : public vrep::Plugin
 public:
     void onStart()
     {
-        bool firstInstancePass = true;
-        bool pluginEnabled = true;
+        firstInstancePass = true;
+        pluginEnabled = true;
         UIProxy::getInstance(); // construct UIProxy here (UI thread)
 
         // find the StatusBar widget (QPlainTextEdit)
