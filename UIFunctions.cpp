@@ -47,6 +47,7 @@ void UIFunctions::destroyInstance()
     if(UIFunctions::instance)
     {
         delete UIFunctions::instance;
+        UIFunctions::instance = nullptr;
 
         DEBUG_OUT << "destroyed UIFunctions instance" << std::endl;
     }

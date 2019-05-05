@@ -277,13 +277,15 @@ public:
 
     void onEnd()
     {
+        if (commanderWidget)
+        {
+            layout->removeWidget(statusBar);
+            delete splitter->replaceWidget(1, statusBar);
+        }
+        UIFunctions::destroyInstance();
+        UIProxy::destroyInstance();
         UI_THREAD = NULL;
         SIM_THREAD = NULL;
-
-        if(!commanderWidget) return;
-
-        layout->removeWidget(statusBar);
-        delete splitter->replaceWidget(1,statusBar);
     }
 
     void updateMenuItems()
