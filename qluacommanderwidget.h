@@ -9,7 +9,6 @@
 #include <QLineEdit>
 #include <QComboBox>
 #include <QPushButton>
-
 #include "qcommandedit.h"
 #include "PersistentOptions.h"
 

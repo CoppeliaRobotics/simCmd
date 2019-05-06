@@ -195,8 +195,12 @@ class Plugin : public vrep::Plugin
 public:
     void onStart()
     {
+        menuHandles.clear();
+        menuState.clear();
+        menuLabels.clear();
         firstInstancePass = true;
         pluginEnabled = true;
+
         UIProxy::getInstance(); // construct UIProxy here (UI thread)
 
         // find the StatusBar widget (QPlainTextEdit)
@@ -277,15 +281,15 @@ public:
 
     void onEnd()
     {
+        UIFunctions::destroyInstance();
+        SIM_THREAD = NULL;
         if (commanderWidget)
         {
             layout->removeWidget(statusBar);
             delete splitter->replaceWidget(1, statusBar);
         }
-        UIFunctions::destroyInstance();
         UIProxy::destroyInstance();
         UI_THREAD = NULL;
-        SIM_THREAD = NULL;
     }
 
     void updateMenuItems()
