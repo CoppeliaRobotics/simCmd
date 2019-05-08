@@ -281,8 +281,6 @@ public:
 
     void onEnd()
     {
-        UIFunctions::destroyInstance();
-        SIM_THREAD = NULL;
         if (commanderWidget)
         {
             layout->removeWidget(statusBar);
@@ -290,6 +288,12 @@ public:
         }
         UIProxy::destroyInstance();
         UI_THREAD = NULL;
+    }
+
+    void onLastInstancePass()
+    {
+        UIFunctions::destroyInstance();
+        SIM_THREAD = NULL;
     }
 
     void updateMenuItems()

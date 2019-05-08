@@ -46,6 +46,7 @@ void QGlobalEventFilter::install(QLuaCommanderWidget *commander, QLuaCommanderEd
 void QGlobalEventFilter::uninstall()
 {
     QCoreApplication::instance()->removeEventFilter(instance_);
+    instance_ = nullptr;
 }
 
 inline bool isID(QChar c)
