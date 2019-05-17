@@ -13,6 +13,7 @@ QCommandEdit::QCommandEdit(QWidget *parent)
 {
     historyState_.reset();
     completionState_.reset();
+    ghostSuffix_.clear();
 
     connect(this, &QCommandEdit::returnPressed, this, &QCommandEdit::onReturnPressed);
     connect(this, &QCommandEdit::escapePressed, this, &QCommandEdit::onEscapePressed);
