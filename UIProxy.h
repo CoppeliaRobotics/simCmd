@@ -31,7 +31,7 @@ private:
     QSplitter *splitter = nullptr;
 
 public:
-    static QWidget *vrepMainWindow;
+    static QWidget *simMainWindow;
 
     void setStatusBar(QPlainTextEdit *statusBar, QSplitter *splitter);
     inline QPlainTextEdit *getStatusBar() {return statusBar;}

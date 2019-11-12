@@ -2,7 +2,7 @@
 #include "debug.h"
 #include "UIProxy.h"
 #include "stubs.h"
-#include "v_repLib.h"
+#include "simLib.h"
 #include <stdexcept>
 #include <iomanip>
 #include <boost/format.hpp>
@@ -638,7 +638,7 @@ QStringList UIFunctions::getCompletionID(int scriptHandleOrType, QString scriptN
             ++it;
     }
 
-#ifdef DEBUG
+#ifndef NDEBUG
     DEBUG_OUT << "dynamic=" << options.dynamicCompletion << ", prefix=" << word.toStdString() << ": ";
     for(int i = 0; i < result.size(); ++i)
         DEBUG_STREAM << (i ? ", " : "") << result[i].toStdString();

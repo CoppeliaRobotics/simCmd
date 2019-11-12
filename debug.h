@@ -9,12 +9,6 @@
 
 #include "plugin.h"
 
-#ifdef QT_DEBUG
-#ifndef DEBUG
-#define DEBUG
-#endif // DEBUG
-#endif // QT_DEBUG
-
 extern Qt::HANDLE UI_THREAD;
 extern Qt::HANDLE SIM_THREAD;
 
@@ -32,11 +26,11 @@ void simThread();
 #define DBG_WHAT __func__
 #endif
 
-#ifdef DEBUG
+#ifndef NDEBUG
 #define DEBUG_OUT DEBUG_STREAM << "\033[1;33m[" << PLUGIN_NAME << ":" << threadNickname() << "] \033[1;31m" << __FILE__ << ":" << __LINE__ << "  \033[1;32m" << DBG_WHAT << "\033[0m" << "  "
-#else // DEBUG
+#else // NDEBUG
 #define DEBUG_OUT if(true) {} else DEBUG_STREAM
-#endif // DEBUG
+#endif // NDEBUG
 
 #define ASSERT_THREAD(ID) \
     if(UI_THREAD == NULL) {\

@@ -10,7 +10,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include "UIFunctions.h"
 #include "UIProxy.h"
-#include "v_repPlusPlus/Plugin.h"
+#include "simPlusPlus/Plugin.h"
 #include "plugin.h"
 #include "stubs.h"
 #include "config.h"
@@ -190,7 +190,7 @@ void setResizeStatusbarWhenFocused(SScriptCallBack *p, const char *cmd, setResiz
     optionsChangedFromData.store(true);
 }
 
-class Plugin : public vrep::Plugin
+class Plugin : public sim::Plugin
 {
 public:
     void onStart()
@@ -204,7 +204,7 @@ public:
         UIProxy::getInstance(); // construct UIProxy here (UI thread)
 
         // find the StatusBar widget (QPlainTextEdit)
-        statusBar = UIProxy::vrepMainWindow->findChild<QPlainTextEdit*>("statusBar");
+        statusBar = UIProxy::simMainWindow->findChild<QPlainTextEdit*>("statusBar");
         if(!statusBar)
             throw std::runtime_error("cannot find the statusbar widget");
 
@@ -217,7 +217,7 @@ public:
         optionsChangedFromGui.store(false);
         optionsChangedFromData.store(false);
 
-        // attach widget to V-REP main window
+        // attach widget to CoppeliaSim main window
         splitter = (QSplitter*)statusBar->parentWidget();
         UIProxy::getInstance()->setStatusBar(statusBar, splitter);
         splitterChild = new QWidget();
@@ -233,7 +233,7 @@ public:
         layout->addWidget(commanderWidget);
         splitterChild->setMaximumHeight(600);
 
-        // add menu items to V-REP main window
+        // add menu items to CoppeliaSim main window
         MENUITEM_TOGGLE_VISIBILITY = menuLabels.size();
         menuLabels.push_back("Enable");
         menuLabels.push_back("");
@@ -452,7 +452,7 @@ public:
         UIFunctions::getInstance()->scriptListChanged(childScripts, customizationScripts, simRunning);
     }
 
-    virtual void onInstancePass(const vrep::InstancePassFlags &flags, bool first)
+    virtual void onInstancePass(const sim::InstancePassFlags &flags, bool first)
     {
         if(!commanderWidget) return;
 
@@ -528,4 +528,4 @@ private:
     static const int itemEnabled = 1, itemChecked = 2;
 };
 
-VREP_PLUGIN(PLUGIN_NAME, PLUGIN_VERSION, Plugin)
+SIM_PLUGIN(PLUGIN_NAME, PLUGIN_VERSION, Plugin)
