@@ -281,7 +281,7 @@ public:
 
     void onEnd()
     {
-        if (commanderWidget)
+        if(commanderWidget)
         {
             layout->removeWidget(statusBar);
             delete splitter->replaceWidget(1, statusBar);
