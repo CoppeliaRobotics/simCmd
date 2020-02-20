@@ -659,8 +659,7 @@ QStringList UIFunctions::getCompletionObjName(QString word)
         handle = simGetObjects(i++, sim_handle_all);
         if(handle == -1) break;
         simChar *name = simGetObjectName(handle);
-        QString nameStr;
-        nameStr.sprintf("%s", name);
+        QString nameStr(QString::fromUtf8(name));
         if(nameStr.startsWith(word))
             result << nameStr;
         simReleaseBuffer(name);
