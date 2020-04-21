@@ -57,3 +57,5 @@ set(LIBRARIES
 add_library(simExtLuaCommander SHARED ${SOURCES})
 target_link_libraries(simExtLuaCommander ${LIBRARIES})
 
+install(TARGETS simExtLuaCommander DESTINATION ${COPPELIASIM_PLUGINS_DIR})
+
