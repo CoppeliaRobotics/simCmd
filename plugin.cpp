@@ -211,8 +211,8 @@ public:
         if(!registerScriptStuff())
             throw std::runtime_error("failed to register script stuff");
 
-        simSetModuleInfo(PLUGIN_NAME, 0, "Lua REPL (read-eval-print-loop) Plugin", 0);
-        simSetModuleInfo(PLUGIN_NAME, 1, BUILD_DATE, 0);
+        setExtVersion("Lua REPL (read-eval-print-loop) Plugin");
+        setBuildDate(BUILD_DATE);
 
         optionsChangedFromGui.store(false);
         optionsChangedFromData.store(false);
