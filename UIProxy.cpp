@@ -48,24 +48,22 @@ UIProxy * UIProxy::getInstance(QObject *parent)
 
         uiThread(); // we remember this currentThreadId as the "UI" thread
 
-        DEBUG_OUT << "UIProxy(" << UIProxy::instance << ") constructed in thread " << QThread::currentThreadId() << std::endl;
+        log(sim_verbosity_debug, boost::format("UIProxy(%x) constructed in thread %s") % UIProxy::instance % QThread::currentThreadId());
     }
     return UIProxy::instance;
 }
 
 void UIProxy::destroyInstance()
 {
-    DEBUG_OUT << "[enter]" << std::endl;
+    TRACE_FUNC;
 
     if(UIProxy::instance)
     {
         delete UIProxy::instance;
         UIProxy::instance = nullptr;
 
-        DEBUG_OUT << "destroyed UIProxy instance" << std::endl;
+        log(sim_verbosity_debug, "destroyed UIProxy instance");
     }
-
-    DEBUG_OUT << "[leave]" << std::endl;
 }
 
 void UIProxy::setStatusBar(QPlainTextEdit *statusBar_, QSplitter *splitter_)

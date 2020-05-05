@@ -35,24 +35,22 @@ UIFunctions * UIFunctions::getInstance(QObject *parent)
 
         simThread(); // we remember of this currentThreadId as the "SIM" thread
 
-        DEBUG_OUT << "UIFunctions(" << UIFunctions::instance << ") constructed in thread " << QThread::currentThreadId() << std::endl;
+        log(sim_verbosity_debug, boost::format("UIFunctions(%x) constructed in thread %s") % UIFunctions::instance % QThread::currentThreadId());
     }
     return UIFunctions::instance;
 }
 
 void UIFunctions::destroyInstance()
 {
-    DEBUG_OUT << "[enter]" << std::endl;
+    TRACE_FUNC;
 
     if(UIFunctions::instance)
     {
         delete UIFunctions::instance;
         UIFunctions::instance = nullptr;
 
-        DEBUG_OUT << "destroyed UIFunctions instance" << std::endl;
+        log(sim_verbosity_debug, "destroyed UIFunctions instance");
     }
-
-    DEBUG_OUT << "[leave]" << std::endl;
 }
 
 void UIFunctions::connectSignals()
@@ -489,9 +487,9 @@ void UIFunctions::setConvenienceVars(int scriptHandleOrType, QString scriptName,
                 if(!boolValue)
                     showWarning("LuaCommander: warning: cannot change 'H' variable");
             }
-            else DEBUG_OUT << "non-bool on stack" << std::endl;
+            else log(sim_verbosity_debug, "non-bool on stack");
         }
-        else DEBUG_OUT << "failed exec" << std::endl;
+        else log(sim_verbosity_debug, "failed exec");
     }
     QString H = QString("H=sim.getObjectHandle@%1").arg(scriptName);
     simExecuteScriptString(scriptHandleOrType, H.toLatin1().data(), stackHandle);
@@ -639,10 +637,9 @@ QStringList UIFunctions::getCompletionID(int scriptHandleOrType, QString scriptN
     }
 
 #ifndef NDEBUG
-    DEBUG_OUT << "dynamic=" << options.dynamicCompletion << ", prefix=" << word.toStdString() << ": ";
+    log(sim_verbosity_debug, boost::format("dynamic=%d, prefix=%s: ") % options.dynamicCompletion % word.toStdString());
     for(int i = 0; i < result.size(); ++i)
-        DEBUG_STREAM << (i ? ", " : "") << result[i].toStdString();
-    DEBUG_STREAM << std::endl;
+        log(sim_verbosity_debug, result[i].toStdString());
 #endif
 
     return result;
