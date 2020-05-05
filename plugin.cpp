@@ -21,175 +21,6 @@
 #include "PersistentOptions.h"
 #include "qluacommanderwidget.h"
 
-std::atomic<bool> optionsChangedFromGui;
-std::atomic<bool> optionsChangedFromData;
-PersistentOptions options;
-
-void setEnabled(SScriptCallBack *p, const char *cmd, setEnabled_in *in, setEnabled_out *out)
-{
-    options.enabled = in->b;
-    options.save();
-    UIFunctions::getInstance()->setOptions(options);
-    optionsChangedFromData.store(true);
-}
-
-void setPrintAllReturnedValues(SScriptCallBack *p, const char *cmd, setPrintAllReturnedValues_in *in, setPrintAllReturnedValues_out *out)
-{
-    options.printAllReturnedValues = in->b;
-    options.save();
-    UIFunctions::getInstance()->setOptions(options);
-    optionsChangedFromData.store(true);
-}
-
-void setWarnAboutMultipleReturnedValues(SScriptCallBack *p, const char *cmd, setWarnAboutMultipleReturnedValues_in *in, setWarnAboutMultipleReturnedValues_out *out)
-{
-    options.warnAboutMultipleReturnedValues = in->b;
-    options.save();
-    UIFunctions::getInstance()->setOptions(options);
-    optionsChangedFromData.store(true);
-}
-
-void setArrayMaxItemsDisplayed(SScriptCallBack *p, const char *cmd, setArrayMaxItemsDisplayed_in *in, setArrayMaxItemsDisplayed_out *out)
-{
-    options.arrayMaxItemsDisplayed = in->n;
-    options.save();
-    UIFunctions::getInstance()->setOptions(options);
-    optionsChangedFromData.store(true);
-}
-
-void setStringLongLimit(SScriptCallBack *p, const char *cmd, setStringLongLimit_in *in, setStringLongLimit_out *out)
-{
-    options.stringLongLimit = in->n;
-    options.save();
-    UIFunctions::getInstance()->setOptions(options);
-    optionsChangedFromData.store(true);
-}
-
-void setStringEscapeSpecials(SScriptCallBack *p, const char *cmd, setStringEscapeSpecials_in *in, setStringEscapeSpecials_out *out)
-{
-    options.stringEscapeSpecials = in->b;
-    options.save();
-    UIFunctions::getInstance()->setOptions(options);
-    optionsChangedFromData.store(true);
-}
-
-void setMapSortKeysByName(SScriptCallBack *p, const char *cmd, setMapSortKeysByName_in *in, setMapSortKeysByName_out *out)
-{
-    options.mapSortKeysByName = in->b;
-    options.save();
-    UIFunctions::getInstance()->setOptions(options);
-    optionsChangedFromData.store(true);
-}
-
-void setMapSortKeysByType(SScriptCallBack *p, const char *cmd, setMapSortKeysByType_in *in, setMapSortKeysByType_out *out)
-{
-    options.mapSortKeysByType = in->b;
-    options.save();
-    UIFunctions::getInstance()->setOptions(options);
-    optionsChangedFromData.store(true);
-}
-
-void setMapShadowLongStrings(SScriptCallBack *p, const char *cmd, setMapShadowLongStrings_in *in, setMapShadowLongStrings_out *out)
-{
-    options.mapShadowLongStrings = in->b;
-    options.save();
-    UIFunctions::getInstance()->setOptions(options);
-    optionsChangedFromData.store(true);
-}
-
-void setMapShadowBufferStrings(SScriptCallBack *p, const char *cmd, setMapShadowBufferStrings_in *in, setMapShadowBufferStrings_out *out)
-{
-    options.mapShadowBufferStrings = in->b;
-    options.save();
-    UIFunctions::getInstance()->setOptions(options);
-    optionsChangedFromData.store(true);
-}
-
-void setMapShadowSpecialStrings(SScriptCallBack *p, const char *cmd, setMapShadowSpecialStrings_in *in, setMapShadowSpecialStrings_out *out)
-{
-    options.mapShadowSpecialStrings = in->b;
-    options.save();
-    UIFunctions::getInstance()->setOptions(options);
-    optionsChangedFromData.store(true);
-}
-
-void setFloatPrecision(SScriptCallBack *p, const char *cmd, setFloatPrecision_in *in, setFloatPrecision_out *out)
-{
-    options.floatPrecision = in->n;
-    options.save();
-    UIFunctions::getInstance()->setOptions(options);
-    optionsChangedFromData.store(true);
-}
-
-void setMapMaxDepth(SScriptCallBack *p, const char *cmd, setMapMaxDepth_in *in, setMapMaxDepth_out *out)
-{
-    options.mapMaxDepth = in->n;
-    options.save();
-    UIFunctions::getInstance()->setOptions(options);
-    optionsChangedFromData.store(true);
-}
-
-void clearHistory(SScriptCallBack *p, const char *cmd, clearHistory_in *in, clearHistory_out *out)
-{
-    UIFunctions::getInstance()->clearHistory();
-}
-
-void setHistorySize(SScriptCallBack *p, const char *cmd, setHistorySize_in *in, setHistorySize_out *out)
-{
-    options.historySize = in->n;
-    options.save();
-    UIFunctions::getInstance()->setOptions(options);
-    optionsChangedFromData.store(true);
-}
-
-void setHistorySkipRepeated(SScriptCallBack *p, const char *cmd, setHistorySkipRepeated_in *in, setHistorySkipRepeated_out *out)
-{
-    options.historySkipRepeated = in->b;
-    options.save();
-    UIFunctions::getInstance()->setOptions(options);
-    optionsChangedFromData.store(true);
-}
-
-void setHistoryRemoveDups(SScriptCallBack *p, const char *cmd, setHistoryRemoveDups_in *in, setHistoryRemoveDups_out *out)
-{
-    options.historyRemoveDups = in->b;
-    options.save();
-    UIFunctions::getInstance()->setOptions(options);
-    optionsChangedFromData.store(true);
-}
-
-void setShowMatchingHistory(SScriptCallBack *p, const char *cmd, setShowMatchingHistory_in *in, setShowMatchingHistory_out *out)
-{
-    options.showMatchingHistory = in->b;
-    options.save();
-    UIFunctions::getInstance()->setOptions(options);
-    optionsChangedFromData.store(true);
-}
-
-void setDynamicCompletion(SScriptCallBack *p, const char *cmd, setDynamicCompletion_in *in, setDynamicCompletion_out *out)
-{
-    options.dynamicCompletion = in->b;
-    options.save();
-    UIFunctions::getInstance()->setOptions(options);
-    optionsChangedFromData.store(true);
-}
-
-void setAutoAcceptCommonCompletionPrefix(SScriptCallBack *p, const char *cmd, setAutoAcceptCommonCompletionPrefix_in *in, setAutoAcceptCommonCompletionPrefix_out *out)
-{
-    options.autoAcceptCommonCompletionPrefix = in->b;
-    options.save();
-    UIFunctions::getInstance()->setOptions(options);
-    optionsChangedFromData.store(true);
-}
-
-void setResizeStatusbarWhenFocused(SScriptCallBack *p, const char *cmd, setResizeStatusbarWhenFocused_in *in, setResizeStatusbarWhenFocused_out *out)
-{
-    options.resizeStatusbarWhenFocused = in->b;
-    options.save();
-    UIFunctions::getInstance()->setOptions(options);
-    optionsChangedFromData.store(true);
-}
-
 class Plugin : public sim::Plugin
 {
 public:
@@ -498,7 +329,175 @@ public:
         }
     }
 
+    void setEnabled(setEnabled_in *in, setEnabled_out *out)
+    {
+        options.enabled = in->b;
+        options.save();
+        UIFunctions::getInstance()->setOptions(options);
+        optionsChangedFromData.store(true);
+    }
+
+    void setPrintAllReturnedValues(setPrintAllReturnedValues_in *in, setPrintAllReturnedValues_out *out)
+    {
+        options.printAllReturnedValues = in->b;
+        options.save();
+        UIFunctions::getInstance()->setOptions(options);
+        optionsChangedFromData.store(true);
+    }
+
+    void setWarnAboutMultipleReturnedValues(setWarnAboutMultipleReturnedValues_in *in, setWarnAboutMultipleReturnedValues_out *out)
+    {
+        options.warnAboutMultipleReturnedValues = in->b;
+        options.save();
+        UIFunctions::getInstance()->setOptions(options);
+        optionsChangedFromData.store(true);
+    }
+
+    void setArrayMaxItemsDisplayed(setArrayMaxItemsDisplayed_in *in, setArrayMaxItemsDisplayed_out *out)
+    {
+        options.arrayMaxItemsDisplayed = in->n;
+        options.save();
+        UIFunctions::getInstance()->setOptions(options);
+        optionsChangedFromData.store(true);
+    }
+
+    void setStringLongLimit(setStringLongLimit_in *in, setStringLongLimit_out *out)
+    {
+        options.stringLongLimit = in->n;
+        options.save();
+        UIFunctions::getInstance()->setOptions(options);
+        optionsChangedFromData.store(true);
+    }
+
+    void setStringEscapeSpecials(setStringEscapeSpecials_in *in, setStringEscapeSpecials_out *out)
+    {
+        options.stringEscapeSpecials = in->b;
+        options.save();
+        UIFunctions::getInstance()->setOptions(options);
+        optionsChangedFromData.store(true);
+    }
+
+    void setMapSortKeysByName(setMapSortKeysByName_in *in, setMapSortKeysByName_out *out)
+    {
+        options.mapSortKeysByName = in->b;
+        options.save();
+        UIFunctions::getInstance()->setOptions(options);
+        optionsChangedFromData.store(true);
+    }
+
+    void setMapSortKeysByType(setMapSortKeysByType_in *in, setMapSortKeysByType_out *out)
+    {
+        options.mapSortKeysByType = in->b;
+        options.save();
+        UIFunctions::getInstance()->setOptions(options);
+        optionsChangedFromData.store(true);
+    }
+
+    void setMapShadowLongStrings(setMapShadowLongStrings_in *in, setMapShadowLongStrings_out *out)
+    {
+        options.mapShadowLongStrings = in->b;
+        options.save();
+        UIFunctions::getInstance()->setOptions(options);
+        optionsChangedFromData.store(true);
+    }
+
+    void setMapShadowBufferStrings(setMapShadowBufferStrings_in *in, setMapShadowBufferStrings_out *out)
+    {
+        options.mapShadowBufferStrings = in->b;
+        options.save();
+        UIFunctions::getInstance()->setOptions(options);
+        optionsChangedFromData.store(true);
+    }
+
+    void setMapShadowSpecialStrings(setMapShadowSpecialStrings_in *in, setMapShadowSpecialStrings_out *out)
+    {
+        options.mapShadowSpecialStrings = in->b;
+        options.save();
+        UIFunctions::getInstance()->setOptions(options);
+        optionsChangedFromData.store(true);
+    }
+
+    void setFloatPrecision(setFloatPrecision_in *in, setFloatPrecision_out *out)
+    {
+        options.floatPrecision = in->n;
+        options.save();
+        UIFunctions::getInstance()->setOptions(options);
+        optionsChangedFromData.store(true);
+    }
+
+    void setMapMaxDepth(setMapMaxDepth_in *in, setMapMaxDepth_out *out)
+    {
+        options.mapMaxDepth = in->n;
+        options.save();
+        UIFunctions::getInstance()->setOptions(options);
+        optionsChangedFromData.store(true);
+    }
+
+    void clearHistory(clearHistory_in *in, clearHistory_out *out)
+    {
+        UIFunctions::getInstance()->clearHistory();
+    }
+
+    void setHistorySize(setHistorySize_in *in, setHistorySize_out *out)
+    {
+        options.historySize = in->n;
+        options.save();
+        UIFunctions::getInstance()->setOptions(options);
+        optionsChangedFromData.store(true);
+    }
+
+    void setHistorySkipRepeated(setHistorySkipRepeated_in *in, setHistorySkipRepeated_out *out)
+    {
+        options.historySkipRepeated = in->b;
+        options.save();
+        UIFunctions::getInstance()->setOptions(options);
+        optionsChangedFromData.store(true);
+    }
+
+    void setHistoryRemoveDups(setHistoryRemoveDups_in *in, setHistoryRemoveDups_out *out)
+    {
+        options.historyRemoveDups = in->b;
+        options.save();
+        UIFunctions::getInstance()->setOptions(options);
+        optionsChangedFromData.store(true);
+    }
+
+    void setShowMatchingHistory(setShowMatchingHistory_in *in, setShowMatchingHistory_out *out)
+    {
+        options.showMatchingHistory = in->b;
+        options.save();
+        UIFunctions::getInstance()->setOptions(options);
+        optionsChangedFromData.store(true);
+    }
+
+    void setDynamicCompletion(setDynamicCompletion_in *in, setDynamicCompletion_out *out)
+    {
+        options.dynamicCompletion = in->b;
+        options.save();
+        UIFunctions::getInstance()->setOptions(options);
+        optionsChangedFromData.store(true);
+    }
+
+    void setAutoAcceptCommonCompletionPrefix(setAutoAcceptCommonCompletionPrefix_in *in, setAutoAcceptCommonCompletionPrefix_out *out)
+    {
+        options.autoAcceptCommonCompletionPrefix = in->b;
+        options.save();
+        UIFunctions::getInstance()->setOptions(options);
+        optionsChangedFromData.store(true);
+    }
+
+    void setResizeStatusbarWhenFocused(setResizeStatusbarWhenFocused_in *in, setResizeStatusbarWhenFocused_out *out)
+    {
+        options.resizeStatusbarWhenFocused = in->b;
+        options.save();
+        UIFunctions::getInstance()->setOptions(options);
+        optionsChangedFromData.store(true);
+    }
+
 private:
+    std::atomic<bool> optionsChangedFromGui;
+    std::atomic<bool> optionsChangedFromData;
+    PersistentOptions options;
     bool firstInstancePass = true;
     bool pluginEnabled = true;
     QPlainTextEdit *statusBar;
@@ -529,3 +528,4 @@ private:
 };
 
 SIM_PLUGIN(PLUGIN_NAME, PLUGIN_VERSION, Plugin)
+#include "stubsPlusPlus.cpp"
