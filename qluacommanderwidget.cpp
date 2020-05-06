@@ -1,7 +1,6 @@
 #include "qluacommanderwidget.h"
 #include "UIProxy.h"
 #include "UIFunctions.h"
-#include "debug.h"
 #include <boost/format.hpp>
 #include <QHBoxLayout>
 #include <QKeyEvent>

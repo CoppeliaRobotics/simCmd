@@ -14,7 +14,6 @@
 #include "plugin.h"
 #include "stubs.h"
 #include "config.h"
-#include "debug.h"
 #include <QPlainTextEdit>
 #include <QVBoxLayout>
 #include <QSplitter>

@@ -1,5 +1,4 @@
 #include "UIFunctions.h"
-#include "debug.h"
 #include "UIProxy.h"
 #include "stubs.h"
 #include "simLib.h"
@@ -269,7 +268,7 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
         }
         else
         {
-            std::cout << "table unfold error. n=" << n << std::endl;
+            log(sim_verbosity_errors, boost::format("table unfold error. n=%d") % n);
             simDebugStack(stackHandle, -1);
             return "<table:unfold-err>";
         }
@@ -354,7 +353,7 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
         if(strType)
             *strType = "?";
 
-        std::cout << "unable to convert stack top. n=" << n << std::endl;
+        log(sim_verbosity_errors, boost::format("unable to convert stack top. n=%d") % n);
         simDebugStack(stackHandle, -1);
         simPopStackItem(stackHandle, 1);
         return "?";

@@ -7,12 +7,11 @@
 #include "plugin.h"
 #include "stubs.h"
 #include "config.h"
-#include "debug.h"
 
 void PersistentOptions::dump()
 {
 #define OPTION(name, type, def) \
-    std::cout << "LuaCommander:     " #name "=" << name << std::endl;
+    log(sim_verbosity_debug, boost::format("LuaCommander:     %s = %s") % #name % name);
 #include "PersistentOptions.list"
 #undef OPTION
 }
@@ -28,7 +27,7 @@ inline bool readOption(const char *name, T *value, T def)
     if(!pdata)
     {
 #ifdef DEBUG_PERSISTENT_OPTIONS
-        std::cout << "LuaCommander: Could not load persistent option '" << name << "': null pointer error" << std::endl;
+        log(sim_verbosity_debug, boost::format("LuaCommander: Could not load persistent option '%s': null pointer error") % name);
 #endif
         return false;
     }
@@ -37,13 +36,14 @@ inline bool readOption(const char *name, T *value, T def)
     {
         memcpy(value, pdata, sizeof(T));
 #ifdef DEBUG_PERSISTENT_OPTIONS
-        std::cout << "LuaCommander: Loaded persistent option '" << name << "': " << *value << std::endl;
+        std::stringstream ss; ss < *value;
+        log(sim_verbosity_debug, boost::format("LuaCommander: Loaded persistent option '%s': %s") % name % ss.str());
 #endif
     }
     else
     {
 #ifdef DEBUG_PERSISTENT_OPTIONS
-        std::cout << "LuaCommander: Could not load persistent option '" << name << "': incorrect data length " << dataLength << ", should be " << sizeof(T) << std::endl;
+        log(sim_verbosity_debug, boost::format("LuaCommander: Could not load persistent option '%s': incorrect data length %d, should be %d") % name % dataLength % sizeof(T));
 #endif
     }
     simReleaseBuffer(pdata);
@@ -53,7 +53,7 @@ inline bool readOption(const char *name, T *value, T def)
 bool PersistentOptions::load()
 {
 #ifdef DEBUG_PERSISTENT_OPTIONS
-    std::cout << "LuaCommander: Loading persistent options..." << std::endl;
+    log(sim_verbosity_debug, "LuaCommander: Loading persistent options...");
 #endif
     bool ok = true;
 #define OPTION(name, type, def) ok = readOption<type>(#name, &name, def) && ok;
@@ -69,7 +69,7 @@ inline bool writeOption(const char *name, T *value)
 #ifdef DEBUG_PERSISTENT_OPTIONS
     if(!ok)
     {
-        std::cout << "LuaCommander: Could not save persistent option '" << name << "': error -1" << std::endl;
+        log(sim_verbosity_debug, boost::format("LuaCommander: Could not save persistent option '%s': error -1") % name);
     }
 #endif
     return ok;
@@ -78,7 +78,7 @@ inline bool writeOption(const char *name, T *value)
 bool PersistentOptions::save()
 {
 #ifdef DEBUG_PERSISTENT_OPTIONS
-    std::cout << "LuaCommander: Saving persistent options:" << std::endl;
+    log(sim_verbosity_debug, "LuaCommander: Saving persistent options:");
     dump();
 #endif
     bool ok = true;
