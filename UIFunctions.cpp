@@ -432,28 +432,19 @@ void UIFunctions::parseStringRenderingFlags(PersistentOptions *popts, const QStr
     }
 }
 
-QString escapeHtml(QString s)
+void UIFunctions::showMessage(QString s)
 {
-    return s.toHtmlEscaped().replace("\n", "<br/>").replace(" ", "&nbsp;");
+    log(sim_verbosity_msgs|sim_verbosity_undecorated, s.toLatin1().data());
 }
 
-void UIFunctions::showMessage(QString s, bool html)
+void UIFunctions::showWarning(QString s)
 {
-    if(!html) s = escapeHtml(s);
-    s += "@html";
-    simAddStatusbarMessage(s.toLatin1().data());
+    log(sim_verbosity_scriptwarnings|sim_verbosity_undecorated, s.toLatin1().data());
 }
 
-void UIFunctions::showWarning(QString s, bool html)
+void UIFunctions::showError(QString s)
 {
-    if(!html) s = escapeHtml(s);
-    showMessage(QString("<font color='#c60'>%1</font>").arg(s), true);
-}
-
-void UIFunctions::showError(QString s, bool html)
-{
-    if(!html) s = escapeHtml(s);
-    showMessage(QString("<font color='#c00'>%1</font>").arg(s), true);
+    log(sim_verbosity_scripterrors|sim_verbosity_undecorated, s.toLatin1().data());
 }
 
 void UIFunctions::onAskCompletion(int scriptHandleOrType, QString scriptName, QString token, QChar context)
@@ -484,7 +475,7 @@ void UIFunctions::setConvenienceVars(int scriptHandleOrType, QString scriptName,
             {
                 simPopStackItem(stackHandle, 1);
                 if(!boolValue)
-                    showWarning("LuaCommander: warning: cannot change 'H' variable");
+                    showWarning("cannot change 'H' variable");
             }
             else log(sim_verbosity_debug, "non-bool on stack");
         }
@@ -503,7 +494,7 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     simInt stackHandle = simCreateStack();
     if(stackHandle == -1)
     {
-        showError("LuaCommander: error: failed to create a stack");
+        showError("failed to create a stack");
         return;
     }
 
@@ -516,7 +507,7 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     }
     catch(std::exception &ex)
     {
-        QString m = QString("LuaCommander: warning: %1").arg(ex.what());
+        QString m(ex.what());
         showWarning(m);
     }
 
@@ -535,7 +526,7 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
         if(!opts.printAllReturnedValues && size > 1)
         {
             if(opts.warnAboutMultipleReturnedValues)
-                showWarning("LuaCommander: warning: more than one return value");
+                showWarning("more than one return value");
             size = 1;
         }
 
@@ -551,7 +542,7 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
         setConvenienceVars(scriptHandleOrType, scriptName, stackHandle, true);
 
         if(size > 0)
-            showMessage(result, false);
+            showMessage(result);
     }
 
     simReleaseStack(stackHandle);

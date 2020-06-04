@@ -27,9 +27,9 @@ public:
     void loadHistory();
     void appendHistory(QString code);
 
-    void showMessage(QString s, bool html = false);
-    void showWarning(QString s, bool html = false);
-    void showError(QString s, bool html = false);
+    void showMessage(QString s);
+    void showWarning(QString s);
+    void showError(QString s);
 
 public slots:
     void clearHistory();
