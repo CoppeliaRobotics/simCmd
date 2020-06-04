@@ -103,7 +103,7 @@ public:
         menuHandles.resize(menuLabels.size());
         if(simAddModuleMenuEntry("Lua Commander", menuHandles.size(), &menuHandles[0]) == -1)
         {
-            simAddStatusbarMessage("LuaCommander error: failed to create menu");
+            log(sim_verbosity_errors, "failed to create menu");
             return;
         }
         updateUI();
