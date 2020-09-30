@@ -468,7 +468,7 @@ void UIFunctions::setConvenienceVars(int scriptHandleOrType, QString scriptName,
     if(check)
     {
         QString Hcheck = QString("H==sim.getObjectHandle@%1").arg(scriptName);
-        if(simExecuteScriptString(scriptHandleOrType, Hcheck.toLatin1().data(), stackHandle) != -1)
+        if(simExecuteScriptString(scriptHandleOrType, Hcheck.toLatin1().data(), stackHandle) == 0)
         {
             simBool boolValue;
             if(simGetStackBoolValue(stackHandle, &boolValue) == 1)
