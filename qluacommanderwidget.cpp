@@ -192,7 +192,7 @@ void QLuaCommanderWidget::onAskCompletion(const QString &cmd, int cursorPos)
     int startPos;
     if(tokenBehindCursor(cmd, cursorPos, &token, &context, &startPos))
     {
-        log(sim_verbosity_debug, boost::format("cmd=\"%s\", pos=%d, tbc=%s, ctx=%s") % cmd.toStdString() % cursorPos % token.toStdString() % context.toLatin1());
+        sim::addLog(sim_verbosity_debug, "cmd=\"%s\", pos=%d, tbc=%s, ctx=%s", cmd.toStdString(), cursorPos, token.toStdString(), context.toLatin1());
 
         emit askCompletion(type, name, token, context);
     }
@@ -272,7 +272,7 @@ void QLuaCommanderWidget::onGlobalFocusChanged(QWidget *old, QWidget *now)
      * text from the statusbar, we don't want to resize the statusbar as if
      * the widget has lost focus. */
 
-    log(sim_verbosity_debug, boost::format("focusChanged: old=%s, new=%s") % (old ? old->metaObject()->className() : "null") % (now ? now->metaObject()->className() : "null"));
+    sim::addLog(sim_verbosity_debug, "focusChanged: old=%s, new=%s", old ? old->metaObject()->className() : "null", now ? now->metaObject()->className() : "null");
 
     QPlainTextEdit *statusBar = UIProxy::getInstance()->getStatusBar();
 

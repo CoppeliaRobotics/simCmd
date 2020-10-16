@@ -34,7 +34,7 @@ UIFunctions * UIFunctions::getInstance(QObject *parent)
 
         simThread(); // we remember of this currentThreadId as the "SIM" thread
 
-        log(sim_verbosity_debug, boost::format("UIFunctions(%x) constructed in thread %s") % UIFunctions::instance % QThread::currentThreadId());
+        sim::addLog(sim_verbosity_debug, "UIFunctions(%x) constructed in thread %s", UIFunctions::instance, QThread::currentThreadId());
     }
     return UIFunctions::instance;
 }
@@ -48,7 +48,7 @@ void UIFunctions::destroyInstance()
         delete UIFunctions::instance;
         UIFunctions::instance = nullptr;
 
-        log(sim_verbosity_debug, "destroyed UIFunctions instance");
+        sim::addLog(sim_verbosity_debug, "destroyed UIFunctions instance");
     }
 }
 
@@ -268,7 +268,7 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
         }
         else
         {
-            log(sim_verbosity_errors, boost::format("table unfold error. n=%d") % n);
+            sim::addLog(sim_verbosity_errors, "table unfold error. n=%d", n);
             simDebugStack(stackHandle, -1);
             return "<table:unfold-err>";
         }
@@ -353,7 +353,7 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
         if(strType)
             *strType = "?";
 
-        log(sim_verbosity_errors, boost::format("unable to convert stack top. n=%d") % n);
+        sim::addLog(sim_verbosity_errors, "unable to convert stack top. n=%d", n);
         simDebugStack(stackHandle, -1);
         simPopStackItem(stackHandle, 1);
         return "?";
@@ -434,17 +434,17 @@ void UIFunctions::parseStringRenderingFlags(PersistentOptions *popts, const QStr
 
 void UIFunctions::showMessage(QString s)
 {
-    log(sim_verbosity_msgs|sim_verbosity_undecorated, s.toLatin1().data());
+    sim::addLog(sim_verbosity_msgs|sim_verbosity_undecorated, s.toLatin1().data());
 }
 
 void UIFunctions::showWarning(QString s)
 {
-    log(sim_verbosity_scriptwarnings|sim_verbosity_undecorated, s.toLatin1().data());
+    sim::addLog(sim_verbosity_scriptwarnings|sim_verbosity_undecorated, s.toLatin1().data());
 }
 
 void UIFunctions::showError(QString s)
 {
-    log(sim_verbosity_scripterrors|sim_verbosity_undecorated, s.toLatin1().data());
+    sim::addLog(sim_verbosity_scripterrors|sim_verbosity_undecorated, s.toLatin1().data());
 }
 
 void UIFunctions::onAskCompletion(int scriptHandleOrType, QString scriptName, QString token, QChar context)
@@ -477,9 +477,9 @@ void UIFunctions::setConvenienceVars(int scriptHandleOrType, QString scriptName,
                 if(!boolValue)
                     showWarning("cannot change 'H' variable");
             }
-            else log(sim_verbosity_debug, "non-bool on stack");
+            else sim::addLog(sim_verbosity_debug, "non-bool on stack");
         }
-        else log(sim_verbosity_debug, "failed exec");
+        else sim::addLog(sim_verbosity_debug, "failed exec");
     }
     QString H = QString("H=sim.getObjectHandle@%1").arg(scriptName);
     simExecuteScriptString(scriptHandleOrType, H.toLatin1().data(), stackHandle);
@@ -627,9 +627,9 @@ QStringList UIFunctions::getCompletionID(int scriptHandleOrType, QString scriptN
     }
 
 #ifndef NDEBUG
-    log(sim_verbosity_debug, boost::format("dynamic=%d, prefix=%s: ") % options.dynamicCompletion % word.toStdString());
+    sim::addLog(sim_verbosity_debug, "dynamic=%d, prefix=%s: ", options.dynamicCompletion, word.toStdString());
     for(int i = 0; i < result.size(); ++i)
-        log(sim_verbosity_debug, result[i].toStdString());
+        sim::addLog(sim_verbosity_debug, result[i].toStdString());
 #endif
 
     return result;

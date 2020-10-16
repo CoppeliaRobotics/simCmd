@@ -47,7 +47,7 @@ UIProxy * UIProxy::getInstance(QObject *parent)
 
         uiThread(); // we remember this currentThreadId as the "UI" thread
 
-        log(sim_verbosity_debug, boost::format("UIProxy(%x) constructed in thread %s") % UIProxy::instance % QThread::currentThreadId());
+        sim::addLog(sim_verbosity_debug, "UIProxy(%x) constructed in thread %s", UIProxy::instance, QThread::currentThreadId());
     }
     return UIProxy::instance;
 }
@@ -61,7 +61,7 @@ void UIProxy::destroyInstance()
         delete UIProxy::instance;
         UIProxy::instance = nullptr;
 
-        log(sim_verbosity_debug, "destroyed UIProxy instance");
+        sim::addLog(sim_verbosity_debug, "destroyed UIProxy instance");
     }
 }
 
