@@ -6,7 +6,6 @@
 #include <iostream>
 #include <boost/format.hpp>
 #include <boost/foreach.hpp>
-#include <boost/bind.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include "UIFunctions.h"
 #include "UIProxy.h"
