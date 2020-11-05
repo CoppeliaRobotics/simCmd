@@ -4,7 +4,6 @@ project(simExtLuaCommander)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_MACOSX_RPATH 1)
-set(CMAKE_CXX_STANDARD 11)
 
 find_package(Boost REQUIRED)
 find_package(Qt5Core REQUIRED)
