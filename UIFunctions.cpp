@@ -434,17 +434,17 @@ void UIFunctions::parseStringRenderingFlags(PersistentOptions *popts, const QStr
 
 void UIFunctions::showMessage(QString s)
 {
-    sim::addLog(sim_verbosity_msgs|sim_verbosity_undecorated, s.toLatin1().data());
+    sim::addLog(sim_verbosity_msgs|sim_verbosity_undecorated, s.toStdString());
 }
 
 void UIFunctions::showWarning(QString s)
 {
-    sim::addLog(sim_verbosity_scriptwarnings|sim_verbosity_undecorated, s.toLatin1().data());
+    sim::addLog(sim_verbosity_scriptwarnings|sim_verbosity_undecorated, s.toStdString());
 }
 
 void UIFunctions::showError(QString s)
 {
-    sim::addLog(sim_verbosity_scripterrors|sim_verbosity_undecorated, s.toLatin1().data());
+    sim::addLog(sim_verbosity_scripterrors|sim_verbosity_undecorated, s.toStdString());
 }
 
 void UIFunctions::onAskCompletion(int scriptHandleOrType, QString scriptName, QString token, QChar context)
