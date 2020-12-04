@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.11)
-project(simExtLuaCommander)
+project(simExtLuaCmd)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
@@ -48,5 +48,5 @@ set(LIBRARIES
     Qt5::PrintSupport
 )
 
-coppeliasim_add_plugin(simExtLuaCommander SOURCES ${SOURCES})
-target_link_libraries(simExtLuaCommander ${LIBRARIES})
+coppeliasim_add_plugin(simExtLuaCmd SOURCES ${SOURCES})
+target_link_libraries(simExtLuaCmd ${LIBRARIES})
