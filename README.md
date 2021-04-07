@@ -12,7 +12,7 @@ Requires CoppeliaSim version 3.5.1 or greater.
 2. Download and install Qt (same version as CoppeliaSim, i.e. 5.9)
 3. Checkout and compile
 ```
-$ git clone --recursive https://github.com/CoppeliaRobotics/simExtLuaCommander.git
+$ git clone --recursive https://github.com/CoppeliaRobotics/simExtLuaCmd.git
 $ cmake .
 $ cmake --build .
 ```
