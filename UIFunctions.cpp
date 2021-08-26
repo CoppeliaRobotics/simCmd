@@ -516,7 +516,9 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     simInt ret = simExecuteScriptString(scriptHandleOrType, s.toLatin1().data(), stackHandle);
     if(ret != 0)
     {
-        std::string s = getStackTopAsString(stackHandle, opts, 0, false);
+        PersistentOptions optsE(opts);
+        optsE.stringEscapeSpecials = false;
+        std::string s = getStackTopAsString(stackHandle, optsE, 0, false);
         QString m = QString::fromStdString(s);
         showError(m);
     }
