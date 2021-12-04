@@ -467,7 +467,7 @@ void UIFunctions::setConvenienceVars(int scriptHandleOrType, QString scriptName,
 {
     if(check)
     {
-        QString Hcheck = QString("H==sim.getObjectHandle@%1").arg(scriptName);
+        QString Hcheck = QString("H==sim.getObject@%1").arg(scriptName);
         if(simExecuteScriptString(scriptHandleOrType, Hcheck.toLatin1().data(), stackHandle) == 0)
         {
             simBool boolValue;
@@ -481,7 +481,7 @@ void UIFunctions::setConvenienceVars(int scriptHandleOrType, QString scriptName,
         }
         else sim::addLog(sim_verbosity_debug, "failed exec");
     }
-    QString H = QString("H=sim.getObjectHandle@%1").arg(scriptName);
+    QString H = QString("H=sim.getObject@%1").arg(scriptName);
     simExecuteScriptString(scriptHandleOrType, H.toLatin1().data(), stackHandle);
 }
 
