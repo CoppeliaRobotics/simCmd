@@ -67,12 +67,27 @@ bool tokenBehindCursor(const QString &cmd, int cursorPos, QString *tok, QChar *c
     *pos = ++j;
     *tok = before.mid(j);
     *ctx = 'i'; // identifier
-    if(j > 0 && (before[j - 1] == '\'' || before[j - 1] == '\"'))
+
+    // check if we are inside a string...
+    QChar prev{0}, inStr{0};
+    int strStart = -1;
+    for(int i = 0; i < before.length(); i++)
     {
-        *ctx = 's'; // string
-        if(j > 1 && before[j - 2] == 'H')
-            *ctx = 'H';
+        QChar c{before[i]};
+        if(inStr != 0 && prev == '\\') goto breakChecks;
+        if(inStr != 0 && c == inStr) inStr = 0;
+        if(inStr == 0 && (c == '\'' || c == '"')) {inStr = c; strStart = i;}
+breakChecks:
+        prev = c;
     }
+
+    if(inStr != 0 && strStart > 0 && before[strStart - 1] == 'H')
+    {
+        *pos = strStart + 1;
+        *tok = before.mid(strStart + 1);
+        *ctx = 'H';
+    }
+
     return true;
 }
 
