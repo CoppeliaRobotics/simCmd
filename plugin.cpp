@@ -265,7 +265,7 @@ public:
         {
             int handle = simGetObjects(i++, sim_handle_all);
             if(handle == -1) break;
-            char *name_cstr = simGetObjectName(handle);
+            char *name_cstr = simGetObjectAlias(handle, 5);
             QString name = QString::fromUtf8(name_cstr);
             simReleaseBuffer(name_cstr);
             if(simRunning)
