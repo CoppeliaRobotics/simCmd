@@ -35,6 +35,13 @@ set(SOURCES
     PersistentOptions.cpp
     qluacommanderwidget.cpp
     qcommandedit.cpp
+    ${COPPELIASIM_COMMON_DIR}/stack/stackObject.cpp
+    ${COPPELIASIM_COMMON_DIR}/stack/stackNull.cpp
+    ${COPPELIASIM_COMMON_DIR}/stack/stackBool.cpp
+    ${COPPELIASIM_COMMON_DIR}/stack/stackNumber.cpp
+    ${COPPELIASIM_COMMON_DIR}/stack/stackString.cpp
+    ${COPPELIASIM_COMMON_DIR}/stack/stackArray.cpp
+    ${COPPELIASIM_COMMON_DIR}/stack/stackMap.cpp
 )
 
 set(LIBRARIES
@@ -46,8 +53,14 @@ set(LIBRARIES
 )
 
 coppeliasim_add_plugin(simExtLuaCmd SOURCES ${SOURCES})
+target_include_directories(simExtLuaCmd PRIVATE ${COPPELIASIM_INCLUDE_DIR}/stack)
 option(CUSTOM_TOOLTIP_WINDOW "use a custom tooltip window class instead of the default tooltip")
 if(CUSTOM_TOOLTIP_WINDOW)
-    target_compile_definitions(-DCUSTOM_TOOLTIP_FOR_CALLTIPS)
+    target_compile_definitions(simExtLuaCmd PRIVATE -DCUSTOM_TOOLTIP_FOR_CALLTIPS)
+endif()
+option(USE_LUA_PARSER "use the lua-parser module to determine correct calltip")
+if(USE_LUA_PARSER)
+    target_compile_definitions(simExtLuaCmd PRIVATE -DUSE_LUA_PARSER)
 endif()
 target_link_libraries(simExtLuaCmd ${LIBRARIES})
+coppeliasim_add_lua(test/getCallContext.lua)

@@ -42,7 +42,7 @@ public:
 
 signals:
     void clearConsole();
-    void askCallTip(QString symbol);
+    void askCallTip(QString input, int pos);
 
 public slots:
 
@@ -71,7 +71,7 @@ public:
 
 private slots:
     void onAskCompletion(const QString &cmd, int cursorPos);
-    void onAskCallTip(QString symbol);
+    void onAskCallTip(QString input, int pos);
     void onExecute(const QString &cmd);
     void onEscape();
     void onClose();
@@ -90,7 +90,7 @@ public slots:
 
 signals:
     void askCompletion(int scriptHandleOrType, QString scriptName, QString token, QChar context);
-    void askCallTip(int scriptHandleOrType, QString symbol);
+    void askCallTip(int scriptHandleOrType, QString input, int pos);
     void execCode(QString code, int scriptHandleOrType, QString scriptName);
 
 public:

@@ -2,6 +2,13 @@
 #include "UIProxy.h"
 #include "stubs.h"
 #include "simLib.h"
+#include "stack/stackObject.h"
+#include "stack/stackNull.h"
+#include "stack/stackBool.h"
+#include "stack/stackNumber.h"
+#include "stack/stackString.h"
+#include "stack/stackArray.h"
+#include "stack/stackMap.h"
 #include <stdexcept>
 #include <iomanip>
 #include <boost/format.hpp>
@@ -657,12 +664,69 @@ QStringList UIFunctions::getCompletionObjName(QString word)
     return result;
 }
 
-void UIFunctions::onAskCallTip(int scriptHandleOrType, QString symbol)
+static inline bool isID(QChar c)
 {
-    simChar *buf = simGetApiInfo(scriptHandleOrType, symbol.toStdString().c_str());
-    QString bufStr = QString::fromUtf8(buf);
-    if(!bufStr.isEmpty())
-        emit setCallTip(bufStr);
-    simReleaseBuffer(buf);
+    return c.isLetterOrNumber() || c == '_' || c == '.';
+}
+
+void UIFunctions::onAskCallTip(int scriptHandleOrType, QString input, int pos)
+{
+    QStringList symbols;
+    QList<int> argIndex;
+#ifdef USE_LUA_PARSER
+    simInt stackHandle = simCreateStack();
+    if(stackHandle == -1)
+        throw std::runtime_error("failed to create a stack");
+
+    std::string req = "getCallContexts=require'getCallContext'@";
+    simInt ret0 = simExecuteScriptString(sim_scripttype_sandboxscript, req.c_str(), stackHandle);
+    if(ret0 == -1)
+        throw std::runtime_error("failed to load getCallContext.lua");
+
+    std::string delim = "========================================================";
+    std::string code = (boost::format("getCallContexts([%s[%s]%s],%d)@") % delim % input.toStdString().c_str() % delim % (pos+1)).str();
+    simInt ret = simExecuteScriptString(sim_scripttype_sandboxscript, code.c_str(), stackHandle);
+    if(ret == -1)
+    {
+        CStackObject *obj = CStackObject::buildItemFromTopStackPosition(stackHandle);
+        throw sim::exception("error: %s", obj->toString());
+    }
+    simInt size = simGetStackSize(stackHandle);
+    if(size == 0)
+        throw std::runtime_error("empty result in stack");
+    CStackObject *obj = CStackObject::buildItemFromTopStackPosition(stackHandle);
+    if(!obj)
+        throw std::runtime_error("obj == NULL");
+    CStackArray *arr = obj->asArray();
+    if(!arr)
+        throw std::runtime_error("obj->asArray() == NULL");
+    for(size_t i = 0; i < arr->getSize(); ++i)
+    {
+        CStackArray *item = arr->getArray(i);
+        if(!item)
+            throw std::runtime_error("item is not array");
+        QString sym{QString::fromStdString(item->getString(0))};
+        int idx{item->getInt(1)};
+        symbols << sym;
+        argIndex << idx;
+    }
+#else // USE_LUA_PARSER
+    // find symbol before '('
+    QString symbol = input.left(pos);
+    int j = symbol.length() - 1;
+    while(j >= 0 && isID(symbol[j])) j--;
+    symbol = symbol.mid(j + 1);
+    symbols << symbol;
+    argIndex << -1;
+#endif // USE_LUA_PARSER
+    QStringList calltips;
+    for(int i = 0; i < symbols.length(); i++)
+    {
+        QString symbol = symbols[i];
+        simChar *buf = simGetApiInfo(scriptHandleOrType, symbol.toStdString().c_str());
+        calltips << QString::fromUtf8(buf);
+        simReleaseBuffer(buf);
+    }
+    emit setCallTip(calltips.join('\n'));
 }
 

@@ -55,26 +55,54 @@ end
 local function findCallsAtPosition(ast,pos,results)
     results=results or {}
     if type(ast)~='table' then return end
+    local fn=''
+    if ast.tag=='Call' then
+        fn=getCompoundId(ast[1])
+    end
     for i,t in ipairs(ast) do
-        if ast.tag=='Call' and t.pos<=pos and pos<=t.end_pos then
-            local fn=getCompoundId(ast[1])
-            local argindex=i-1
-            table.insert(results,{fn,argindex})
+        if type(t)=='table' then
+            if type(t)=='table' and ast.tag=='Call' and t.pos and t.end_pos and t.pos<=pos and pos<=t.end_pos then
+                local argindex=i-1
+                table.insert(results,{fn,argindex})
+            end
+            findCallsAtPosition(t,pos,results)
         end
-        findCallsAtPosition(t,pos,results)
+    end
+    -- if no call context are being returned for <fn>...
+    -- but anyway we are in a call, so return <fn,1>:
+    if ast.tag=='Call' and ast.pos<=pos and pos<=ast.end_pos then
+        local havefn=false
+        for i=1,#results do
+            if results[i][1]==fn then
+                havefn=true
+                break
+            end
+        end
+        if not havefn then
+            print('adding extra',fn)
+            table.insert(results,{fn,1})
+        end
     end
     return results
 end
 
+function dump(o,indent)
+    indent=indent or ''
+    if type(o)=='table' then
+        local s='{\n'
+        for k,v in pairs(o) do
+            if type(k)=='number' then k='['..k..']' end
+            s = s..indent..'    '..k..'='..dump(v,indent..'    ')..',\n'
+        end
+        return s..indent..'}'
+    else
+        return tostring(o)
+    end
+end
+
 function getCallContexts(s,pos)
     s1,ast=parseIncomplete(s)
-    --print(ast)
-    print('')
-    print(s)
     rs=findCallsAtPosition(ast,#s)
-    for i,r in ipairs(rs) do
-        print(r[1],r[2])
-    end
     return rs
 end
 
@@ -96,6 +124,10 @@ local function sysCall_init()
     test('sim.getObject(names[')
     test('sim.foo(x..')
     test('sim.foo(a,b,c,sim.bar(x+')
+    test('sim.getObject(')
+    test('sim.getObjectAlias(0,sim.getObject(),{')
 end
 
 sysCall_init()
+
+return getCallContexts

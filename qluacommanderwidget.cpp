@@ -48,7 +48,7 @@ void QGlobalEventFilter::uninstall()
     instance_ = nullptr;
 }
 
-inline bool isID(QChar c)
+static inline bool isID(QChar c)
 {
     return c.isLetterOrNumber() || c == '_' || c == '.';
 }
@@ -105,17 +105,12 @@ QLuaCommanderEdit::~QLuaCommanderEdit()
 
 void QLuaCommanderEdit::keyPressEvent(QKeyEvent *event)
 {
+    QCommandEdit::keyPressEvent(event);
     if(event->key() == Qt::Key_ParenLeft)
     {
         acceptCompletion();
 
-        // find symbol before '('
-        QString symbol = text().left(cursorPosition());
-        int j = symbol.length() - 1;
-        while(j >= 0 && isID(symbol[j])) j--;
-        symbol = symbol.mid(j + 1);
-
-        emit askCallTip(symbol);
+        emit askCallTip(text(), cursorPosition());
     }
     else if(event->key() == Qt::Key_Period)
     {
@@ -123,8 +118,12 @@ void QLuaCommanderEdit::keyPressEvent(QKeyEvent *event)
     }
     else if(event->key() == Qt::Key_Comma)
     {
+#ifdef USE_LUA_PARSER
+        emit askCallTip(text(), cursorPosition());
+#else // USE_LUA_PARSER
         // reshow last tooltip when comma is pressed
         setToolTipAtCursor(toolTip());
+#endif // USE_LUA_PARSER
     }
     else if(event->key() == Qt::Key_ParenRight)
     {
@@ -135,7 +134,6 @@ void QLuaCommanderEdit::keyPressEvent(QKeyEvent *event)
         emit clearConsole();
         return;
     }
-    QCommandEdit::keyPressEvent(event);
 }
 
 QLuaCommanderWidget::QLuaCommanderWidget(QWidget *parent)
@@ -213,13 +211,13 @@ void QLuaCommanderWidget::onAskCompletion(const QString &cmd, int cursorPos)
     }
 }
 
-void QLuaCommanderWidget::onAskCallTip(QString symbol)
+void QLuaCommanderWidget::onAskCallTip(QString input, int pos)
 {
     int type = sim_scripttype_sandboxscript;
     int handle = -1;
     QString name;
     getSelectedScriptInfo(type, handle, name);
-    emit askCallTip(type, symbol);
+    emit askCallTip(type, input, pos);
 }
 
 void QLuaCommanderWidget::onExecute(const QString &cmd)

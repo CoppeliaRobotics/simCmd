@@ -55,7 +55,7 @@ private:
 public slots:
     void onExecCode(QString code, int scriptHandleOrType, QString scriptName);
     void onAskCompletion(int scriptHandleOrType, QString scriptName, QString token, QChar context);
-    void onAskCallTip(int scriptHandleOrType, QString symbol);
+    void onAskCallTip(int scriptHandleOrType, QString input, int pos);
 
 signals:
     void scriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning);
