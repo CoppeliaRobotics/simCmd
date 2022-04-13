@@ -43,61 +43,32 @@ local function parseIncomplete(s,f,d)
     error(error_msg)
 end
 
-local function transformTree(ast,d)
-    if type(ast)~='table' then
-        return ast
+local function getCompoundId(ast)
+    if type(ast)~='table' then return ast end
+    if ast.tag=='Id' then return ast[1] end
+    if ast.tag=='String' then return ast[1] end
+    if ast.tag=='Index' and ast[3]==nil then
+        return getCompoundId(ast[1])..'.'..getCompoundId(ast[2])
     end
-
-    if ast.tag=='Index' and ast[1].tag=='Id' and ast[2].tag=='String' and ast[3]==nil then
-        return {tag='IdDot',pos=ast.pos,end_pos=ast.end_pos,[1]=ast[1][1]..'.'..ast[2][1]}
-    end
-
-    local ast1={tag=ast.tag,pos=ast.pos,end_pos=ast.end_pos}
-    for i,t in ipairs(ast) do
-        local t1=transformTree(t,d)
-
-        if ast1.tag=='Call' and t1.tag=='IdDot' then
-            ast1.f=t1[1]
-        else
-            table.insert(ast1,t1)
-        end
-    end
-
-    return ast1
 end
 
 local function findCallsAtPosition(ast,pos,results)
     results=results or {}
     if type(ast)~='table' then return end
     for i,t in ipairs(ast) do
-        if ast.tag=='Call' and ast.f and t.pos<=pos and pos<=t.end_pos then
-            table.insert(results,{ast.f,i})
+        if ast.tag=='Call' and t.pos<=pos and pos<=t.end_pos then
+            local fn=getCompoundId(ast[1])
+            local argindex=i-1
+            table.insert(results,{fn,argindex})
         end
         findCallsAtPosition(t,pos,results)
     end
     return results
 end
 
-local function visitTree(ast,d)
-    d=(d or 0)+1
-    s='';for i=1,d do s=s..'    ' end
-
-    if type(ast)~='table' then
-        print(s..'visitTree:',ast)
-        return
-    end
-
-    print(s..'visitTree:',ast.tag,ast.pos,ast.end_pos,ast.f)
-    for i,t in ipairs(ast) do
-        visitTree(t,d)
-    end
-end
-
 function getCallContexts(s,pos)
     s1,ast=parseIncomplete(s)
-    ast=transformTree(ast)
     --print(ast)
-    --visitTree(ast)
     print('')
     print(s)
     rs=findCallsAtPosition(ast,#s)
