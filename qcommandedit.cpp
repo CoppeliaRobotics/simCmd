@@ -418,14 +418,16 @@ void QCommandEdit::setToolTipAtCursor(const QString &tip)
         QPoint cur = mapToGlobal(cursorRect().topLeft());
         QFontMetrics fm(QToolTip::font());
         QRect r = fm.boundingRect(QRect(0, 0, 500, 50), 0, tip);
-        cur.setY(cur.y() - 0 * height() - r.height() - 4);
 #ifdef CUSTOM_TOOLTIP_FOR_CALLTIPS
         auto toolTipWin = ToolTipWindow::getInstance(parent()->parent());
         toolTipWin->setText(tip);
         toolTipWin->adjustSize();
+        QCoreApplication::processEvents();
+        cur.setY(cur.y() - height() - r.height() - 4);
         toolTipWin->move(cur);
         toolTipWin->show();
 #else
+        cur.setY(cur.y() - height() - r.height() - 4);
         setToolTip(tip);
         QHelpEvent *event = new QHelpEvent(QEvent::ToolTip, pos(), cur);
         QApplication::postEvent(this, event);
