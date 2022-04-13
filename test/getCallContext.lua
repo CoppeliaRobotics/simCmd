@@ -118,28 +118,81 @@ end
 if arg[1]=='test' then
     verbose=1
 
-    local function test(s)
-        getCallContexts(s,#s)
+    local function test(s,expected_ccs)
+        local ccs=getCallContexts(s,#s)
+        local d,e=dump(ccs),dump(expected_ccs)
+        if d~=e then
+            print('test failed:',s)
+            print('return value:',d)
+            print('expected return value:',e)
+            os.exit()
+        end
     end
 
-    test('if f("x')
-    test('if f(\'x')
-    test('for ')
-    test('while ')
-    test('if ')
-    test('if (function() return 1')
-    test('if (function() return 1 end)(')
-    test('sim.setObjectAlias(sim.getObject("a"),"b')
-    test('sim.setObjectPosition(h,-')
-    test('sim.setObjectPosition(h,-1,{')
-    test('sim.getObject(names[')
-    test('sim.foo(x..')
-    test('sim.foo(a,b,c,sim.bar(x+')
-    test('sim.getObject(')
-    test('sim.getObjectAlias(0,sim.getObject(),{')
-    test('sim.getObjectAlias(sim.getObject(')
-    test('sim.getObjectAlias(sim.getObject()')
-    test('sim.getObjectAlias(sim.getObject(),')
+    test(
+        'if f("x',
+        {{'f',1}}
+    )
+    test(
+        'if f(\'x',
+        {{'f',1}}
+    )
+    test(
+        'for ',
+        {}
+    )
+    test(
+        'while ',
+        {}
+    )
+    test(
+        'if ',
+        {}
+    )
+    test(
+        'sim.setObjectAlias(sim.getObject("a"),"b',
+        {{'sim.setObjectAlias',2}}
+    )
+    test(
+        'sim.setObjectPosition(h,-',
+        {{'sim.setObjectPosition',2}}
+    )
+    test(
+        'sim.setObjectPosition(h,-1,{',
+        {{'sim.setObjectPosition',3}}
+    )
+    test(
+        'sim.getObject(names[',
+        {{'sim.getObject',1}}
+    )
+    test(
+        'sim.foo(x..',
+        {{'sim.foo',1}}
+    )
+    test(
+        'sim.foo(a,b,c,sim.bar(x+',
+        {{'sim.foo',4},{'sim.bar',1}}
+    )
+    test(
+        'sim.getObject(',
+        {{'sim.getObject',1}}
+    )
+    test(
+        'sim.getObjectAlias(0,sim.getObject(),{',
+        {{'sim.getObjectAlias',3}}
+    )
+    test(
+        'sim.getObjectAlias(sim.getObject(',
+        {{'sim.getObjectAlias',1},{'sim.getObject',1}}
+    )
+    test(
+        'sim.getObjectAlias(sim.getObject()',
+        {{'sim.getObjectAlias',1}}
+    )
+    test(
+        'sim.getObjectAlias(sim.getObject(),',
+        {{'sim.getObjectAlias',2}}
+    )
 end
 
 return getCallContexts
