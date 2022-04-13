@@ -46,4 +46,8 @@ set(LIBRARIES
 )
 
 coppeliasim_add_plugin(simExtLuaCmd SOURCES ${SOURCES})
+option(CUSTOM_TOOLTIP_WINDOW "use a custom tooltip window class instead of the default tooltip")
+if(CUSTOM_TOOLTIP_WINDOW)
+    target_compile_definitions(-DCUSTOM_TOOLTIP_FOR_CALLTIPS)
+endif()
 target_link_libraries(simExtLuaCmd ${LIBRARIES})

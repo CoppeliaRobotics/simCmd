@@ -366,6 +366,38 @@ void QCommandEdit::cancelCompletion()
     }
 }
 
+#ifdef __APPLE__
+#ifndef CUSTOM_TOOLTIP_FOR_CALLTIPS
+#define CUSTOM_TOOLTIP_FOR_CALLTIPS
+#endif // CUSTOM_TOOLTIP_FOR_CALLTIPS
+#endif // __APPLE__
+
+#ifdef CUSTOM_TOOLTIP_FOR_CALLTIPS
+#include <QLabel>
+class ToolTipWindow : public QLabel
+{
+public:
+    static ToolTipWindow * getInstance(QObject * parent = nullptr)
+    {
+        if(!instance)
+            instance = new ToolTipWindow(dynamic_cast<QWidget*>(parent));
+        return instance;
+    }
+
+    ToolTipWindow(QWidget *parent = nullptr)
+        : QLabel(parent)
+    {
+        setWindowFlags(Qt::ToolTip);
+        setFont(QToolTip::font());
+    }
+
+private:
+    static ToolTipWindow *instance;
+};
+
+ToolTipWindow * ToolTipWindow::instance = nullptr;
+#endif // CUSTOM_TOOLTIP_FOR_CALLTIPS
+
 /*!
  * \brief Display a tooltip at the cursor position
  * \param tip The tooltip text
@@ -374,20 +406,29 @@ void QCommandEdit::setToolTipAtCursor(const QString &tip)
 {
     if(tip.isEmpty())
     {
+#ifdef CUSTOM_TOOLTIP_FOR_CALLTIPS
+        auto toolTipWin = ToolTipWindow::getInstance(parent()->parent());
+        toolTipWin->hide();
+#else
         QToolTip::hideText();
+#endif // CUSTOM_TOOLTIP_FOR_CALLTIPS
     }
     else
     {
-        setToolTip(tip);
-
+        QPoint cur = mapToGlobal(cursorRect().topLeft());
         QFontMetrics fm(QToolTip::font());
         QRect r = fm.boundingRect(QRect(0, 0, 500, 50), 0, tip);
-
-        QPoint cur = mapToGlobal(cursorRect().topLeft());
-        QHelpEvent *event = new QHelpEvent(QEvent::ToolTip,
-                QPoint(pos().x(), pos().y()),
-                QPoint(cur.x(), cur.y() - height() - r.height() - 4));
+        cur.setY(cur.y() - 0 * height() - r.height() - 4);
+        setToolTip(tip);
+#ifdef CUSTOM_TOOLTIP_FOR_CALLTIPS
+        auto toolTipWin = ToolTipWindow::getInstance(parent()->parent());
+        toolTipWin->setText(tip);
+        toolTipWin->move(cur);
+        toolTipWin->show();
+#else
+        QHelpEvent *event = new QHelpEvent(QEvent::ToolTip, pos(), cur);
         QApplication::postEvent(this, event);
+#endif // CUSTOM_TOOLTIP_FOR_CALLTIPS
     }
 }
 
