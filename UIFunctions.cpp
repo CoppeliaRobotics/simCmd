@@ -710,6 +710,23 @@ void UIFunctions::onAskCallTip(int scriptHandleOrType, QString input, int pos)
         symbols << sym;
         argIndex << idx;
     }
+    QStringList calltips;
+    for(int i = 0; i < symbols.length(); i++)
+    {
+        QString tip{getApiInfo(scriptHandleOrType, symbols[i])};
+        QStringList p = tip.split(',');
+        QStringList q = p[0].split('(');
+        tip = q[0];
+        for(int j = 0; j < p.length(); j++)
+        {
+            tip += j == 0 ? "(" : ", ";
+            if(argIndex[i] == (j + 1)) tip += "<b>";
+            tip += j == 0 ? q[1] : p[j];
+            if(argIndex[i] == (j + 1)) tip += "</b>";
+        }
+        calltips << tip;
+    }
+    emit setCallTip(calltips.join("<br>"));
 #else // USE_LUA_PARSER
     // find symbol before '('
     QString symbol = input.left(pos);
@@ -718,15 +735,15 @@ void UIFunctions::onAskCallTip(int scriptHandleOrType, QString input, int pos)
     symbol = symbol.mid(j + 1);
     symbols << symbol;
     argIndex << -1;
+    emit setCallTip(getApiInfo(scriptHandleOrType, symbols[i]));
 #endif // USE_LUA_PARSER
-    QStringList calltips;
-    for(int i = 0; i < symbols.length(); i++)
-    {
-        QString symbol = symbols[i];
-        simChar *buf = simGetApiInfo(scriptHandleOrType, symbol.toStdString().c_str());
-        calltips << QString::fromUtf8(buf);
-        simReleaseBuffer(buf);
-    }
-    emit setCallTip(calltips.join('\n'));
+}
+
+static inline QString getApiInfo(const int &scriptHandleOrType, const QString &symbol)
+{
+    simChar *buf = simGetApiInfo(scriptHandleOrType, symbol.toStdString().c_str());
+    QString tip{QString::fromUtf8(buf)};
+    simReleaseBuffer(buf);
+    return tip;
 }
 
