@@ -671,6 +671,13 @@ static inline bool isID(QChar c)
 
 void UIFunctions::onAskCallTip(int scriptHandleOrType, QString input, int pos)
 {
+    auto getApiInfo = [=](const int &scriptHandleOrType, const QString &symbol)
+    {
+        simChar *buf = simGetApiInfo(scriptHandleOrType, symbol.toStdString().c_str());
+        QString tip{QString::fromUtf8(buf)};
+        simReleaseBuffer(buf);
+        return tip;
+    };
     QStringList symbols;
     QList<int> argIndex;
 #ifdef USE_LUA_PARSER
@@ -738,12 +745,3 @@ void UIFunctions::onAskCallTip(int scriptHandleOrType, QString input, int pos)
     emit setCallTip(getApiInfo(scriptHandleOrType, symbols[i]));
 #endif // USE_LUA_PARSER
 }
-
-static inline QString getApiInfo(const int &scriptHandleOrType, const QString &symbol)
-{
-    simChar *buf = simGetApiInfo(scriptHandleOrType, symbol.toStdString().c_str());
-    QString tip{QString::fromUtf8(buf)};
-    simReleaseBuffer(buf);
-    return tip;
-}
-
