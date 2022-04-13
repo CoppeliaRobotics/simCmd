@@ -65,9 +65,10 @@ local function findCallsAtPosition(ast,pos,results)
     end
     for i,t in ipairs(ast) do
         if type(t)=='table' then
-            if type(t)=='table' and ast.tag=='Call' and t.pos and t.end_pos and t.pos<=pos and pos<=t.end_pos then
+            if type(t)=='table' and ast.tag=='Call' and t.pos<=pos and pos<=t.end_pos then
                 local argindex=i-1
                 table.insert(results,{fn,argindex})
+                if verbose then print('> ',fn,argindex) end
             end
             findCallsAtPosition(t,pos,results)
         end
@@ -83,7 +84,7 @@ local function findCallsAtPosition(ast,pos,results)
             end
         end
         if not havefn then
-            print('adding extra',fn)
+            if verbose then print('> ',fn,1,'*') end
             table.insert(results,{fn,1})
         end
     end
@@ -106,15 +107,21 @@ end
 
 function getCallContexts(s,pos)
     s1,ast=parseIncomplete(s)
+    if verbose then
+        print(s)
+        print(s1)
+    end
     rs=findCallsAtPosition(ast,#s)
     return rs
 end
 
-local function test(s)
-    getCallContexts(s,#s)
-end
+if arg[1]=='test' then
+    verbose=1
 
-local function sysCall_init()
+    local function test(s)
+        getCallContexts(s,#s)
+    end
+
     test('if f("x')
     test('if f(\'x')
     test('for ')
@@ -130,8 +137,9 @@ local function sysCall_init()
     test('sim.foo(a,b,c,sim.bar(x+')
     test('sim.getObject(')
     test('sim.getObjectAlias(0,sim.getObject(),{')
+    test('sim.getObjectAlias(sim.getObject(')
+    test('sim.getObjectAlias(sim.getObject()')
+    test('sim.getObjectAlias(sim.getObject(),')
 end
-
-sysCall_init()
 
 return getCallContexts
