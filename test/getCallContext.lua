@@ -4,6 +4,10 @@ local pp=require'lua-parser.pp'
 local function parseIncomplete(s,f,d)
     d=1+(d or 0)
 
+    -- if the input is not "fixable", exit after
+    -- a finite number of steps
+    if d>8 then return end
+
     local ast,error_msg=parser.parse(s,f)
     if ast then
         return s,ast
