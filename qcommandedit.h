@@ -36,6 +36,7 @@ Q_SIGNALS:
     void execute(const QString &cmd);
     void askCompletion(const QString &cmd, int cursorPos);
     void escape();
+    void editorCleared();
     void escapePressed();
     void upPressed();
     void downPressed();

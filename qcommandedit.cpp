@@ -422,7 +422,10 @@ void QCommandEdit::onEscapePressed()
         cancelCompletion();
     }
     else
+    {
         clear();
+        Q_EMIT editorCleared();
+    }
 }
 
 void QCommandEdit::onUpPressed()

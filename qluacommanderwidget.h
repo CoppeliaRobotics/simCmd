@@ -76,6 +76,9 @@ private slots:
     void onAskCallTip(QString input, int pos);
     void onExecute(const QString &cmd);
     void onEscape();
+    void onEditorCleared();
+    void onEditorChanged(QString text);
+    void onEditorCursorChanged(int oldPos, int newPos);
     void onClose();
     void onClearConsole();
     void onFocusIn();

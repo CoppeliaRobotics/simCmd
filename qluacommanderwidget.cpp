@@ -112,9 +112,7 @@ void QLuaCommanderEdit::keyPressEvent(QKeyEvent *event)
     {
         acceptCompletion();
 
-#ifdef USE_LUA_PARSER
-        emit askCallTip(text() + "(", cursorPosition() + 1);
-#else // USE_LUA_PARSER
+#ifndef USE_LUA_PARSER
         emit askCallTip(text(), cursorPosition());
 #endif // USE_LUA_PARSER
     }
@@ -124,18 +122,14 @@ void QLuaCommanderEdit::keyPressEvent(QKeyEvent *event)
     }
     else if(event->key() == Qt::Key_Comma)
     {
-#ifdef USE_LUA_PARSER
-        emit askCallTip(text() + ",", cursorPosition() + 1);
-#else // USE_LUA_PARSER
+#ifndef USE_LUA_PARSER
         // reshow last tooltip when comma is pressed
         w->onSetCallTip(toolTip());
 #endif // USE_LUA_PARSER
     }
     else if(event->key() == Qt::Key_ParenRight)
     {
-#ifdef USE_LUA_PARSER
-        emit askCallTip(text() + ")", cursorPosition() + 1);
-#else // USE_LUA_PARSER
+#ifndef USE_LUA_PARSER
         w->onSetCallTip("");
 #endif // USE_LUA_PARSER
     }
@@ -187,6 +181,9 @@ QLuaCommanderWidget::QLuaCommanderWidget(QWidget *parent)
     connect(editor, &QLuaCommanderEdit::askCallTip, this, &QLuaCommanderWidget::onAskCallTip);
     connect(editor, &QLuaCommanderEdit::execute, this, &QLuaCommanderWidget::onExecute);
     connect(editor, &QLuaCommanderEdit::escape, this, &QLuaCommanderWidget::onEscape);
+    connect(editor, &QLuaCommanderEdit::editorCleared, this, &QLuaCommanderWidget::onEditorCleared);
+    connect(editor, &QLuaCommanderEdit::textChanged, this, &QLuaCommanderWidget::onEditorChanged);
+    connect(editor, &QLuaCommanderEdit::cursorPositionChanged, this, &QLuaCommanderWidget::onEditorCursorChanged);
     connect(editor, &QLuaCommanderEdit::clearConsole, this, &QLuaCommanderWidget::onClearConsole);
     connect(closeButton, &QPushButton::clicked, this, &QLuaCommanderWidget::onClose);
     connect(QApplication::instance(), SIGNAL(focusChanged(QWidget*,QWidget*)), this, SLOT(onGlobalFocusChanged(QWidget*,QWidget*)));
@@ -256,7 +253,21 @@ void QLuaCommanderWidget::onExecute(const QString &cmd)
 void QLuaCommanderWidget::onEscape()
 {
     editor->clearFocus();
+}
+
+void QLuaCommanderWidget::onEditorCleared()
+{
     onSetCallTip("");
+}
+
+void QLuaCommanderWidget::onEditorChanged(QString text)
+{
+    onAskCallTip(text, editor->cursorPosition());
+}
+
+void QLuaCommanderWidget::onEditorCursorChanged(int oldPos, int newPos)
+{
+    onAskCallTip(editor->text(), newPos);
 }
 
 void QLuaCommanderWidget::onClose()
