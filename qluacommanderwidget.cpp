@@ -133,7 +133,11 @@ void QLuaCommanderEdit::keyPressEvent(QKeyEvent *event)
     }
     else if(event->key() == Qt::Key_ParenRight)
     {
+#ifdef USE_LUA_PARSER
+        emit askCallTip(text() + ")", cursorPosition() + 1);
+#else // USE_LUA_PARSER
         w->onSetCallTip("");
+#endif // USE_LUA_PARSER
     }
     else if(event->key() == Qt::Key_L && event->modifiers().testFlag(Q_REAL_CTRL))
     {
@@ -246,11 +250,13 @@ void QLuaCommanderWidget::onExecute(const QString &cmd)
     getSelectedScriptInfo(type, handle, name);
     emit execCode(cmd, type, name);
     editor->clear();
+    onSetCallTip("");
 }
 
 void QLuaCommanderWidget::onEscape()
 {
     editor->clearFocus();
+    onSetCallTip("");
 }
 
 void QLuaCommanderWidget::onClose()
