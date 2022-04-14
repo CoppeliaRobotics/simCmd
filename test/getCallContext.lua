@@ -115,7 +115,7 @@ function getCallContexts(s,pos)
     return rs
 end
 
-if arg[1]=='test' then
+if arg and arg[1]=='test' then
     verbose=1
 
     local function test(s,expected_ccs)
