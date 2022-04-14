@@ -401,17 +401,26 @@ void QCommandEdit::onReturnPressed()
     if(text().isEmpty()) return;
 
     if(hasSelectedText())
+    {
         acceptCompletion();
+    }
     else
+    {
         Q_EMIT execute(text());
+    }
 }
 
 void QCommandEdit::onEscapePressed()
 {
     if(text().isEmpty())
+    {
         Q_EMIT escape();
+    }
+
     if(hasSelectedText())
+    {
         cancelCompletion();
+    }
     else
         clear();
 }
