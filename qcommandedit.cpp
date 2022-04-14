@@ -366,12 +366,6 @@ void QCommandEdit::cancelCompletion()
     }
 }
 
-#ifdef __APPLE__
-#ifndef CUSTOM_TOOLTIP_FOR_CALLTIPS
-#define CUSTOM_TOOLTIP_FOR_CALLTIPS
-#endif // CUSTOM_TOOLTIP_FOR_CALLTIPS
-#endif // __APPLE__
-
 #ifdef CUSTOM_TOOLTIP_FOR_CALLTIPS
 #include <QLabel>
 class ToolTipWindow : public QLabel
