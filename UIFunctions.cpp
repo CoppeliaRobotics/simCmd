@@ -683,40 +683,58 @@ void UIFunctions::onAskCallTip(int scriptHandleOrType, QString input, int pos)
     QList<int> argIndex;
     simInt stackHandle = simCreateStack();
     if(stackHandle == -1)
-        throw std::runtime_error("failed to create a stack");
-
+    {
+        sim::addLog(sim_verbosity_errors, "failed to create a stack");
+        return;
+    }
     std::string req = "getCallContexts=require'getCallContext'@";
     simInt ret0 = simExecuteScriptString(sim_scripttype_sandboxscript, req.c_str(), stackHandle);
     if(ret0 == -1)
-        throw std::runtime_error("failed to load getCallContext.lua");
-
+    {
+        sim::addLog(sim_verbosity_errors, "failed to execute lua: %s", req);
+        return;
+    }
     std::string delim = "========================================================";
     std::string code = (boost::format("getCallContexts([%s[%s]%s],%d)@") % delim % input.toStdString().c_str() % delim % (pos+1)).str();
     simInt ret = simExecuteScriptString(sim_scripttype_sandboxscript, code.c_str(), stackHandle);
     if(ret == -1)
     {
         CStackObject *obj = CStackObject::buildItemFromTopStackPosition(stackHandle);
-        throw sim::exception("error: %s", obj->toString());
+        sim::addLog(sim_verbosity_errors, "failed to execute lua: %s. error: %s", code, obj->toString());
+        delete obj;
+        return;
     }
     simInt size = simGetStackSize(stackHandle);
     if(size == 0)
-        throw std::runtime_error("empty result in stack");
+    {
+        sim::addLog(sim_verbosity_warnings, "empty result in stack");
+        return;
+    }
     CStackObject *obj = CStackObject::buildItemFromTopStackPosition(stackHandle);
     if(!obj)
-        throw std::runtime_error("obj == NULL");
+    {
+        sim::addLog(sim_verbosity_errors, "CStackObject::buildItemFromTopStackPosition() returned NULL");
+        return;
+    }
     CStackArray *arr = obj->asArray();
     if(!arr)
-        throw std::runtime_error("obj->asArray() == NULL");
+    {
+        sim::addLog(sim_verbosity_errors, "CStackObject::asArray() returned NULL");
+        delete obj;
+        return;
+    }
     for(size_t i = 0; i < arr->getSize(); ++i)
     {
         CStackArray *item = arr->getArray(i);
-        if(!item)
-            throw std::runtime_error("item is not array");
-        QString sym{QString::fromStdString(item->getString(0))};
-        int idx{item->getInt(1)};
-        symbols << sym;
-        argIndex << idx;
+        if(item)
+        {
+            QString sym{QString::fromStdString(item->getString(0))};
+            int idx{item->getInt(1)};
+            symbols << sym;
+            argIndex << idx;
+        }
     }
+    delete obj;
     QStringList calltips;
     for(int i = 0; i < symbols.length(); i++)
     {
