@@ -678,9 +678,9 @@ void UIFunctions::onAskCallTip(int scriptHandleOrType, QString input, int pos)
         simReleaseBuffer(buf);
         return tip;
     };
+#ifdef USE_LUA_PARSER
     QStringList symbols;
     QList<int> argIndex;
-#ifdef USE_LUA_PARSER
     simInt stackHandle = simCreateStack();
     if(stackHandle == -1)
         throw std::runtime_error("failed to create a stack");
@@ -740,8 +740,6 @@ void UIFunctions::onAskCallTip(int scriptHandleOrType, QString input, int pos)
     int j = symbol.length() - 1;
     while(j >= 0 && isID(symbol[j])) j--;
     symbol = symbol.mid(j + 1);
-    symbols << symbol;
-    argIndex << -1;
-    emit setCallTip(getApiInfo(scriptHandleOrType, symbols[i]));
+    emit setCallTip(getApiInfo(scriptHandleOrType, symbol));
 #endif // USE_LUA_PARSER
 }
