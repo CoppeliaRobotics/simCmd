@@ -105,12 +105,15 @@ QLuaCommanderEdit::~QLuaCommanderEdit()
 
 void QLuaCommanderEdit::keyPressEvent(QKeyEvent *event)
 {
-    QCommandEdit::keyPressEvent(event);
     if(event->key() == Qt::Key_ParenLeft)
     {
         acceptCompletion();
 
+#ifdef USE_LUA_PARSER
+        emit askCallTip(text() + "(", cursorPosition() + 1);
+#else // USE_LUA_PARSER
         emit askCallTip(text(), cursorPosition());
+#endif // USE_LUA_PARSER
     }
     else if(event->key() == Qt::Key_Period)
     {
@@ -119,7 +122,7 @@ void QLuaCommanderEdit::keyPressEvent(QKeyEvent *event)
     else if(event->key() == Qt::Key_Comma)
     {
 #ifdef USE_LUA_PARSER
-        emit askCallTip(text(), cursorPosition());
+        emit askCallTip(text() + ",", cursorPosition() + 1);
 #else // USE_LUA_PARSER
         // reshow last tooltip when comma is pressed
         setToolTipAtCursor(toolTip());
@@ -134,6 +137,7 @@ void QLuaCommanderEdit::keyPressEvent(QKeyEvent *event)
         emit clearConsole();
         return;
     }
+    QCommandEdit::keyPressEvent(event);
 }
 
 QLuaCommanderWidget::QLuaCommanderWidget(QWidget *parent)
