@@ -7,6 +7,7 @@
 #include <QTimer>
 #include <QToolTip>
 #include <QApplication>
+#include <QLabel>
 
 #ifdef Q_OS_MACOS
 #define Q_REAL_CTRL Qt::MetaModifier
@@ -105,6 +106,8 @@ QLuaCommanderEdit::~QLuaCommanderEdit()
 
 void QLuaCommanderEdit::keyPressEvent(QKeyEvent *event)
 {
+    auto w = static_cast<QLuaCommanderWidget*>(parent());
+
     if(event->key() == Qt::Key_ParenLeft)
     {
         acceptCompletion();
@@ -125,12 +128,12 @@ void QLuaCommanderEdit::keyPressEvent(QKeyEvent *event)
         emit askCallTip(text() + ",", cursorPosition() + 1);
 #else // USE_LUA_PARSER
         // reshow last tooltip when comma is pressed
-        setToolTipAtCursor(toolTip());
+        w->onSetCallTip(toolTip());
 #endif // USE_LUA_PARSER
     }
     else if(event->key() == Qt::Key_ParenRight)
     {
-        setToolTipAtCursor("");
+        w->onSetCallTip("");
     }
     else if(event->key() == Qt::Key_L && event->modifiers().testFlag(Q_REAL_CTRL))
     {
@@ -149,6 +152,16 @@ QLuaCommanderWidget::QLuaCommanderWidget(QWidget *parent)
     statusbarSizeFocused.push_back(statusbarSize[1] + k);
 
     closeFlag.store(false);
+
+    QGridLayout *grid = new QGridLayout(this);
+    grid->setSpacing(0);
+    grid->setMargin(0);
+    setLayout(grid);
+
+#ifdef CUSTOM_TOOLTIP_FOR_CALLTIPS
+    calltipLabel = new QLabel(this);
+    calltipLabel->setVisible(false);
+#endif // CUSTOM_TOOLTIP_FOR_CALLTIPS
     editor = new QLuaCommanderEdit(this);
     editor->setPlaceholderText("Input Lua code here, or type \"help()\" (use TAB for auto-completion)");
     editor->setFont(QFont("Courier", 12));
@@ -158,13 +171,14 @@ QLuaCommanderWidget::QLuaCommanderWidget(QWidget *parent)
     closeButton->setIcon(style()->standardIcon(QStyle::SP_TitleBarCloseButton));
     closeButton->setFlat(true);
     closeButton->setStyleSheet("margin-left: 5px; margin-right: 5px; font-size: 14pt;");
-    QHBoxLayout *layout = new QHBoxLayout(this);
-    layout->setSpacing(0);
-    layout->setMargin(0);
-    setLayout(layout);
-    layout->addWidget(editor);
-    layout->addWidget(scriptCombo);
-    layout->addWidget(closeButton);
+
+#ifdef CUSTOM_TOOLTIP_FOR_CALLTIPS
+    grid->addWidget(calltipLabel, 0, 0);
+#endif // CUSTOM_TOOLTIP_FOR_CALLTIPS
+    grid->addWidget(editor, 1, 0);
+    grid->addWidget(scriptCombo, 1, 1);
+    grid->addWidget(closeButton, 1, 2);
+
     connect(editor, &QLuaCommanderEdit::askCompletion, this, &QLuaCommanderWidget::onAskCompletion);
     connect(editor, &QLuaCommanderEdit::askCallTip, this, &QLuaCommanderWidget::onAskCallTip);
     connect(editor, &QLuaCommanderEdit::execute, this, &QLuaCommanderWidget::onExecute);
@@ -314,7 +328,19 @@ void QLuaCommanderWidget::onSetCompletion(const QStringList &comp)
 
 void QLuaCommanderWidget::onSetCallTip(const QString &tip)
 {
+#ifdef CUSTOM_TOOLTIP_FOR_CALLTIPS
+    if(tip.isEmpty())
+    {
+        calltipLabel->hide();
+    }
+    else
+    {
+        calltipLabel->setText(tip);
+        calltipLabel->show();
+    }
+#else // CUSTOM_TOOLTIP_FOR_CALLTIPS
     editor->setToolTipAtCursor(tip);
+#endif // CUSTOM_TOOLTIP_FOR_CALLTIPS
 }
 
 void QLuaCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning)

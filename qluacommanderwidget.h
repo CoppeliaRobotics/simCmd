@@ -9,6 +9,7 @@
 #include <QLineEdit>
 #include <QComboBox>
 #include <QPushButton>
+#include <QLabel>
 #include "qcommandedit.h"
 #include "PersistentOptions.h"
 
@@ -65,6 +66,7 @@ protected:
     QLuaCommanderEdit *editor;
     QComboBox *scriptCombo;
     QPushButton *closeButton;
+    QLabel *calltipLabel;
 
 public:
     bool getSelectedScriptInfo(int &type, int &handle, QString &name);
