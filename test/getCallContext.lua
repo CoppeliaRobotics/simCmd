@@ -84,8 +84,8 @@ local function findCallsAtPosition(ast,pos,results)
             end
         end
         if not havefn then
-            if verbose then print('> ',fn,1,'*') end
-            table.insert(results,{fn,1})
+            if verbose then print('> ',fn,-1,'*') end
+            table.insert(results,{fn,-1})
         end
     end
     return results
