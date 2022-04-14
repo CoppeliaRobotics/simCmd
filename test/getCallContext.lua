@@ -117,15 +117,20 @@ end
 
 if arg and arg[1]=='test' then
     verbose=1
+    runAll=true
+    numPassed,numTotal=0,0
 
     local function test(s,expected_ccs)
+        numTotal=numTotal+1
         local ccs=getCallContexts(s,#s)
         local d,e=dump(ccs),dump(expected_ccs)
         if d~=e then
             print('test failed:',s)
             print('return value:',d)
             print('expected return value:',e)
-            os.exit()
+            if not runAll then os.exit() end
+        else
+            numPassed=numPassed+1
         end
     end
 
@@ -193,6 +198,8 @@ if arg and arg[1]=='test' then
         'sim.getObjectAlias(sim.getObject(),',
         {{'sim.getObjectAlias',2}}
     )
+
+    print('Number of tests passed: '..numPassed..'/'..numTotal)
 end
 
 return getCallContexts
