@@ -555,6 +555,7 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     }
 
     simReleaseStack(stackHandle);
+    simAnnounceSceneContentChange();
 }
 
 QStringList UIFunctions::getCompletion(int scriptHandleOrType, QString scriptName, QString word, QChar context)
