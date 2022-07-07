@@ -740,16 +740,36 @@ void UIFunctions::onAskCallTip(int scriptHandleOrType, QString input, int pos)
     for(int i = 0; i < symbols.length(); i++)
     {
         QString tip{getApiInfo(scriptHandleOrType, symbols[i])};
-        QStringList p = tip.split(',');
-        QStringList q = p[0].split('(');
-        tip = q[0];
+
+        QString retArgs, funcCall;
+        int equalSignPos = tip.indexOf('=');
+        if(equalSignPos < 0) {
+            funcCall = tip;
+        } else {
+            retArgs = tip.left(equalSignPos);
+            funcCall = tip.mid(equalSignPos + 1);
+        }
+
+        QString funcName, funcArgs;
+        int openParenPos = funcCall.indexOf('(');
+        if(openParenPos < 0) {
+            funcName = funcCall;
+        } else {
+            funcName = funcCall.left(openParenPos);
+            funcArgs = funcCall.mid(openParenPos + 1);
+            funcArgs = funcArgs.left(funcArgs.length() - 1);
+        }
+
+        tip = retArgs + "=" + funcName;
+        QStringList p = funcArgs.split(',');
         for(int j = 0; j < p.length(); j++)
         {
             tip += j == 0 ? "(" : ", ";
             if(argIndex[i] == (j + 1)) tip += "<b>";
-            tip += j == 0 ? q[1] : p[j];
+            tip += p[j];
             if(argIndex[i] == (j + 1)) tip += "</b>";
         }
+        tip += ")";
         calltips << tip;
     }
     emit setCallTip(calltips.join("<br>"));
