@@ -739,38 +739,45 @@ void UIFunctions::onAskCallTip(int scriptHandleOrType, QString input, int pos)
     QStringList calltips;
     for(int i = 0; i < symbols.length(); i++)
     {
-        QString tip{getApiInfo(scriptHandleOrType, symbols[i])};
-
-        QString retArgs, funcCall;
-        int equalSignPos = tip.indexOf('=');
-        if(equalSignPos < 0) {
-            funcCall = tip;
-        } else {
-            retArgs = tip.left(equalSignPos);
-            funcCall = tip.mid(equalSignPos + 1);
-        }
-
-        QString funcName, funcArgs;
-        int openParenPos = funcCall.indexOf('(');
-        if(openParenPos < 0) {
-            funcName = funcCall;
-        } else {
-            funcName = funcCall.left(openParenPos);
-            funcArgs = funcCall.mid(openParenPos + 1);
-            funcArgs = funcArgs.left(funcArgs.length() - 1);
-        }
-
-        tip = retArgs + "=" + funcName;
-        QStringList p = funcArgs.split(',');
-        for(int j = 0; j < p.length(); j++)
+        QString txt{getApiInfo(scriptHandleOrType, symbols[i])};
+        for(QString tip : txt.split('\n'))
         {
-            tip += j == 0 ? "(" : ", ";
-            if(argIndex[i] == (j + 1)) tip += "<b>";
-            tip += p[j];
-            if(argIndex[i] == (j + 1)) tip += "</b>";
+            if(tip == "") break;
+
+            int equalSignPos = tip.indexOf('=');
+            int openParenPos = tip.indexOf('(');
+            int closeParenPos = tip.lastIndexOf(')');
+            if(openParenPos < 0 || closeParenPos < 0)
+            {
+                sim::addLog(sim_verbosity_errors, "invalid calltip (missing%s%s%s paren): %s",
+                        openParenPos < 0 ? " open" : "",
+                        openParenPos * closeParenPos > 0 ? " and" : "",
+                        closeParenPos < 0 ? " close" : "",
+                        tip.toStdString());
+                continue;
+            }
+            QString retArgs, eq, funcName, funcArgs;
+            if(equalSignPos >= 0 && equalSignPos < openParenPos)
+            {
+                eq = " = ";
+                retArgs = tip.left(equalSignPos);
+                funcName = tip.mid(equalSignPos + 1, openParenPos - equalSignPos - 1);
+            }
+            else funcName = tip.left(openParenPos);
+            funcArgs = tip.mid(openParenPos + 1, closeParenPos - 1 - openParenPos);
+
+            tip = retArgs + eq + funcName;
+            QStringList p = funcArgs.split(',');
+            for(int j = 0; j < p.length(); j++)
+            {
+                tip += j == 0 ? "(" : ", ";
+                if(argIndex[i] == (j + 1)) tip += "<b>";
+                tip += p[j];
+                if(argIndex[i] == (j + 1)) tip += "</b>";
+            }
+            tip += ")";
+            calltips << tip;
         }
-        tip += ")";
-        calltips << tip;
     }
     emit setCallTip(calltips.join("<br>"));
 #else // USE_LUA_PARSER
