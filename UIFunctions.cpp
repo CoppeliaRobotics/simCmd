@@ -688,7 +688,7 @@ void UIFunctions::onAskCallTip(int scriptHandleOrType, QString input, int pos)
         sim::addLog(sim_verbosity_errors, "failed to create a stack");
         return;
     }
-    std::string req = "getCallContexts=require'getCallContext'@";
+    std::string req = "getCallContexts=require'getCallContexts'@";
     simInt ret0 = simExecuteScriptString(sim_scripttype_sandboxscript, req.c_str(), stackHandle);
     if(ret0 == -1)
     {
