@@ -156,10 +156,10 @@ QLuaCommanderWidget::QLuaCommanderWidget(QWidget *parent)
     grid->setMargin(0);
     setLayout(grid);
 
-#ifdef CUSTOM_TOOLTIP_FOR_CALLTIPS
+#ifdef CUSTOM_TOOLTIP_WINDOW
     calltipLabel = new QLabel(this);
     calltipLabel->setVisible(false);
-#endif // CUSTOM_TOOLTIP_FOR_CALLTIPS
+#endif // CUSTOM_TOOLTIP_WINDOW
     editor = new QLuaCommanderEdit(this);
     editor->setPlaceholderText("Input Lua code here, or type \"help()\" (use TAB for auto-completion)");
     editor->setFont(QFont("Courier", 12));
@@ -170,9 +170,9 @@ QLuaCommanderWidget::QLuaCommanderWidget(QWidget *parent)
     closeButton->setFlat(true);
     closeButton->setStyleSheet("margin-left: 5px; margin-right: 5px; font-size: 14pt;");
 
-#ifdef CUSTOM_TOOLTIP_FOR_CALLTIPS
+#ifdef CUSTOM_TOOLTIP_WINDOW
     grid->addWidget(calltipLabel, 0, 0);
-#endif // CUSTOM_TOOLTIP_FOR_CALLTIPS
+#endif // CUSTOM_TOOLTIP_WINDOW
     grid->addWidget(editor, 1, 0);
     grid->addWidget(scriptCombo, 1, 1);
     grid->addWidget(closeButton, 1, 2);
@@ -345,7 +345,7 @@ void QLuaCommanderWidget::onSetCompletion(const QStringList &comp)
 
 void QLuaCommanderWidget::onSetCallTip(const QString &tip)
 {
-#ifdef CUSTOM_TOOLTIP_FOR_CALLTIPS
+#ifdef CUSTOM_TOOLTIP_WINDOW
     if(tip.isEmpty())
     {
         calltipLabel->hide();
@@ -355,9 +355,9 @@ void QLuaCommanderWidget::onSetCallTip(const QString &tip)
         calltipLabel->setText(tip);
         calltipLabel->show();
     }
-#else // CUSTOM_TOOLTIP_FOR_CALLTIPS
+#else // CUSTOM_TOOLTIP_WINDOW
     editor->setToolTipAtCursor(tip);
-#endif // CUSTOM_TOOLTIP_FOR_CALLTIPS
+#endif // CUSTOM_TOOLTIP_WINDOW
 }
 
 void QLuaCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning)
