@@ -708,19 +708,19 @@ void UIFunctions::onAskCallTip(int scriptHandleOrType, QString input, int pos)
     simInt size = simGetStackSize(stackHandle);
     if(size == 0)
     {
-        sim::addLog(sim_verbosity_warnings, "empty result in stack");
+        sim::addLog(sim_verbosity_debug, "empty result in stack");
         return;
     }
     CStackObject *obj = CStackObject::buildItemFromTopStackPosition(stackHandle);
     if(!obj)
     {
-        sim::addLog(sim_verbosity_errors, "CStackObject::buildItemFromTopStackPosition() returned NULL");
+        sim::addLog(sim_verbosity_debug, "CStackObject::buildItemFromTopStackPosition() returned NULL");
         return;
     }
     CStackArray *arr = obj->asArray();
     if(!arr)
     {
-        sim::addLog(sim_verbosity_errors, "CStackObject::asArray() returned NULL (CStackObject::getObjectTypeString() == \"%s\")", obj->getObjectTypeString());
+        sim::addLog(sim_verbosity_debug, "CStackObject::asArray() returned NULL (CStackObject::getObjectTypeString() == \"%s\")", obj->getObjectTypeString());
         delete obj;
         return;
     }
