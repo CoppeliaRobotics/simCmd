@@ -44,6 +44,14 @@ local function parseIncomplete(s,f,d)
         return parseIncomplete(s..' 0 ',f,d)
     end
 
+    if error_msg:match" unexpected token, invalid start of statement" or
+       error_msg:match" expected a field name after '.'" or
+       error_msg:match" expected a function definition or assignment after local" or
+       error_msg:match" expected a function name after 'function'" then
+        -- these can't be fixed
+        return
+    end
+
     error(error_msg)
 end
 
