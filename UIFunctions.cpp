@@ -720,7 +720,7 @@ void UIFunctions::onAskCallTip(int scriptHandleOrType, QString input, int pos)
     CStackArray *arr = obj->asArray();
     if(!arr)
     {
-        sim::addLog(sim_verbosity_errors, "CStackObject::asArray() returned NULL");
+        sim::addLog(sim_verbosity_errors, "CStackObject::asArray() returned NULL (CStackObject::getObjectTypeString() == \"%s\")", obj->getObjectTypeString());
         delete obj;
         return;
     }
