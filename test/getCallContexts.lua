@@ -52,7 +52,9 @@ local function parseIncomplete(s,f,d)
         return
     end
 
-    error(error_msg)
+    if sim.getNamedBoolParam('simExtLuaCmd.showUnhandledFixErrors') then
+        error(error_msg)
+    end
 end
 
 local function getCompoundId(ast)
