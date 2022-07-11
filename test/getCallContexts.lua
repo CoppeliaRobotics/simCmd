@@ -111,7 +111,7 @@ function getCallContexts(s,pos)
         print(s)
         print(s1)
     end
-    rs=findCallsAtPosition(ast,#s)
+    rs=findCallsAtPosition(ast,pos)
     return rs
 end
 
