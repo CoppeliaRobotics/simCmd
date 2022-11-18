@@ -22,8 +22,8 @@ template<typename T>
 inline bool readOption(const char *name, T *value, T def)
 {
     *value = def;
-    simInt dataLength;
-    simChar *pdata = simPersistentDataRead((boost::format(fmt) % name).str().c_str(), &dataLength);
+    int dataLength;
+    char *pdata = simPersistentDataRead((boost::format(fmt) % name).str().c_str(), &dataLength);
     if(!pdata)
     {
 #ifdef DEBUG_PERSISTENT_OPTIONS

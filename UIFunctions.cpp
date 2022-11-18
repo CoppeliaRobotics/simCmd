@@ -69,8 +69,8 @@ void UIFunctions::connectSignals()
 
 QStringList loadHistoryData()
 {
-    simInt histSize;
-    simChar *pdata = simPersistentDataRead("LuaCommander.history", &histSize);
+    int histSize;
+    char *pdata = simPersistentDataRead("LuaCommander.history", &histSize);
     QStringList hist;
     if(pdata)
     {
@@ -177,10 +177,10 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
         return "nil";
     }
 
-    simBool boolValue;
-    simDouble doubleValue;
-    simChar *stringValue;
-    simInt stringSize;
+    bool boolValue;
+    double doubleValue;
+    char *stringValue;
+    int stringSize;
     int n = simGetStackTableInfo(stackHandle, 0);
     if(n == sim_stack_table_map || n >= 0)
     {
@@ -477,7 +477,7 @@ void UIFunctions::setConvenienceVars(int scriptHandleOrType, QString scriptName,
         QString Hcheck = QString("H==sim.getObject@%1").arg(scriptName);
         if(simExecuteScriptString(scriptHandleOrType, Hcheck.toLatin1().data(), stackHandle) == 0)
         {
-            simBool boolValue;
+            bool boolValue;
             if(simGetStackBoolValue(stackHandle, &boolValue) == 1)
             {
                 simPopStackItem(stackHandle, 1);
@@ -498,7 +498,7 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
 
     appendHistory(code);
 
-    simInt stackHandle = simCreateStack();
+    int stackHandle = simCreateStack();
     if(stackHandle == -1)
     {
         showError("failed to create a stack");
@@ -520,7 +520,7 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
 
     setConvenienceVars(scriptHandleOrType, scriptName, stackHandle, false);
     QString s = QString("%1@%2").arg(code, scriptName);
-    simInt ret = simExecuteScriptString(scriptHandleOrType, s.toLatin1().data(), stackHandle);
+    int ret = simExecuteScriptString(scriptHandleOrType, s.toLatin1().data(), stackHandle);
     if(ret != 0)
     {
         PersistentOptions optsE(opts);
@@ -531,7 +531,7 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     }
     else
     {
-        simInt size = simGetStackSize(stackHandle);
+        int size = simGetStackSize(stackHandle);
         if(!opts.printAllReturnedValues && size > 1)
         {
             if(opts.warnAboutMultipleReturnedValues)
@@ -578,7 +578,7 @@ QStringList UIFunctions::getCompletionID(int scriptHandleOrType, QString scriptN
 
     if(options.dynamicCompletion)
     {
-        simInt stackHandle = simCreateStack();
+        int stackHandle = simCreateStack();
         if(stackHandle == -1) return {};
 
         int dotIdx = word.lastIndexOf('.');
@@ -587,7 +587,7 @@ QStringList UIFunctions::getCompletionID(int scriptHandleOrType, QString scriptN
         QString child = global ? word : word.mid(dotIdx + 1);
 
         QString s = QString("%1@%2").arg(parent, scriptName);
-        simInt ret = simExecuteScriptString(scriptHandleOrType, s.toLatin1().data(), stackHandle);
+        int ret = simExecuteScriptString(scriptHandleOrType, s.toLatin1().data(), stackHandle);
         if(ret == 0 && simGetStackSize(stackHandle) > 0)
         {
             int n = simGetStackTableInfo(stackHandle, 0);
@@ -621,7 +621,7 @@ QStringList UIFunctions::getCompletionID(int scriptHandleOrType, QString scriptN
     }
     else
     {
-        simChar *buf = simGetApiFunc(scriptHandleOrType, word.toStdString().c_str());
+        char *buf = simGetApiFunc(scriptHandleOrType, word.toStdString().c_str());
         QString bufStr = QString::fromUtf8(buf);
         simReleaseBuffer(buf);
         result = bufStr.split(QRegExp("\\s+"), QString::SkipEmptyParts);
@@ -655,7 +655,7 @@ QStringList UIFunctions::getCompletionObjName(QString word)
     {
         handle = simGetObjects(i++, sim_handle_all);
         if(handle == -1) break;
-        simChar *name = simGetObjectAlias(handle, 5);
+        char *name = simGetObjectAlias(handle, 5);
         QString nameStr(QString::fromUtf8(name));
         if(nameStr.startsWith(word))
             result << nameStr;
@@ -674,7 +674,7 @@ void UIFunctions::onAskCallTip(int scriptHandleOrType, QString input, int pos)
 {
     auto getApiInfo = [=](const int &scriptHandleOrType, const QString &symbol)
     {
-        simChar *buf = simGetApiInfo(scriptHandleOrType, symbol.toStdString().c_str());
+        char *buf = simGetApiInfo(scriptHandleOrType, symbol.toStdString().c_str());
         QString tip{QString::fromUtf8(buf)};
         simReleaseBuffer(buf);
         return tip;
@@ -682,14 +682,14 @@ void UIFunctions::onAskCallTip(int scriptHandleOrType, QString input, int pos)
 #ifdef USE_LUA_PARSER
     QStringList symbols;
     QList<int> argIndex;
-    simInt stackHandle = simCreateStack();
+    int stackHandle = simCreateStack();
     if(stackHandle == -1)
     {
         sim::addLog(sim_verbosity_errors, "failed to create a stack");
         return;
     }
     std::string req = "getCallContexts=require'getCallContexts'@";
-    simInt ret0 = simExecuteScriptString(sim_scripttype_sandboxscript, req.c_str(), stackHandle);
+    int ret0 = simExecuteScriptString(sim_scripttype_sandboxscript, req.c_str(), stackHandle);
     if(ret0 == -1)
     {
         sim::addLog(sim_verbosity_errors, "failed to execute lua: %s", req);
@@ -697,7 +697,7 @@ void UIFunctions::onAskCallTip(int scriptHandleOrType, QString input, int pos)
     }
     std::string delim = "========================================================";
     std::string code = (boost::format("getCallContexts([%s[%s]%s],%d)@") % delim % input.toStdString().c_str() % delim % (pos+1)).str();
-    simInt ret = simExecuteScriptString(sim_scripttype_sandboxscript, code.c_str(), stackHandle);
+    int ret = simExecuteScriptString(sim_scripttype_sandboxscript, code.c_str(), stackHandle);
     if(ret == -1)
     {
         CStackObject *obj = CStackObject::buildItemFromTopStackPosition(stackHandle);
@@ -705,7 +705,7 @@ void UIFunctions::onAskCallTip(int scriptHandleOrType, QString input, int pos)
         delete obj;
         return;
     }
-    simInt size = simGetStackSize(stackHandle);
+    int size = simGetStackSize(stackHandle);
     if(size == 0)
     {
         sim::addLog(sim_verbosity_debug, "empty result in stack");

@@ -503,8 +503,8 @@ private:
     QWidget *splitterChild = 0L;
     QVBoxLayout *layout = 0L;
     QLuaCommanderWidget *commanderWidget = 0L;
-    std::vector<simInt> menuHandles;
-    std::vector<simInt> menuState;
+    std::vector<int> menuHandles;
+    std::vector<int> menuState;
     std::vector<std::string> menuLabels;
     int MENUITEM_TOGGLE_VISIBILITY;
     int MENUITEM_HISTORY_CLEAR;
