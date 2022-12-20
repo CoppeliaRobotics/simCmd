@@ -277,7 +277,7 @@ void QLuaCommanderWidget::onClose()
 
 void QLuaCommanderWidget::onClearConsole()
 {
-    simAddStatusbarMessage(NULL);
+    simAddLog(NULL,0,NULL);
 }
 
 void QLuaCommanderWidget::onFocusIn()

@@ -270,11 +270,11 @@ public:
             simReleaseBuffer(name_cstr);
             if(simRunning)
             {
-                int childScript = simGetScriptAssociatedWithObject(handle);
+                int childScript = simGetScriptHandleEx(sim_scripttype_childscript,handle,NULL);
                 if(childScript != -1)
                     childScripts[handle] = name;
             }
-            int customizationScript = simGetCustomizationScriptAssociatedWithObject(handle);
+            int customizationScript = simGetScriptHandleEx(sim_scripttype_customizationscript,handle,NULL);
             if(customizationScript != -1)
                 customizationScripts[handle] = name;
         }
