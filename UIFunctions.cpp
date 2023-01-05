@@ -490,6 +490,12 @@ void UIFunctions::setConvenienceVars(int scriptHandleOrType, QString scriptName,
     }
     QString H = QString("H=sim.getObject@%1").arg(scriptName);
     simExecuteScriptString(scriptHandleOrType, H.toLatin1().data(), stackHandle);
+
+    QString sel = QString("SEL=sim.getObjectSel()@%1").arg(scriptName);
+    simExecuteScriptString(scriptHandleOrType, sel.toLatin1().data(), stackHandle);
+
+    QString sel0 = QString("SEL1=SEL[1]@%1").arg(scriptName);
+    simExecuteScriptString(scriptHandleOrType, sel0.toLatin1().data(), stackHandle);
 }
 
 void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scriptName)
