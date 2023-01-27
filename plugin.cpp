@@ -100,7 +100,7 @@ public:
 
         menuState.resize(menuLabels.size());
         menuHandles.resize(menuLabels.size());
-        if(simAddModuleMenuEntry("Lua Commander", menuHandles.size(), &menuHandles[0]) == -1)
+        if(simAddModuleMenuEntry("Developer tools\nLua Commander", menuHandles.size(), &menuHandles[0]) == -1)
         {
             sim::addLog(sim_verbosity_errors, "failed to create menu");
             return;
