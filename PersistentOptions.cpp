@@ -22,21 +22,24 @@ template<typename T>
 inline bool readOption(const char *name, T *value, T def)
 {
     *value = def;
-    int dataLength;
-    char *pdata = simPersistentDataRead((boost::format(fmt) % name).str().c_str(), &dataLength);
-    if(!pdata)
+    std::string pdata;
+    try
+    {
+        pdata = sim::persistentDataRead((boost::format(fmt) % name).str());
+    }
+    catch(sim::api_error &ex)
     {
 #ifdef DEBUG_PERSISTENT_OPTIONS
-        sim::addLog(sim_verbosity_debug, "LuaCommander: Could not load persistent option '%s': null pointer error", name);
+        sim::addLog(sim_verbosity_debug, "LuaCommander: Could not load persistent option '%s': %s", name, ex.what());
 #endif
         return false;
     }
-    bool ok = dataLength == sizeof(T);
+    bool ok = pdata.length() == sizeof(T);
     if(ok)
     {
-        memcpy(value, pdata, sizeof(T));
+        memcpy(value, pdata.c_str(), sizeof(T));
 #ifdef DEBUG_PERSISTENT_OPTIONS
-        std::stringstream ss; ss < *value;
+        std::stringstream ss; ss << *value;
         sim::addLog(sim_verbosity_debug, "LuaCommander: Loaded persistent option '%s': %s", name, ss.str());
 #endif
     }
@@ -46,7 +49,6 @@ inline bool readOption(const char *name, T *value, T def)
         sim::addLog(sim_verbosity_debug, "LuaCommander: Could not load persistent option '%s': incorrect data length %d, should be %d", name, dataLength, sizeof(T));
 #endif
     }
-    simReleaseBuffer(pdata);
     return ok;
 }
 
@@ -65,14 +67,19 @@ bool PersistentOptions::load()
 template<typename T>
 inline bool writeOption(const char *name, T *value)
 {
-    bool ok = simPersistentDataWrite((boost::format(fmt) % name).str().c_str(), reinterpret_cast<const char*>(value), sizeof(T), 1) != -1;
-#ifdef DEBUG_PERSISTENT_OPTIONS
-    if(!ok)
+    try
     {
-        sim::addLog(sim_verbosity_debug, "LuaCommander: Could not save persistent option '%s': error -1", name);
+        std::string data(reinterpret_cast<const char*>(value), sizeof(T));
+        sim::persistentDataWrite((boost::format(fmt) % name).str(), data, 1);
     }
+    catch(sim::api_error &ex)
+    {
+#ifdef DEBUG_PERSISTENT_OPTIONS
+        sim::addLog(sim_verbosity_debug, "LuaCommander: Could not save persistent option '%s': %s", name, ex.what());
 #endif
-    return ok;
+        return false;
+    }
+    return true;
 }
 
 bool PersistentOptions::save()

@@ -277,7 +277,7 @@ void QLuaCommanderWidget::onClose()
 
 void QLuaCommanderWidget::onClearConsole()
 {
-    simAddLog(NULL,0,NULL);
+    sim::addLog({}, 0, {});
 }
 
 void QLuaCommanderWidget::onFocusIn()

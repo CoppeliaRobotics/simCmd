@@ -257,28 +257,23 @@ public:
 
     void updateScriptsList()
     {
-        bool simRunning = simGetSimulationState() == sim_simulation_advancing_running;
-        QMap<int,QString> childScripts;
-        QMap<int,QString> customizationScripts;
-        int i = 0;
-        while(1)
+        bool isRunning = sim::getSimulationState() == sim_simulation_advancing_running;
+        QMap<int, QString> childScripts;
+        QMap<int, QString> customizationScripts;
+        for(int handle : sim::getObjects())
         {
-            int handle = simGetObjects(i++, sim_handle_all);
-            if(handle == -1) break;
-            char *name_cstr = simGetObjectAlias(handle, 5);
-            QString name = QString::fromUtf8(name_cstr);
-            simReleaseBuffer(name_cstr);
-            if(simRunning)
+            QString name = QString::fromStdString(sim::getObjectAlias(handle, 5));
+            if(isRunning)
             {
-                int childScript = simGetScriptHandleEx(sim_scripttype_childscript,handle,NULL);
+                int childScript = sim::getScriptHandleEx(sim_scripttype_childscript, handle);
                 if(childScript != -1)
                     childScripts[handle] = name;
             }
-            int customizationScript = simGetScriptHandleEx(sim_scripttype_customizationscript,handle,NULL);
+            int customizationScript = sim::getScriptHandleEx(sim_scripttype_customizationscript, handle);
             if(customizationScript != -1)
                 customizationScripts[handle] = name;
         }
-        UIFunctions::getInstance()->scriptListChanged(childScripts, customizationScripts, simRunning);
+        UIFunctions::getInstance()->scriptListChanged(childScripts, customizationScripts, isRunning);
     }
 
     virtual void onInstancePass(const sim::InstancePassFlags &flags, bool first)

@@ -43,7 +43,7 @@ UIProxy * UIProxy::getInstance(QObject *parent)
     if(!UIProxy::instance)
     {
         UIProxy::instance = new UIProxy(parent);
-        UIProxy::simMainWindow = (QWidget *)simGetMainWindow(1);
+        UIProxy::simMainWindow = (QWidget *)sim::getMainWindow(1);
 
         uiThread(); // we remember this currentThreadId as the "UI" thread
 

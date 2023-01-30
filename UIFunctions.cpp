@@ -69,14 +69,22 @@ void UIFunctions::connectSignals()
 
 QStringList loadHistoryData()
 {
-    int histSize;
-    char *pdata = simPersistentDataRead("LuaCommander.history", &histSize);
     QStringList hist;
-    if(pdata)
+    try
     {
-        QString s = QString::fromUtf8(pdata);
-        hist = s.split(QRegExp("(\\r\\n)|(\\n\\r)|\\r|\\n"), QString::SkipEmptyParts);
-        simReleaseBuffer(pdata);
+        std::string pdata = sim::persistentDataRead("LuaCommander.history");
+        QString s = QString::fromStdString(pdata);
+        hist = s.split(QRegExp("(\\r\\n)|(\\n\\r)|\\r|\\n"),
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+            QString::SkipEmptyParts
+#else
+            Qt::SkipEmptyParts
+#endif
+        );
+    }
+    catch(sim::api_error &ex)
+    {
+        sim::addLog(sim_verbosity_debug, "failed to read history persistent block");
     }
     return hist;
 }
@@ -84,7 +92,14 @@ QStringList loadHistoryData()
 void saveHistoryData(QStringList hist)
 {
     QString histStr = hist.join("\n");
-    simPersistentDataWrite("LuaCommander.history", histStr.toUtf8(), histStr.length() + 1, 1);
+    try
+    {
+        sim::persistentDataWrite("LuaCommander.history", histStr.toStdString(), 1);
+    }
+    catch(sim::api_error &ex)
+    {
+        sim::addLog(sim_verbosity_debug, "failed to write history persistent block");
+    }
 }
 
 void UIFunctions::loadHistory()
@@ -169,7 +184,7 @@ std::string escapeSpecialChars(std::string s)
 
 std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOptions &opts, int depth, bool quoteStrings, bool insideTable, std::string *strType)
 {
-    if(simIsStackValueNull(stackHandle) == 1)
+    if(sim::isStackValueNull(stackHandle) == 1)
     {
         if(strType)
             *strType = "99|nil";
@@ -181,132 +196,132 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
     double doubleValue;
     char *stringValue;
     int stringSize;
-    int n = simGetStackTableInfo(stackHandle, 0);
+    int n = sim::getStackTableInfo(stackHandle, 0);
     if(n == sim_stack_table_map || n >= 0)
     {
         if(strType)
             *strType = "90|table";
 
-        int oldSize = simGetStackSize(stackHandle);
-        if(simUnfoldStackTable(stackHandle) != -1)
+        int oldSize = sim::getStackSize(stackHandle);
+
+        sim::unfoldStackTable(stackHandle);
+
+        if(opts.mapMaxDepth >= 0 && depth > opts.mapMaxDepth)
+            return "<...>";
+
+        int newSize = sim::getStackSize(stackHandle);
+        int numItems = (newSize - oldSize + 1) / 2;
+
+        std::stringstream ss;
+        ss << "{";
+
+        std::vector<std::vector<std::string> > lines;
+
+        for(int i = 0; i < numItems; i++)
         {
-            if(opts.mapMaxDepth >= 0 && depth > opts.mapMaxDepth)
-                return "<...>";
+            std::string type;
 
-            int newSize = simGetStackSize(stackHandle);
-            int numItems = (newSize - oldSize + 1) / 2;
+            sim::moveStackItemToTop(stackHandle, oldSize - 1);
+            std::string key = getStackTopAsString(stackHandle, opts, depth + 1, false, true, &type);
 
-            std::stringstream ss;
-            ss << "{";
-
-            std::vector<std::vector<std::string> > lines;
-
-            for(int i = 0; i < numItems; i++)
+            // fix for rendering of numeric string keys:
+            if(type.substr(3) == "string")
             {
-                std::string type;
-
-                simMoveStackItemToTop(stackHandle, oldSize - 1);
-                std::string key = getStackTopAsString(stackHandle, opts, depth + 1, false, true, &type);
-
-                // fix for rendering of numeric string keys:
-                if(type.substr(3) == "string")
-                    try {boost::lexical_cast<int>(key); key = (boost::format("\"%s\"") % key).str();}
-                    catch(std::exception &ex) {}
-
-                simMoveStackItemToTop(stackHandle, oldSize - 1);
-                std::string value = getStackTopAsString(stackHandle, opts, depth + 1, true, true, &type);
-
-                if(n > 0)
+                try
                 {
-                    if(opts.arrayMaxItemsDisplayed >= 0 && i >= opts.arrayMaxItemsDisplayed)
+                    boost::lexical_cast<int>(key);
+                    key = (boost::format("\"%s\"") % key).str();
+                }
+                catch(std::exception &ex) {}
+            }
+
+            sim::moveStackItemToTop(stackHandle, oldSize - 1);
+            std::string value = getStackTopAsString(stackHandle, opts, depth + 1, true, true, &type);
+
+            if(n > 0)
+            {
+                if(opts.arrayMaxItemsDisplayed >= 0 && i >= opts.arrayMaxItemsDisplayed)
+                {
+                    ss << (i ? " " : "") << "... (" << numItems << " items)";
+                    break;
+                }
+                ss << (i ? ", " : "") << value;
+            }
+            else
+            {
+                std::vector<std::string> line;
+                line.push_back(type);
+                line.push_back(key);
+                line.push_back(value);
+                lines.push_back(line);
+            }
+        }
+
+        if(lines.size())
+        {
+            if(opts.mapSortKeysByName || opts.mapSortKeysByType)
+            {
+                std::sort(lines.begin(), lines.end(), [opts](const std::vector<std::string>& a, const std::vector<std::string>& b)
+                {
+                    std::string sa, sb;
+                    if(opts.mapSortKeysByType)
                     {
-                        ss << (i ? " " : "") << "... (" << numItems << " items)";
-                        break;
+                        sa += a[0];
+                        sb += b[0];
                     }
-                    ss << (i ? ", " : "") << value;
-                }
-                else
-                {
-                    std::vector<std::string> line;
-                    line.push_back(type);
-                    line.push_back(key);
-                    line.push_back(value);
-                    lines.push_back(line);
-                }
-            }
-
-            if(lines.size())
-            {
-                if(opts.mapSortKeysByName || opts.mapSortKeysByType)
-                {
-                    std::sort(lines.begin(), lines.end(), [opts](const std::vector<std::string>& a, const std::vector<std::string>& b)
+                    if(opts.mapSortKeysByName)
                     {
-                        std::string sa, sb;
-                        if(opts.mapSortKeysByType)
-                        {
-                            sa += a[0];
-                            sb += b[0];
-                        }
-                        if(opts.mapSortKeysByName)
-                        {
-                            sa += a[1];
-                            sb += b[1];
-                        }
-                        return sa < sb;
-                    });
-                }
-
-                for(int i = 0; i < lines.size(); i++)
-                {
-                    ss << "\n";
-                    for(int d = 0; d < depth; d++)
-                        ss << "    ";
-                    ss << "    " << lines[i][1] << "=" << lines[i][2] << ((i + 1) < numItems ? "," : "");
-                }
+                        sa += a[1];
+                        sb += b[1];
+                    }
+                    return sa < sb;
+                });
             }
 
-            if(n < 0)
+            for(int i = 0; i < lines.size(); i++)
             {
                 ss << "\n";
-                for(int d = 0; d < depth; d++) ss << "    ";
+                for(int d = 0; d < depth; d++)
+                    ss << "    ";
+                ss << "    " << lines[i][1] << "=" << lines[i][2] << ((i + 1) < numItems ? "," : "");
             }
-            ss << "}";
-            return ss.str();
         }
-        else
+
+        if(n < 0)
         {
-            sim::addLog(sim_verbosity_errors, "table unfold error. n=%d", n);
-            simDebugStack(stackHandle, -1);
-            return "<table:unfold-err>";
+            ss << "\n";
+            for(int d = 0; d < depth; d++) ss << "    ";
         }
+        ss << "}";
+        return ss.str();
     }
     else if(n == sim_stack_table_circular_ref)
     {
         if(strType)
             *strType = "90|table";
 
-        simPopStackItem(stackHandle, 1);
+        sim::popStackItem(stackHandle, 1);
         return "<...>";
     }
-    else if(simGetStackBoolValue(stackHandle, &boolValue) == 1)
+    else if(sim::getStackBoolValue(stackHandle, &boolValue) == 1)
     {
         if(strType)
             *strType = "10|bool";
 
-        simPopStackItem(stackHandle, 1);
+        sim::popStackItem(stackHandle, 1);
         return boolValue ? "true" : "false";
     }
-    else if(simGetStackDoubleValue(stackHandle, &doubleValue) == 1)
+    else if(sim::getStackDoubleValue(stackHandle, &doubleValue) == 1)
     {
         if(strType)
             *strType = "30|number";
 
-        simPopStackItem(stackHandle, 1);
+        sim::popStackItem(stackHandle, 1);
         std::ostringstream ss;
         ss << std::setprecision(opts.floatPrecision) << doubleValue;
         return ss.str();
     }
-    else if((stringValue = simGetStackStringValue(stackHandle, &stringSize)) != NULL)
+    else if((stringValue = sim::getStackStringValue(stackHandle, &stringSize)) != NULL)
     {
         std::string s(stringValue, stringSize);
 
@@ -322,7 +337,7 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
                 *strType = "50|string";
         }
 
-        simPopStackItem(stackHandle, 1);
+        sim::popStackItem(stackHandle, 1);
 
         if(insideTable)
         {
@@ -351,7 +366,7 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
             s = "\"" + s + "\"";
         }
 
-        simReleaseBuffer(stringValue);
+        sim::releaseBuffer(stringValue);
 
         return s;
     }
@@ -361,8 +376,8 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
             *strType = "?";
 
         sim::addLog(sim_verbosity_errors, "unable to convert stack top. n=%d", n);
-        simDebugStack(stackHandle, -1);
-        simPopStackItem(stackHandle, 1);
+        sim::debugStack(stackHandle, -1);
+        sim::popStackItem(stackHandle, 1);
         return "?";
     }
 }
@@ -475,27 +490,39 @@ void UIFunctions::setConvenienceVars(int scriptHandleOrType, QString scriptName,
     if(check)
     {
         QString Hcheck = QString("H==sim.getObject@%1").arg(scriptName);
-        if(simExecuteScriptString(scriptHandleOrType, Hcheck.toLatin1().data(), stackHandle) == 0)
+        try
         {
+            sim::executeScriptString(scriptHandleOrType, Hcheck.toStdString(), stackHandle);
             bool boolValue;
-            if(simGetStackBoolValue(stackHandle, &boolValue) == 1)
+            if(sim::getStackBoolValue(stackHandle, &boolValue) == 1)
             {
-                simPopStackItem(stackHandle, 1);
+                sim::popStackItem(stackHandle, 1);
                 if(!boolValue)
                     showWarning("cannot change 'H' variable");
             }
             else sim::addLog(sim_verbosity_debug, "non-bool on stack");
         }
-        else sim::addLog(sim_verbosity_debug, "failed exec");
+        catch(sim::api_error &ex)
+        {
+            sim::addLog(sim_verbosity_debug, ex.what());
+        }
     }
-    QString H = QString("H=sim.getObject@%1").arg(scriptName);
-    simExecuteScriptString(scriptHandleOrType, H.toLatin1().data(), stackHandle);
 
-    QString sel = QString("SEL=sim.getObjectSel()@%1").arg(scriptName);
-    simExecuteScriptString(scriptHandleOrType, sel.toLatin1().data(), stackHandle);
+    try
+    {
+        QString H = QString("H=sim.getObject@%1").arg(scriptName);
+        sim::executeScriptString(scriptHandleOrType, H.toStdString(), stackHandle);
 
-    QString sel0 = QString("SEL1=SEL[1]@%1").arg(scriptName);
-    simExecuteScriptString(scriptHandleOrType, sel0.toLatin1().data(), stackHandle);
+        QString sel = QString("SEL=sim.getObjectSel()@%1").arg(scriptName);
+        sim::executeScriptString(scriptHandleOrType, sel.toStdString(), stackHandle);
+
+        QString sel0 = QString("SEL1=SEL[1]@%1").arg(scriptName);
+        sim::executeScriptString(scriptHandleOrType, sel0.toStdString(), stackHandle);
+    }
+    catch(sim::api_error &ex)
+    {
+        sim::addLog(sim_verbosity_debug, ex.what());
+    }
 }
 
 void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scriptName)
@@ -504,12 +531,7 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
 
     appendHistory(code);
 
-    int stackHandle = simCreateStack();
-    if(stackHandle == -1)
-    {
-        showError("failed to create a stack");
-        return;
-    }
+    int stackHandle = sim::createStack();
 
     showMessage("> " + code);
 
@@ -526,18 +548,24 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
 
     setConvenienceVars(scriptHandleOrType, scriptName, stackHandle, false);
     QString s = QString("%1@%2").arg(code, scriptName);
-    int ret = simExecuteScriptString(scriptHandleOrType, s.toLatin1().data(), stackHandle);
-    if(ret != 0)
+    bool err = false;
+    try
+    {
+        sim::executeScriptString(scriptHandleOrType, s.toStdString(), stackHandle);
+    }
+    catch(sim::api_error &ex)
     {
         PersistentOptions optsE(opts);
         optsE.stringEscapeSpecials = false;
         std::string s = getStackTopAsString(stackHandle, optsE, 0, false);
         QString m = QString::fromStdString(s);
         showError(m);
+        err = true;
     }
-    else
+
+    if(!err)
     {
-        int size = simGetStackSize(stackHandle);
+        int size = sim::getStackSize(stackHandle);
         if(!opts.printAllReturnedValues && size > 1)
         {
             if(opts.warnAboutMultipleReturnedValues)
@@ -548,7 +576,7 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
         QString result;
         for(int i = 0; i < size; i++)
         {
-            simMoveStackItemToTop(stackHandle, 0);
+            sim::moveStackItemToTop(stackHandle, 0);
             std::string stackTopStr = getStackTopAsString(stackHandle, opts);
             if(i) result.append(", ");
             result.append(QString::fromStdString(stackTopStr));
@@ -560,8 +588,15 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
             showMessage(result);
     }
 
-    simReleaseStack(stackHandle);
-    simAnnounceSceneContentChange();
+    sim::releaseStack(stackHandle);
+    try
+    {
+        sim::announceSceneContentChange();
+    }
+    catch(sim::api_error &ex)
+    {
+        sim::addLog(sim_verbosity_errors, ex.what());
+    }
 }
 
 QStringList UIFunctions::getCompletion(int scriptHandleOrType, QString scriptName, QString word, QChar context)
@@ -584,7 +619,7 @@ QStringList UIFunctions::getCompletionID(int scriptHandleOrType, QString scriptN
 
     if(options.dynamicCompletion)
     {
-        int stackHandle = simCreateStack();
+        int stackHandle = sim::createStack();
         if(stackHandle == -1) return {};
 
         int dotIdx = word.lastIndexOf('.');
@@ -593,33 +628,38 @@ QStringList UIFunctions::getCompletionID(int scriptHandleOrType, QString scriptN
         QString child = global ? word : word.mid(dotIdx + 1);
 
         QString s = QString("%1@%2").arg(parent, scriptName);
-        int ret = simExecuteScriptString(scriptHandleOrType, s.toLatin1().data(), stackHandle);
-        if(ret == 0 && simGetStackSize(stackHandle) > 0)
+        try
         {
-            int n = simGetStackTableInfo(stackHandle, 0);
+            sim::executeScriptString(scriptHandleOrType, s.toStdString(), stackHandle);
+        }
+        catch(sim::api_error &ex)
+        {
+            return {};
+        }
+        if(sim::getStackSize(stackHandle) > 0)
+        {
+            int n = sim::getStackTableInfo(stackHandle, 0);
             if(n == sim_stack_table_map)
             {
-                int oldSize = simGetStackSize(stackHandle);
-                if(simUnfoldStackTable(stackHandle) != -1)
+                int oldSize = sim::getStackSize(stackHandle);
+                sim::unfoldStackTable(stackHandle);
+                int newSize = sim::getStackSize(stackHandle);
+                int numItems = (newSize - oldSize + 1) / 2;
+                for(int i = 0; i < numItems; i++)
                 {
-                    int newSize = simGetStackSize(stackHandle);
-                    int numItems = (newSize - oldSize + 1) / 2;
-                    for(int i = 0; i < numItems; i++)
+                    sim::moveStackItemToTop(stackHandle, oldSize - 1);
+                    QString key = QString::fromStdString(getStackTopAsString(stackHandle, options, 0, false));
+
+                    sim::moveStackItemToTop(stackHandle, oldSize - 1);
+                    std::string value = getStackTopAsString(stackHandle, options, 0, false);
+
+                    if(key.startsWith(child))
                     {
-                        simMoveStackItemToTop(stackHandle, oldSize - 1);
-                        QString key = QString::fromStdString(getStackTopAsString(stackHandle, options, 0, false));
-
-                        simMoveStackItemToTop(stackHandle, oldSize - 1);
-                        std::string value = getStackTopAsString(stackHandle, options, 0, false);
-
-                        if(key.startsWith(child))
-                        {
-                            if(key.startsWith("_") && child.isEmpty())
-                                continue;
-                            if(!global)
-                                key = parent + "." + key;
-                            result << key;
-                        }
+                        if(key.startsWith("_") && child.isEmpty())
+                            continue;
+                        if(!global)
+                            key = parent + "." + key;
+                        result << key;
                     }
                 }
             }
@@ -627,16 +667,15 @@ QStringList UIFunctions::getCompletionID(int scriptHandleOrType, QString scriptN
     }
     else
     {
-        char *buf = simGetApiFunc(scriptHandleOrType, word.toStdString().c_str());
-        QString bufStr = QString::fromUtf8(buf);
-        simReleaseBuffer(buf);
-        result = bufStr.split(QRegExp("\\s+"), QString::SkipEmptyParts);
+        std::vector<std::string> funcs = sim::getApiFunc(scriptHandleOrType, word.toStdString());
+        for(const auto &s : funcs)
+            result << QString::fromStdString(s);
     }
 
     // filter deprecated symbols:
     for(QStringList::iterator it = result.begin(); it != result.end(); )
     {
-        if(simIsDeprecated(it->toLatin1().data()) == 1)
+        if(sim::isDeprecated(it->toStdString()))
             it = result.erase(it);
         else
             ++it;
@@ -656,16 +695,11 @@ QStringList UIFunctions::getCompletionObjName(QString word)
     ASSERT_THREAD(!UI);
 
     QStringList result;
-    int i = 0, handle = -1;
-    while(1)
+    for(int handle : sim::getObjects(sim_handle_all))
     {
-        handle = simGetObjects(i++, sim_handle_all);
-        if(handle == -1) break;
-        char *name = simGetObjectAlias(handle, 5);
-        QString nameStr(QString::fromUtf8(name));
+        QString nameStr(QString::fromStdString(sim::getObjectAlias(handle, 5)));
         if(nameStr.startsWith(word))
             result << nameStr;
-        simReleaseBuffer(name);
     }
 
     return result;
@@ -680,38 +714,37 @@ void UIFunctions::onAskCallTip(int scriptHandleOrType, QString input, int pos)
 {
     auto getApiInfo = [=](const int &scriptHandleOrType, const QString &symbol)
     {
-        char *buf = simGetApiInfo(scriptHandleOrType, symbol.toStdString().c_str());
-        QString tip{QString::fromUtf8(buf)};
-        simReleaseBuffer(buf);
+        QString tip{QString::fromStdString(sim::getApiInfo(scriptHandleOrType, symbol.toStdString()))};
         return tip;
     };
 #ifdef USE_LUA_PARSER
     QStringList symbols;
     QList<int> argIndex;
-    int stackHandle = simCreateStack();
-    if(stackHandle == -1)
-    {
-        sim::addLog(sim_verbosity_errors, "failed to create a stack");
-        return;
-    }
+    int stackHandle = sim::createStack();
     std::string req = "getCallContexts=require'getCallContexts'@";
-    int ret0 = simExecuteScriptString(sim_scripttype_sandboxscript, req.c_str(), stackHandle);
-    if(ret0 == -1)
+    try
+    {
+        sim::executeScriptString(sim_scripttype_sandboxscript, req, stackHandle);
+    }
+    catch(sim::api_error &ex)
     {
         sim::addLog(sim_verbosity_errors, "failed to execute lua: %s", req);
         return;
     }
     std::string delim = "========================================================";
     std::string code = (boost::format("getCallContexts([%s[%s]%s],%d)@") % delim % input.toStdString().c_str() % delim % (pos+1)).str();
-    int ret = simExecuteScriptString(sim_scripttype_sandboxscript, code.c_str(), stackHandle);
-    if(ret == -1)
+    try
+    {
+        sim::executeScriptString(sim_scripttype_sandboxscript, code, stackHandle);
+    }
+    catch(sim::api_error &ex)
     {
         CStackObject *obj = CStackObject::buildItemFromTopStackPosition(stackHandle);
         sim::addLog(sim_verbosity_errors, "failed to execute lua: %s. error: %s", code, obj->toString());
         delete obj;
         return;
     }
-    int size = simGetStackSize(stackHandle);
+    int size = sim::getStackSize(stackHandle);
     if(size == 0)
     {
         sim::addLog(sim_verbosity_debug, "empty result in stack");
