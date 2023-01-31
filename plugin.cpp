@@ -260,7 +260,7 @@ public:
         bool isRunning = sim::getSimulationState() == sim_simulation_advancing_running;
         QMap<int, QString> childScripts;
         QMap<int, QString> customizationScripts;
-        for(int handle : sim::getObjects())
+        for(int handle : sim::getObjects(sim_handle_all))
         {
             QString name = QString::fromStdString(sim::getObjectAlias(handle, 5));
             if(isRunning)
