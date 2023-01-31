@@ -24,9 +24,6 @@ class Plugin : public sim::Plugin
 public:
     void onStart()
     {
-        menuHandles.clear();
-        menuState.clear();
-        menuLabels.clear();
         firstInstancePass = true;
         pluginEnabled = true;
 
@@ -63,48 +60,25 @@ public:
         splitterChild->setMaximumHeight(600);
 
         // add menu items to CoppeliaSim main window
-        MENUITEM_TOGGLE_VISIBILITY = menuLabels.size();
-        menuLabels.push_back("Enable");
-        menuLabels.push_back("");
-        MENUITEM_HISTORY_CLEAR = menuLabels.size();
-        menuLabels.push_back("Clear command history");
-        menuLabels.push_back("");
-        MENUITEM_PRINT_ALL_RETURNED_VALUES = menuLabels.size();
-        menuLabels.push_back("Print all returned values");
-        MENUITEM_WARN_ABOUT_MULTIPLE_RETURNED_VALUES = menuLabels.size();
-        menuLabels.push_back("Warn about multiple returned values");
-        MENUITEM_STRING_ESCAPE_SPECIALS = menuLabels.size();
-        menuLabels.push_back("String rendering: escape special characters");
-        MENUITEM_MAP_SORT_KEYS_BY_NAME = menuLabels.size();
-        menuLabels.push_back("Map/array rendering: sort keys by name");
-        MENUITEM_MAP_SORT_KEYS_BY_TYPE = menuLabels.size();
-        menuLabels.push_back("Map/array rendering: sort keys by type");
-        MENUITEM_MAP_SHADOW_LONG_STRINGS = menuLabels.size();
-        menuLabels.push_back("Map/array rendering: shadow long strings");
-        MENUITEM_MAP_SHADOW_BUFFER_STRINGS = menuLabels.size();
-        menuLabels.push_back("Map/array rendering: shadow buffer strings");
-        MENUITEM_MAP_SHADOW_SPECIAL_STRINGS = menuLabels.size();
-        menuLabels.push_back("Map/array rendering: shadow strings with special characters");
-        MENUITEM_HISTORY_SKIP_REPEATED = menuLabels.size();
-        menuLabels.push_back("History: skip repeated commands");
-        MENUITEM_HISTORY_REMOVE_DUPS = menuLabels.size();
-        menuLabels.push_back("History: remove duplicates");
-        MENUITEM_SHOW_MATCHING_HISTORY = menuLabels.size();
-        menuLabels.push_back("History: show matching entries (select with UP)");
-        MENUITEM_DYNAMIC_COMPLETION = menuLabels.size();
-        menuLabels.push_back("Dynamic completion");
-        MENUITEM_AUTO_ACCEPT_COMMON_COMPLETION_PREFIX = menuLabels.size();
-        menuLabels.push_back("Auto-accept common completion prefix");
-        MENUITEM_RESIZE_STATUSBAR_WHEN_FOCUSED = menuLabels.size();
-        menuLabels.push_back("Resize statusbar when focused");
+        MENUITEM_TOGGLE_VISIBILITY = addMenuItem("Enable", itemEnabled|itemCheckable);
+        addMenuItem("", itemEnabled);
+        MENUITEM_HISTORY_CLEAR = addMenuItem("Clear command history", itemEnabled);
+        addMenuItem("", itemEnabled);
+        MENUITEM_PRINT_ALL_RETURNED_VALUES = addMenuItem("Print all returned values", itemEnabled|itemCheckable);
+        MENUITEM_WARN_ABOUT_MULTIPLE_RETURNED_VALUES = addMenuItem("Warn about multiple returned values", itemEnabled|itemCheckable);
+        MENUITEM_STRING_ESCAPE_SPECIALS = addMenuItem("String rendering: escape special characters", itemEnabled|itemCheckable);
+        MENUITEM_MAP_SORT_KEYS_BY_NAME = addMenuItem("Map/array rendering: sort keys by name", itemEnabled|itemCheckable);
+        MENUITEM_MAP_SORT_KEYS_BY_TYPE = addMenuItem("Map/array rendering: sort keys by type", itemEnabled|itemCheckable);
+        MENUITEM_MAP_SHADOW_LONG_STRINGS = addMenuItem("Map/array rendering: shadow long strings", itemEnabled|itemCheckable);
+        MENUITEM_MAP_SHADOW_BUFFER_STRINGS = addMenuItem("Map/array rendering: shadow buffer strings", itemEnabled|itemCheckable);
+        MENUITEM_MAP_SHADOW_SPECIAL_STRINGS = addMenuItem("Map/array rendering: shadow strings with special characters", itemEnabled|itemCheckable);
+        MENUITEM_HISTORY_SKIP_REPEATED = addMenuItem("History: skip repeated commands", itemEnabled|itemCheckable);
+        MENUITEM_HISTORY_REMOVE_DUPS = addMenuItem("History: remove duplicates", itemEnabled|itemCheckable);
+        MENUITEM_SHOW_MATCHING_HISTORY = addMenuItem("History: show matching entries (select with UP)", itemEnabled|itemCheckable);
+        MENUITEM_DYNAMIC_COMPLETION = addMenuItem("Dynamic completion", itemEnabled|itemCheckable);
+        MENUITEM_AUTO_ACCEPT_COMMON_COMPLETION_PREFIX = addMenuItem("Auto-accept common completion prefix", itemEnabled|itemCheckable);
+        MENUITEM_RESIZE_STATUSBAR_WHEN_FOCUSED = addMenuItem("Resize statusbar when focused", itemEnabled|itemCheckable);
 
-        menuState.resize(menuLabels.size());
-        menuHandles.resize(menuLabels.size());
-        if(simAddModuleMenuEntry("Developer tools\nLua Commander", menuHandles.size(), &menuHandles[0]) == -1)
-        {
-            sim::addLog(sim_verbosity_errors, "failed to create menu");
-            return;
-        }
         updateUI();
     }
 
@@ -125,27 +99,29 @@ public:
         SIM_THREAD = NULL;
     }
 
+    int addMenuItem(const std::string &label, int flags)
+    {
+        return sim::moduleEntry("Developer tools\nLua Commander\n" + label, flags);
+    }
+
     void updateMenuItems()
     {
-        menuState[MENUITEM_TOGGLE_VISIBILITY] = (options.enabled ? itemChecked : 0) + itemEnabled;
-        menuState[MENUITEM_HISTORY_CLEAR] = (options.enabled ? itemEnabled : 0);
-        menuState[MENUITEM_PRINT_ALL_RETURNED_VALUES] = (options.enabled ? itemEnabled : 0) + (options.printAllReturnedValues ? itemChecked : 0);
-        menuState[MENUITEM_WARN_ABOUT_MULTIPLE_RETURNED_VALUES] = (options.enabled ? itemEnabled : 0) + (options.warnAboutMultipleReturnedValues ? itemChecked : 0);
-        menuState[MENUITEM_STRING_ESCAPE_SPECIALS] = (options.enabled ? itemEnabled : 0) + (options.stringEscapeSpecials ? itemChecked : 0);
-        menuState[MENUITEM_MAP_SORT_KEYS_BY_NAME] = (options.enabled ? itemEnabled : 0) + (options.mapSortKeysByName ? itemChecked : 0);
-        menuState[MENUITEM_MAP_SORT_KEYS_BY_TYPE] = (options.enabled ? itemEnabled : 0) + (options.mapSortKeysByType ? itemChecked : 0);
-        menuState[MENUITEM_MAP_SHADOW_LONG_STRINGS] = (options.enabled ? itemEnabled : 0) + (options.mapShadowLongStrings ? itemChecked : 0);
-        menuState[MENUITEM_MAP_SHADOW_BUFFER_STRINGS] = (options.enabled ? itemEnabled : 0) + (options.mapShadowBufferStrings ? itemChecked : 0);
-        menuState[MENUITEM_MAP_SHADOW_SPECIAL_STRINGS] = (options.enabled ? itemEnabled : 0) + (options.mapShadowSpecialStrings ? itemChecked : 0);
-        menuState[MENUITEM_HISTORY_SKIP_REPEATED] = (options.enabled ? itemEnabled : 0) + (options.historySkipRepeated ? itemChecked : 0);
-        menuState[MENUITEM_HISTORY_REMOVE_DUPS] = (options.enabled ? itemEnabled : 0) + (options.historyRemoveDups ? itemChecked : 0);
-        menuState[MENUITEM_SHOW_MATCHING_HISTORY] = (options.enabled ? itemEnabled : 0) + (options.showMatchingHistory ? itemChecked : 0);
-        menuState[MENUITEM_DYNAMIC_COMPLETION] = (options.enabled ? itemEnabled : 0) + (options.autoAcceptCommonCompletionPrefix ? itemChecked : 0);
-        menuState[MENUITEM_AUTO_ACCEPT_COMMON_COMPLETION_PREFIX] = (options.enabled ? itemEnabled : 0) + (options.dynamicCompletion ? itemChecked : 0);
-        menuState[MENUITEM_RESIZE_STATUSBAR_WHEN_FOCUSED] = (options.enabled ? itemEnabled : 0) + (options.resizeStatusbarWhenFocused ? itemChecked : 0);
-
-        for(int i = 0; i < menuHandles.size(); i++)
-            simSetModuleMenuItemState(menuHandles[i], menuState[i], menuLabels[i].c_str());
+        sim::moduleEntry(MENUITEM_TOGGLE_VISIBILITY, (options.enabled ? itemChecked : 0) + itemEnabled);
+        sim::moduleEntry(MENUITEM_HISTORY_CLEAR, (options.enabled ? itemEnabled : 0));
+        sim::moduleEntry(MENUITEM_PRINT_ALL_RETURNED_VALUES, (options.enabled ? itemEnabled : 0) + (options.printAllReturnedValues ? itemChecked : 0));
+        sim::moduleEntry(MENUITEM_WARN_ABOUT_MULTIPLE_RETURNED_VALUES, (options.enabled ? itemEnabled : 0) + (options.warnAboutMultipleReturnedValues ? itemChecked : 0));
+        sim::moduleEntry(MENUITEM_STRING_ESCAPE_SPECIALS, (options.enabled ? itemEnabled : 0) + (options.stringEscapeSpecials ? itemChecked : 0));
+        sim::moduleEntry(MENUITEM_MAP_SORT_KEYS_BY_NAME, (options.enabled ? itemEnabled : 0) + (options.mapSortKeysByName ? itemChecked : 0));
+        sim::moduleEntry(MENUITEM_MAP_SORT_KEYS_BY_TYPE, (options.enabled ? itemEnabled : 0) + (options.mapSortKeysByType ? itemChecked : 0));
+        sim::moduleEntry(MENUITEM_MAP_SHADOW_LONG_STRINGS, (options.enabled ? itemEnabled : 0) + (options.mapShadowLongStrings ? itemChecked : 0));
+        sim::moduleEntry(MENUITEM_MAP_SHADOW_BUFFER_STRINGS, (options.enabled ? itemEnabled : 0) + (options.mapShadowBufferStrings ? itemChecked : 0));
+        sim::moduleEntry(MENUITEM_MAP_SHADOW_SPECIAL_STRINGS, (options.enabled ? itemEnabled : 0) + (options.mapShadowSpecialStrings ? itemChecked : 0));
+        sim::moduleEntry(MENUITEM_HISTORY_SKIP_REPEATED, (options.enabled ? itemEnabled : 0) + (options.historySkipRepeated ? itemChecked : 0));
+        sim::moduleEntry(MENUITEM_HISTORY_REMOVE_DUPS, (options.enabled ? itemEnabled : 0) + (options.historyRemoveDups ? itemChecked : 0));
+        sim::moduleEntry(MENUITEM_SHOW_MATCHING_HISTORY, (options.enabled ? itemEnabled : 0) + (options.showMatchingHistory ? itemChecked : 0));
+        sim::moduleEntry(MENUITEM_DYNAMIC_COMPLETION, (options.enabled ? itemEnabled : 0) + (options.autoAcceptCommonCompletionPrefix ? itemChecked : 0));
+        sim::moduleEntry(MENUITEM_AUTO_ACCEPT_COMMON_COMPLETION_PREFIX, (options.enabled ? itemEnabled : 0) + (options.dynamicCompletion ? itemChecked : 0));
+        sim::moduleEntry(MENUITEM_RESIZE_STATUSBAR_WHEN_FOCUSED, (options.enabled ? itemEnabled : 0) + (options.resizeStatusbarWhenFocused ? itemChecked : 0));
     }
 
     void updateUI()
@@ -174,67 +150,67 @@ public:
 
     virtual void onMenuItemSelected(int itemHandle, int itemState)
     {
-        if(itemHandle == menuHandles[MENUITEM_TOGGLE_VISIBILITY])
+        if(itemHandle == MENUITEM_TOGGLE_VISIBILITY)
         {
             options.enabled = !options.enabled;
         }
-        else if(itemHandle == menuHandles[MENUITEM_HISTORY_CLEAR])
+        else if(itemHandle == MENUITEM_HISTORY_CLEAR)
         {
             UIProxy::getInstance()->clearHistory();
         }
-        else if(itemHandle == menuHandles[MENUITEM_PRINT_ALL_RETURNED_VALUES])
+        else if(itemHandle == MENUITEM_PRINT_ALL_RETURNED_VALUES)
         {
             options.printAllReturnedValues = !options.printAllReturnedValues;
         }
-        else if(itemHandle == menuHandles[MENUITEM_WARN_ABOUT_MULTIPLE_RETURNED_VALUES])
+        else if(itemHandle == MENUITEM_WARN_ABOUT_MULTIPLE_RETURNED_VALUES)
         {
             options.warnAboutMultipleReturnedValues = !options.warnAboutMultipleReturnedValues;
         }
-        else if(itemHandle == menuHandles[MENUITEM_STRING_ESCAPE_SPECIALS])
+        else if(itemHandle == MENUITEM_STRING_ESCAPE_SPECIALS)
         {
             options.stringEscapeSpecials = !options.stringEscapeSpecials;
         }
-        else if(itemHandle == menuHandles[MENUITEM_MAP_SORT_KEYS_BY_NAME])
+        else if(itemHandle == MENUITEM_MAP_SORT_KEYS_BY_NAME)
         {
             options.mapSortKeysByName = !options.mapSortKeysByName;
         }
-        else if(itemHandle == menuHandles[MENUITEM_MAP_SORT_KEYS_BY_TYPE])
+        else if(itemHandle == MENUITEM_MAP_SORT_KEYS_BY_TYPE)
         {
             options.mapSortKeysByType = !options.mapSortKeysByType;
         }
-        else if(itemHandle == menuHandles[MENUITEM_MAP_SHADOW_LONG_STRINGS])
+        else if(itemHandle == MENUITEM_MAP_SHADOW_LONG_STRINGS)
         {
             options.mapShadowLongStrings = !options.mapShadowLongStrings;
         }
-        else if(itemHandle == menuHandles[MENUITEM_MAP_SHADOW_BUFFER_STRINGS])
+        else if(itemHandle == MENUITEM_MAP_SHADOW_BUFFER_STRINGS)
         {
             options.mapShadowBufferStrings = !options.mapShadowBufferStrings;
         }
-        else if(itemHandle == menuHandles[MENUITEM_MAP_SHADOW_SPECIAL_STRINGS])
+        else if(itemHandle == MENUITEM_MAP_SHADOW_SPECIAL_STRINGS)
         {
             options.mapShadowSpecialStrings = !options.mapShadowSpecialStrings;
         }
-        else if(itemHandle == menuHandles[MENUITEM_HISTORY_SKIP_REPEATED])
+        else if(itemHandle == MENUITEM_HISTORY_SKIP_REPEATED)
         {
             options.historySkipRepeated = !options.historySkipRepeated;
         }
-        else if(itemHandle == menuHandles[MENUITEM_HISTORY_REMOVE_DUPS])
+        else if(itemHandle == MENUITEM_HISTORY_REMOVE_DUPS)
         {
             options.historyRemoveDups = !options.historyRemoveDups;
         }
-        else if(itemHandle == menuHandles[MENUITEM_SHOW_MATCHING_HISTORY])
+        else if(itemHandle == MENUITEM_SHOW_MATCHING_HISTORY)
         {
             options.showMatchingHistory = !options.showMatchingHistory;
         }
-        else if(itemHandle == menuHandles[MENUITEM_DYNAMIC_COMPLETION])
+        else if(itemHandle == MENUITEM_DYNAMIC_COMPLETION)
         {
             options.dynamicCompletion = !options.dynamicCompletion;
         }
-        else if(itemHandle == menuHandles[MENUITEM_AUTO_ACCEPT_COMMON_COMPLETION_PREFIX])
+        else if(itemHandle == MENUITEM_AUTO_ACCEPT_COMMON_COMPLETION_PREFIX)
         {
             options.autoAcceptCommonCompletionPrefix = !options.autoAcceptCommonCompletionPrefix;
         }
-        else if(itemHandle == menuHandles[MENUITEM_RESIZE_STATUSBAR_WHEN_FOCUSED])
+        else if(itemHandle == MENUITEM_RESIZE_STATUSBAR_WHEN_FOCUSED)
         {
             options.resizeStatusbarWhenFocused = !options.resizeStatusbarWhenFocused;
         }
@@ -498,9 +474,6 @@ private:
     QWidget *splitterChild = 0L;
     QVBoxLayout *layout = 0L;
     QLuaCommanderWidget *commanderWidget = 0L;
-    std::vector<int> menuHandles;
-    std::vector<int> menuState;
-    std::vector<std::string> menuLabels;
     int MENUITEM_TOGGLE_VISIBILITY;
     int MENUITEM_HISTORY_CLEAR;
     int MENUITEM_PRINT_ALL_RETURNED_VALUES;
@@ -517,7 +490,7 @@ private:
     int MENUITEM_DYNAMIC_COMPLETION;
     int MENUITEM_AUTO_ACCEPT_COMMON_COMPLETION_PREFIX;
     int MENUITEM_RESIZE_STATUSBAR_WHEN_FOCUSED;
-    static const int itemEnabled = 1, itemChecked = 2;
+    static const int itemEnabled = 1, itemChecked = 2, itemCheckable = 4;
 };
 
 SIM_PLUGIN(PLUGIN_NAME, PLUGIN_VERSION, Plugin)
