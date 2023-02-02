@@ -35,13 +35,13 @@ set(SOURCES
     PersistentOptions.cpp
     qluacommanderwidget.cpp
     qcommandedit.cpp
-    ${COPPELIASIM_COMMON_DIR}/stack/stackObject.cpp
-    ${COPPELIASIM_COMMON_DIR}/stack/stackNull.cpp
-    ${COPPELIASIM_COMMON_DIR}/stack/stackBool.cpp
-    ${COPPELIASIM_COMMON_DIR}/stack/stackNumber.cpp
-    ${COPPELIASIM_COMMON_DIR}/stack/stackString.cpp
-    ${COPPELIASIM_COMMON_DIR}/stack/stackArray.cpp
-    ${COPPELIASIM_COMMON_DIR}/stack/stackMap.cpp
+    ${COPPELIASIM_INCLUDE_DIR}/stack/stackObject.cpp
+    ${COPPELIASIM_INCLUDE_DIR}/stack/stackNull.cpp
+    ${COPPELIASIM_INCLUDE_DIR}/stack/stackBool.cpp
+    ${COPPELIASIM_INCLUDE_DIR}/stack/stackNumber.cpp
+    ${COPPELIASIM_INCLUDE_DIR}/stack/stackString.cpp
+    ${COPPELIASIM_INCLUDE_DIR}/stack/stackArray.cpp
+    ${COPPELIASIM_INCLUDE_DIR}/stack/stackMap.cpp
 )
 
 set(LIBRARIES
