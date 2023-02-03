@@ -9,7 +9,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include "UIFunctions.h"
 #include "UIProxy.h"
-#include "simPlusPlus/Plugin.h"
+#include <simPlusPlus/Plugin.h>
 #include "plugin.h"
 #include "stubs.h"
 #include "config.h"

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <boost/format.hpp>
 
-#include "simLib.h"
+#include <simPlusPlus/Lib.h>
 #include "plugin.h"
 #include "stubs.h"
 #include "config.h"

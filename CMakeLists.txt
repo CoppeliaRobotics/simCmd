@@ -35,13 +35,13 @@ set(SOURCES
     PersistentOptions.cpp
     qluacommanderwidget.cpp
     qcommandedit.cpp
-    ${COPPELIASIM_INCLUDE_DIR}/stack/stackObject.cpp
-    ${COPPELIASIM_INCLUDE_DIR}/stack/stackNull.cpp
-    ${COPPELIASIM_INCLUDE_DIR}/stack/stackBool.cpp
-    ${COPPELIASIM_INCLUDE_DIR}/stack/stackNumber.cpp
-    ${COPPELIASIM_INCLUDE_DIR}/stack/stackString.cpp
-    ${COPPELIASIM_INCLUDE_DIR}/stack/stackArray.cpp
-    ${COPPELIASIM_INCLUDE_DIR}/stack/stackMap.cpp
+    ${COPPELIASIM_INCLUDE_DIR}/simStack/stackObject.cpp
+    ${COPPELIASIM_INCLUDE_DIR}/simStack/stackNull.cpp
+    ${COPPELIASIM_INCLUDE_DIR}/simStack/stackBool.cpp
+    ${COPPELIASIM_INCLUDE_DIR}/simStack/stackNumber.cpp
+    ${COPPELIASIM_INCLUDE_DIR}/simStack/stackString.cpp
+    ${COPPELIASIM_INCLUDE_DIR}/simStack/stackArray.cpp
+    ${COPPELIASIM_INCLUDE_DIR}/simStack/stackMap.cpp
 )
 
 set(LIBRARIES
@@ -53,7 +53,6 @@ set(LIBRARIES
 )
 
 coppeliasim_add_plugin(simExtLuaCmd SOURCES ${SOURCES})
-target_include_directories(simExtLuaCmd PRIVATE ${COPPELIASIM_INCLUDE_DIR}/stack)
 option(CUSTOM_TOOLTIP_WINDOW "use a custom tooltip window class instead of the default tooltip")
 if(CUSTOM_TOOLTIP_WINDOW)
     target_compile_definitions(simExtLuaCmd PRIVATE -DCUSTOM_TOOLTIP_WINDOW)
