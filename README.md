@@ -8,7 +8,7 @@ Requires CoppeliaSim version 3.5.1 or greater.
 
 ### Compiling
 
-1. Install required packages for [libPlugin](https://github.com/CoppeliaRobotics/libPlugin): see libPlugin's README
+1. Install required packages for simStubsGen: see simStubsGen's [README](https://github.com/CoppeliaRobotics/include/blob/master/simStubsGen/README.md)
 2. Download and install Qt (same version as CoppeliaSim, i.e. 5.9)
 3. Checkout, compile and install into CoppeliaSim:
 ```sh
