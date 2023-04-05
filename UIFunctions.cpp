@@ -516,7 +516,7 @@ void UIFunctions::setConvenienceVars(int scriptHandleOrType, QString scriptName,
         QString sel = QString("SEL=sim.getObjectSel()@%1").arg(scriptName);
         sim::executeScriptString(scriptHandleOrType, sel.toStdString(), stackHandle);
 
-        QString sel0 = QString("SEL1=SEL[1]@%1").arg(scriptName);
+        QString sel0 = QString("SEL1=SEL[#SEL]@%1").arg(scriptName);
         sim::executeScriptString(scriptHandleOrType, sel0.toStdString(), stackHandle);
     }
     catch(sim::api_error &ex)
