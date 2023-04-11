@@ -38,7 +38,7 @@ html_help = [[
         <ul>
             <li><b>H</b>: (function) alias for sim.getObject, e.g. H'/foo' as a shortcut for sim.getObject('/foo'); it also accepts TAB-completion.</li>
             <li><b>SEL</b>: (table) the current object selection, i.e. a list of handles.</li>
-            <li><b>SEL1</b>: (int) the first selected object, i.e. SEL[1].</li>
+            <li><b>SEL1</b>: (int) the last selected object, i.e. SEL[#SEL].</li>
         </ul>
 
         <h3>Misc. utility functions</h3>
