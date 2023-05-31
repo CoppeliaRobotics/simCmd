@@ -10,14 +10,14 @@
 #include "stubs.h"
 #include "PersistentOptions.h"
 
-class UIFunctions : public QObject
+class SIM : public QObject
 {
     Q_OBJECT
 
 public:
-    virtual ~UIFunctions();
+    virtual ~SIM();
 
-    static UIFunctions * getInstance(QObject *parent = 0);
+    static SIM * getInstance(QObject *parent = 0);
     static void destroyInstance();
 
     void connectSignals();
@@ -36,9 +36,9 @@ public slots:
 
 private:
 
-    UIFunctions(QObject *parent = 0);
+    SIM(QObject *parent = 0);
 
-    static UIFunctions *instance;
+    static SIM *instance;
 
     std::string getStackTopAsString(int stackHandle, const PersistentOptions &opts, int depth = 0, bool quoteStrings = true, bool insideTable = false, std::string *strType = nullptr);
 

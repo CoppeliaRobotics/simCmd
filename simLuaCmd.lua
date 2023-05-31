@@ -1,4 +1,4 @@
-local simLuaCmd={}
+local simLuaCmd=loadPlugin'simLuaCmd'
 
 html_help = [[
         <h2>LuaCommander plugin</h2>
@@ -56,5 +56,7 @@ function help()
         ui = simUI.create('<ui title="LuaCommander Plugin" closeable="true" on-close="help" modal="true" size="440,520"><text-browser text="'..string.gsub(html_help,'"','&quot;')..'" /></ui>')
     end
 end
+
+(require'simLuaCmd-typecheck')(simLuaCmd)
 
 return simLuaCmd

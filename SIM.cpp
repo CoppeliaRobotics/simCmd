@@ -1,5 +1,5 @@
-#include "UIFunctions.h"
-#include "UIProxy.h"
+#include "SIM.h"
+#include "UI.h"
 #include "stubs.h"
 #include <simPlusPlus/Lib.h>
 #include <simStack/stackObject.h>
@@ -17,54 +17,54 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <QRegExp>
 
-// UIFunctions is a singleton
+// SIM is a singleton
 
-UIFunctions *UIFunctions::instance = NULL;
+SIM *SIM::instance = NULL;
 
-UIFunctions::UIFunctions(QObject *parent)
+SIM::SIM(QObject *parent)
     : QObject(parent)
 {
-    connectSignals();
     initStringRenderingFlags();
 }
 
-UIFunctions::~UIFunctions()
+SIM::~SIM()
 {
-    UIFunctions::instance = NULL;
+    SIM::instance = NULL;
 }
 
-UIFunctions * UIFunctions::getInstance(QObject *parent)
+SIM * SIM::getInstance(QObject *parent)
 {
-    if(!UIFunctions::instance)
+    if(!SIM::instance)
     {
-        UIFunctions::instance = new UIFunctions(parent);
+        SIM::instance = new SIM(parent);
 
         simThread(); // we remember of this currentThreadId as the "SIM" thread
 
-        sim::addLog(sim_verbosity_debug, "UIFunctions(%x) constructed in thread %s", UIFunctions::instance, QThread::currentThreadId());
+        sim::addLog(sim_verbosity_debug, "SIM(%x) constructed in thread %s", SIM::instance, QThread::currentThreadId());
     }
-    return UIFunctions::instance;
+    return SIM::instance;
 }
 
-void UIFunctions::destroyInstance()
+void SIM::destroyInstance()
 {
     TRACE_FUNC;
 
-    if(UIFunctions::instance)
+    if(SIM::instance)
     {
-        delete UIFunctions::instance;
-        UIFunctions::instance = nullptr;
+        delete SIM::instance;
+        SIM::instance = nullptr;
 
-        sim::addLog(sim_verbosity_debug, "destroyed UIFunctions instance");
+        sim::addLog(sim_verbosity_debug, "destroyed SIM instance");
     }
 }
 
-void UIFunctions::connectSignals()
+void SIM::connectSignals()
 {
-    UIProxy *uiproxy = UIProxy::getInstance();
-    // connect signals/slots from UIProxy to UIFunctions and vice-versa
-    connect(uiproxy, &UIProxy::execCode, this, &UIFunctions::onExecCode);
-    connect(uiproxy, &UIProxy::clearHistory, this, &UIFunctions::clearHistory);
+    UI *ui = UI::getInstance();
+    SIM *sim = this;
+    // connect signals/slots from UI to SIM and vice-versa
+    connect(ui, &UI::execCode, sim, &SIM::onExecCode);
+    connect(ui, &UI::clearHistory, sim, &SIM::clearHistory);
 }
 
 QStringList loadHistoryData()
@@ -102,13 +102,13 @@ void saveHistoryData(QStringList hist)
     }
 }
 
-void UIFunctions::loadHistory()
+void SIM::loadHistory()
 {
     QStringList hist = loadHistoryData();
     emit historyChanged(hist);
 }
 
-void UIFunctions::clearHistory()
+void SIM::clearHistory()
 {
     QStringList hist;
     saveHistoryData(hist);
@@ -121,7 +121,7 @@ inline void reverse(QStringList &lst)
         std::swap(lst[i], lst[lst.size() - i - 1]);
 }
 
-void UIFunctions::appendHistory(QString cmd)
+void SIM::appendHistory(QString cmd)
 {
     QStringList hist = loadHistoryData();
 
@@ -147,7 +147,7 @@ void UIFunctions::appendHistory(QString cmd)
     emit historyChanged(hist);
 }
 
-void UIFunctions::setOptions(const PersistentOptions &options)
+void SIM::setOptions(const PersistentOptions &options)
 {
     this->options = options;
 }
@@ -182,7 +182,7 @@ std::string escapeSpecialChars(std::string s)
     return ss.str();
 }
 
-std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOptions &opts, int depth, bool quoteStrings, bool insideTable, std::string *strType)
+std::string SIM::getStackTopAsString(int stackHandle, const PersistentOptions &opts, int depth, bool quoteStrings, bool insideTable, std::string *strType)
 {
     if(sim::isStackValueNull(stackHandle) == 1)
     {
@@ -382,7 +382,7 @@ std::string UIFunctions::getStackTopAsString(int stackHandle, const PersistentOp
     }
 }
 
-void UIFunctions::initStringRenderingFlags()
+void SIM::initStringRenderingFlags()
 {
     stringRenderingFlags.clear();
     stringRenderingFlags << "retvals";
@@ -392,7 +392,7 @@ void UIFunctions::initStringRenderingFlags()
     stringRenderingFlags << "escape";
 }
 
-QStringList UIFunctions::getMatchingStringRenderingFlags(QString shortFlag)
+QStringList SIM::getMatchingStringRenderingFlags(QString shortFlag)
 {
     QStringList ret;
     foreach(const QString &flag, stringRenderingFlags)
@@ -403,7 +403,7 @@ QStringList UIFunctions::getMatchingStringRenderingFlags(QString shortFlag)
     return ret;
 }
 
-void UIFunctions::parseStringRenderingFlags(PersistentOptions *popts, const QString &code)
+void SIM::parseStringRenderingFlags(PersistentOptions *popts, const QString &code)
 {
     int index = code.lastIndexOf("--");
     if(index == -1) return;
@@ -454,22 +454,22 @@ void UIFunctions::parseStringRenderingFlags(PersistentOptions *popts, const QStr
     }
 }
 
-void UIFunctions::showMessage(QString s)
+void SIM::showMessage(QString s)
 {
     sim::addLog(sim_verbosity_msgs|sim_verbosity_undecorated, s.toStdString());
 }
 
-void UIFunctions::showWarning(QString s)
+void SIM::showWarning(QString s)
 {
     sim::addLog(sim_verbosity_scriptwarnings|sim_verbosity_undecorated, s.toStdString());
 }
 
-void UIFunctions::showError(QString s)
+void SIM::showError(QString s)
 {
     sim::addLog(sim_verbosity_scripterrors|sim_verbosity_undecorated, s.toStdString());
 }
 
-void UIFunctions::onAskCompletion(int scriptHandleOrType, QString scriptName, QString token, QChar context)
+void SIM::onAskCompletion(int scriptHandleOrType, QString scriptName, QString token, QChar context)
 {
     ASSERT_THREAD(!UI);
 
@@ -485,7 +485,7 @@ void UIFunctions::onAskCompletion(int scriptHandleOrType, QString scriptName, QS
     emit setCompletion(cl2);
 }
 
-void UIFunctions::setConvenienceVars(int scriptHandleOrType, QString scriptName, int stackHandle, bool check)
+void SIM::setConvenienceVars(int scriptHandleOrType, QString scriptName, int stackHandle, bool check)
 {
     if(check)
     {
@@ -525,7 +525,7 @@ void UIFunctions::setConvenienceVars(int scriptHandleOrType, QString scriptName,
     }
 }
 
-void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scriptName)
+void SIM::onExecCode(QString code, int scriptHandleOrType, QString scriptName)
 {
     ASSERT_THREAD(!UI);
 
@@ -599,7 +599,7 @@ void UIFunctions::onExecCode(QString code, int scriptHandleOrType, QString scrip
     }
 }
 
-QStringList UIFunctions::getCompletion(int scriptHandleOrType, QString scriptName, QString word, QChar context)
+QStringList SIM::getCompletion(int scriptHandleOrType, QString scriptName, QString word, QChar context)
 {
     QStringList result;
 
@@ -611,7 +611,7 @@ QStringList UIFunctions::getCompletion(int scriptHandleOrType, QString scriptNam
     return result;
 }
 
-QStringList UIFunctions::getCompletionID(int scriptHandleOrType, QString scriptName, QString word)
+QStringList SIM::getCompletionID(int scriptHandleOrType, QString scriptName, QString word)
 {
     ASSERT_THREAD(!UI);
 
@@ -690,7 +690,7 @@ QStringList UIFunctions::getCompletionID(int scriptHandleOrType, QString scriptN
     return result;
 }
 
-QStringList UIFunctions::getCompletionObjName(QString word)
+QStringList SIM::getCompletionObjName(QString word)
 {
     ASSERT_THREAD(!UI);
 
@@ -710,7 +710,7 @@ static inline bool isID(QChar c)
     return c.isLetterOrNumber() || c == '_' || c == '.';
 }
 
-void UIFunctions::onAskCallTip(int scriptHandleOrType, QString input, int pos)
+void SIM::onAskCallTip(int scriptHandleOrType, QString input, int pos)
 {
     auto getApiInfo = [=](const int &scriptHandleOrType, const QString &symbol)
     {

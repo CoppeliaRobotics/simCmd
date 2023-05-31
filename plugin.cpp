@@ -7,8 +7,8 @@
 #include <boost/format.hpp>
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include "UIFunctions.h"
-#include "UIProxy.h"
+#include "SIM.h"
+#include "UI.h"
 #include <simPlusPlus/Plugin.h>
 #include "plugin.h"
 #include "stubs.h"
@@ -22,30 +22,42 @@
 class Plugin : public sim::Plugin
 {
 public:
-    void onStart()
+    void onInit() override
     {
-        firstInstancePass = true;
-        pluginEnabled = true;
-
-        UIProxy::getInstance(); // construct UIProxy here (UI thread)
-
-        // find the StatusBar widget (QPlainTextEdit)
-        statusBar = UIProxy::simMainWindow->findChild<QPlainTextEdit*>("statusBar");
-        if(!statusBar)
-            throw std::runtime_error("cannot find the statusbar widget");
-
         if(!registerScriptStuff())
             throw std::runtime_error("failed to register script stuff");
 
         setExtVersion("Lua REPL (read-eval-print-loop) Plugin");
         setBuildDate(BUILD_DATE);
 
+        SIM::getInstance(); // construct SIM here (SIM thread)
+
         optionsChangedFromGui.store(false);
         optionsChangedFromData.store(false);
 
+        addMenuItems();
+    }
+
+    void onCleanup() override
+    {
+        SIM::destroyInstance();
+        SIM_THREAD = NULL;
+    }
+
+    void onUIInit() override
+    {
+        firstInstancePass = true;
+
+        UI::getInstance(); // construct UI here (UI thread)
+
+        // find the StatusBar widget (QPlainTextEdit)
+        statusBar = UI::simMainWindow->findChild<QPlainTextEdit*>("statusBar");
+        if(!statusBar)
+            throw std::runtime_error("cannot find the statusbar widget");
+
         // attach widget to CoppeliaSim main window
         splitter = (QSplitter*)statusBar->parentWidget();
-        UIProxy::getInstance()->setStatusBar(statusBar, splitter);
+        UI::getInstance()->setStatusBar(statusBar, splitter);
         splitterChild = new QWidget();
         splitter->replaceWidget(1,splitterChild);
         layout = new QVBoxLayout();
@@ -59,7 +71,28 @@ public:
         layout->addWidget(commanderWidget);
         splitterChild->setMaximumHeight(600);
 
-        // add menu items to CoppeliaSim main window
+        updateUI();
+    }
+
+    void onUICleanup() override
+    {
+        if(commanderWidget)
+        {
+            layout->removeWidget(statusBar);
+            delete splitter->replaceWidget(1, statusBar);
+        }
+
+        UI::destroyInstance();
+        UI_THREAD = NULL;
+    }
+
+    int addMenuItem(const std::string &label, int flags)
+    {
+        return sim::moduleEntry("Developer tools\nLua Commander\n" + label, flags);
+    }
+
+    void addMenuItems()
+    {
         MENUITEM_TOGGLE_VISIBILITY = addMenuItem("Enable", itemEnabled|itemCheckable);
         addMenuItem("", itemEnabled);
         MENUITEM_HISTORY_CLEAR = addMenuItem("Clear command history", itemEnabled);
@@ -78,30 +111,6 @@ public:
         MENUITEM_DYNAMIC_COMPLETION = addMenuItem("Dynamic completion", itemEnabled|itemCheckable);
         MENUITEM_AUTO_ACCEPT_COMMON_COMPLETION_PREFIX = addMenuItem("Auto-accept common completion prefix", itemEnabled|itemCheckable);
         MENUITEM_RESIZE_STATUSBAR_WHEN_FOCUSED = addMenuItem("Resize statusbar when focused", itemEnabled|itemCheckable);
-
-        updateUI();
-    }
-
-    void onEnd()
-    {
-        if(commanderWidget)
-        {
-            layout->removeWidget(statusBar);
-            delete splitter->replaceWidget(1, statusBar);
-        }
-        UIProxy::destroyInstance();
-        UI_THREAD = NULL;
-    }
-
-    void onLastInstancePass()
-    {
-        UIFunctions::destroyInstance();
-        SIM_THREAD = NULL;
-    }
-
-    int addMenuItem(const std::string &label, int flags)
-    {
-        return sim::moduleEntry("Developer tools\nLua Commander\n" + label, flags);
     }
 
     void updateMenuItems()
@@ -126,29 +135,27 @@ public:
 
     void updateUI()
     {
-        updateMenuItems();
-        if(commanderWidget)
+        if(!commanderWidget) return;
+
+        bool oldVis = commanderWidget->isVisible();
+
+        if(!firstInstancePass)
+            commanderWidget->setVisible(options.enabled);
+
+        bool newVis = commanderWidget->isVisible();
+        if(oldVis && !newVis)
         {
-            bool oldVis = commanderWidget->isVisible();
-
-            if(!firstInstancePass)
-                commanderWidget->setVisible(options.enabled);
-
-            bool newVis = commanderWidget->isVisible();
-            if(oldVis && !newVis)
-            {
-                // when commander is hidden, focus the statusbar
-                statusBar->setFocus();
-            }
-            else if(!oldVis && newVis)
-            {
-                // when it is shown, focus it
-                commanderWidget->editor_()->setFocus();
-            }
+            // when commander is hidden, focus the statusbar
+            statusBar->setFocus();
+        }
+        else if(!oldVis && newVis)
+        {
+            // when it is shown, focus it
+            commanderWidget->editor_()->setFocus();
         }
     }
 
-    virtual void onMenuItemSelected(int itemHandle, int itemState)
+    void onUIMenuItemSelected(int itemHandle, int itemState) override
     {
         if(itemHandle == MENUITEM_TOGGLE_VISIBILITY)
         {
@@ -156,7 +163,7 @@ public:
         }
         else if(itemHandle == MENUITEM_HISTORY_CLEAR)
         {
-            UIProxy::getInstance()->clearHistory();
+            UI::getInstance()->clearHistory();
         }
         else if(itemHandle == MENUITEM_PRINT_ALL_RETURNED_VALUES)
         {
@@ -221,16 +228,6 @@ public:
         commanderWidget->setOptions(options);
     }
 
-    virtual void onGuiPass()
-    {
-        if(optionsChangedFromData.load())
-        {
-            optionsChangedFromData.store(false);
-            updateUI();
-            commanderWidget->setOptions(options);
-        }
-    }
-
     void updateScriptsList()
     {
         bool isRunning = sim::getSimulationState() == sim_simulation_advancing_running;
@@ -249,10 +246,20 @@ public:
             if(customizationScript != -1)
                 customizationScripts[handle] = name;
         }
-        UIFunctions::getInstance()->scriptListChanged(childScripts, customizationScripts, isRunning);
+        SIM::getInstance()->scriptListChanged(childScripts, customizationScripts, isRunning);
     }
 
-    virtual void onInstancePass(const sim::InstancePassFlags &flags, bool first)
+    void onUIPass() override
+    {
+        if(optionsChangedFromData.load())
+        {
+            optionsChangedFromData.store(false);
+            updateUI();
+            commanderWidget->setOptions(options);
+        }
+    }
+
+    void onInstancePass(const sim::InstancePassFlags &flags) override
     {
         if(!commanderWidget) return;
 
@@ -262,19 +269,21 @@ public:
 
             int id = qRegisterMetaType< QMap<int,QString> >();
 
-            UIFunctions::getInstance(); // construct UIFunctions here (SIM thread)
-            QObject::connect(commanderWidget, &QLuaCommanderWidget::execCode, UIFunctions::getInstance(), &UIFunctions::onExecCode);
-            QObject::connect(commanderWidget, &QLuaCommanderWidget::askCompletion, UIFunctions::getInstance(), &UIFunctions::onAskCompletion);
-            QObject::connect(UIFunctions::getInstance(), &UIFunctions::scriptListChanged, commanderWidget, &QLuaCommanderWidget::onScriptListChanged);
-            QObject::connect(UIFunctions::getInstance(), &UIFunctions::setCompletion, commanderWidget, &QLuaCommanderWidget::onSetCompletion);
-            QObject::connect(commanderWidget, &QLuaCommanderWidget::askCallTip, UIFunctions::getInstance(), &UIFunctions::onAskCallTip);
-            QObject::connect(UIFunctions::getInstance(), &UIFunctions::setCallTip, commanderWidget, &QLuaCommanderWidget::onSetCallTip);
-            QObject::connect(UIFunctions::getInstance(), &UIFunctions::historyChanged, commanderWidget, &QLuaCommanderWidget::setHistory);
+            SIM *sim = SIM::getInstance();
+            QObject::connect(commanderWidget, &QLuaCommanderWidget::execCode, sim, &SIM::onExecCode);
+            QObject::connect(commanderWidget, &QLuaCommanderWidget::askCompletion, sim, &SIM::onAskCompletion);
+            QObject::connect(sim, &SIM::scriptListChanged, commanderWidget, &QLuaCommanderWidget::onScriptListChanged);
+            QObject::connect(sim, &SIM::setCompletion, commanderWidget, &QLuaCommanderWidget::onSetCompletion);
+            QObject::connect(commanderWidget, &QLuaCommanderWidget::askCallTip, sim, &SIM::onAskCallTip);
+            QObject::connect(sim, &SIM::setCallTip, commanderWidget, &QLuaCommanderWidget::onSetCallTip);
+            QObject::connect(sim, &SIM::historyChanged, commanderWidget, &QLuaCommanderWidget::setHistory);
             options.load();
-            UIFunctions::getInstance()->setOptions(options);
-            UIFunctions::getInstance()->loadHistory();
+            sim->setOptions(options);
+            sim->loadHistory();
             optionsChangedFromData.store(true);
         }
+
+        updateMenuItems();
 
         if(commanderWidget->closeFlag.load())
         {
@@ -288,7 +297,7 @@ public:
         {
             optionsChangedFromGui.store(false);
             options.save();
-            UIFunctions::getInstance()->setOptions(options);
+            SIM::getInstance()->setOptions(options);
             updateUI();
         }
 
@@ -302,7 +311,7 @@ public:
     {
         options.enabled = in->b;
         options.save();
-        UIFunctions::getInstance()->setOptions(options);
+        SIM::getInstance()->setOptions(options);
         optionsChangedFromData.store(true);
     }
 
@@ -310,7 +319,7 @@ public:
     {
         options.printAllReturnedValues = in->b;
         options.save();
-        UIFunctions::getInstance()->setOptions(options);
+        SIM::getInstance()->setOptions(options);
         optionsChangedFromData.store(true);
     }
 
@@ -318,7 +327,7 @@ public:
     {
         options.warnAboutMultipleReturnedValues = in->b;
         options.save();
-        UIFunctions::getInstance()->setOptions(options);
+        SIM::getInstance()->setOptions(options);
         optionsChangedFromData.store(true);
     }
 
@@ -326,7 +335,7 @@ public:
     {
         options.arrayMaxItemsDisplayed = in->n;
         options.save();
-        UIFunctions::getInstance()->setOptions(options);
+        SIM::getInstance()->setOptions(options);
         optionsChangedFromData.store(true);
     }
 
@@ -334,7 +343,7 @@ public:
     {
         options.stringLongLimit = in->n;
         options.save();
-        UIFunctions::getInstance()->setOptions(options);
+        SIM::getInstance()->setOptions(options);
         optionsChangedFromData.store(true);
     }
 
@@ -342,7 +351,7 @@ public:
     {
         options.stringEscapeSpecials = in->b;
         options.save();
-        UIFunctions::getInstance()->setOptions(options);
+        SIM::getInstance()->setOptions(options);
         optionsChangedFromData.store(true);
     }
 
@@ -350,7 +359,7 @@ public:
     {
         options.mapSortKeysByName = in->b;
         options.save();
-        UIFunctions::getInstance()->setOptions(options);
+        SIM::getInstance()->setOptions(options);
         optionsChangedFromData.store(true);
     }
 
@@ -358,7 +367,7 @@ public:
     {
         options.mapSortKeysByType = in->b;
         options.save();
-        UIFunctions::getInstance()->setOptions(options);
+        SIM::getInstance()->setOptions(options);
         optionsChangedFromData.store(true);
     }
 
@@ -366,7 +375,7 @@ public:
     {
         options.mapShadowLongStrings = in->b;
         options.save();
-        UIFunctions::getInstance()->setOptions(options);
+        SIM::getInstance()->setOptions(options);
         optionsChangedFromData.store(true);
     }
 
@@ -374,7 +383,7 @@ public:
     {
         options.mapShadowBufferStrings = in->b;
         options.save();
-        UIFunctions::getInstance()->setOptions(options);
+        SIM::getInstance()->setOptions(options);
         optionsChangedFromData.store(true);
     }
 
@@ -382,7 +391,7 @@ public:
     {
         options.mapShadowSpecialStrings = in->b;
         options.save();
-        UIFunctions::getInstance()->setOptions(options);
+        SIM::getInstance()->setOptions(options);
         optionsChangedFromData.store(true);
     }
 
@@ -390,7 +399,7 @@ public:
     {
         options.floatPrecision = in->n;
         options.save();
-        UIFunctions::getInstance()->setOptions(options);
+        SIM::getInstance()->setOptions(options);
         optionsChangedFromData.store(true);
     }
 
@@ -398,20 +407,20 @@ public:
     {
         options.mapMaxDepth = in->n;
         options.save();
-        UIFunctions::getInstance()->setOptions(options);
+        SIM::getInstance()->setOptions(options);
         optionsChangedFromData.store(true);
     }
 
     void clearHistory(clearHistory_in *in, clearHistory_out *out)
     {
-        UIFunctions::getInstance()->clearHistory();
+        SIM::getInstance()->clearHistory();
     }
 
     void setHistorySize(setHistorySize_in *in, setHistorySize_out *out)
     {
         options.historySize = in->n;
         options.save();
-        UIFunctions::getInstance()->setOptions(options);
+        SIM::getInstance()->setOptions(options);
         optionsChangedFromData.store(true);
     }
 
@@ -419,7 +428,7 @@ public:
     {
         options.historySkipRepeated = in->b;
         options.save();
-        UIFunctions::getInstance()->setOptions(options);
+        SIM::getInstance()->setOptions(options);
         optionsChangedFromData.store(true);
     }
 
@@ -427,7 +436,7 @@ public:
     {
         options.historyRemoveDups = in->b;
         options.save();
-        UIFunctions::getInstance()->setOptions(options);
+        SIM::getInstance()->setOptions(options);
         optionsChangedFromData.store(true);
     }
 
@@ -435,7 +444,7 @@ public:
     {
         options.showMatchingHistory = in->b;
         options.save();
-        UIFunctions::getInstance()->setOptions(options);
+        SIM::getInstance()->setOptions(options);
         optionsChangedFromData.store(true);
     }
 
@@ -443,7 +452,7 @@ public:
     {
         options.dynamicCompletion = in->b;
         options.save();
-        UIFunctions::getInstance()->setOptions(options);
+        SIM::getInstance()->setOptions(options);
         optionsChangedFromData.store(true);
     }
 
@@ -451,7 +460,7 @@ public:
     {
         options.autoAcceptCommonCompletionPrefix = in->b;
         options.save();
-        UIFunctions::getInstance()->setOptions(options);
+        SIM::getInstance()->setOptions(options);
         optionsChangedFromData.store(true);
     }
 
@@ -459,7 +468,7 @@ public:
     {
         options.resizeStatusbarWhenFocused = in->b;
         options.save();
-        UIFunctions::getInstance()->setOptions(options);
+        SIM::getInstance()->setOptions(options);
         optionsChangedFromData.store(true);
     }
 
@@ -468,7 +477,6 @@ private:
     std::atomic<bool> optionsChangedFromData;
     PersistentOptions options;
     bool firstInstancePass = true;
-    bool pluginEnabled = true;
     QPlainTextEdit *statusBar;
     QSplitter *splitter = 0L;
     QWidget *splitterChild = 0L;
@@ -493,5 +501,5 @@ private:
     static const int itemEnabled = 1, itemChecked = 2, itemCheckable = 4;
 };
 
-SIM_PLUGIN(PLUGIN_NAME, PLUGIN_VERSION, Plugin)
+SIM_UI_PLUGIN(PLUGIN_NAME, PLUGIN_VERSION, Plugin)
 #include "stubsPlusPlus.cpp"

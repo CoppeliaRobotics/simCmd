@@ -1,6 +1,6 @@
 #include "qluacommanderwidget.h"
-#include "UIProxy.h"
-#include "UIFunctions.h"
+#include "UI.h"
+#include "SIM.h"
 #include <boost/format.hpp>
 #include <QHBoxLayout>
 #include <QKeyEvent>
@@ -144,7 +144,7 @@ void QLuaCommanderEdit::keyPressEvent(QKeyEvent *event)
 QLuaCommanderWidget::QLuaCommanderWidget(QWidget *parent)
     : QWidget(parent)
 {
-    statusbarSize = UIProxy::getInstance()->getStatusbarSize();
+    statusbarSize = UI::getInstance()->getStatusbarSize();
     const int k = 100;
     statusbarSizeFocused.push_back(statusbarSize[0] - k);
     statusbarSizeFocused.push_back(statusbarSize[1] + k);
@@ -296,8 +296,8 @@ void QLuaCommanderWidget::expandStatusbar()
 {
     if(!statusbarExpanded)
     {
-        statusbarSize = UIProxy::getInstance()->getStatusbarSize();
-        UIProxy::getInstance()->setStatusbarSize(statusbarSizeFocused);
+        statusbarSize = UI::getInstance()->getStatusbarSize();
+        UI::getInstance()->setStatusbarSize(statusbarSizeFocused);
         statusbarExpanded = true;
     }
 }
@@ -306,8 +306,8 @@ void QLuaCommanderWidget::contractStatusbar()
 {
     if(statusbarExpanded)
     {
-        statusbarSizeFocused = UIProxy::getInstance()->getStatusbarSize();
-        UIProxy::getInstance()->setStatusbarSize(statusbarSize);
+        statusbarSizeFocused = UI::getInstance()->getStatusbarSize();
+        UI::getInstance()->setStatusbarSize(statusbarSize);
         statusbarExpanded = false;
     }
 }
@@ -322,7 +322,7 @@ void QLuaCommanderWidget::onGlobalFocusChanged(QWidget *old, QWidget *now)
 
     sim::addLog(sim_verbosity_debug, "focusChanged: old=%s, new=%s", old ? old->metaObject()->className() : "null", now ? now->metaObject()->className() : "null");
 
-    QPlainTextEdit *statusBar = UIProxy::getInstance()->getStatusBar();
+    QPlainTextEdit *statusBar = UI::getInstance()->getStatusBar();
 
     if(old == editor && now == statusBar)
     {

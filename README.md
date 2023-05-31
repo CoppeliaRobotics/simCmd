@@ -12,8 +12,8 @@ Requires CoppeliaSim version 3.5.1 or greater.
 2. Download and install Qt (same version as CoppeliaSim, i.e. 5.9)
 3. Checkout, compile and install into CoppeliaSim:
 ```sh
-$ git clone https://github.com/CoppeliaRobotics/simExtLuaCmd.git
-$ cd simExtLuaCmd
+$ git clone https://github.com/CoppeliaRobotics/simLuaCmd.git
+$ cd simLuaCmd
 $ git checkout coppeliasim-v4.5.0-rev0
 $ mkdir -p build && cd build
 $ cmake -DCMAKE_BUILD_TYPE=Release ..

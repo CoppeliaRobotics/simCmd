@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.11)
-project(simExtLuaCmd)
+project(simLuaCmd)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
@@ -29,8 +29,8 @@ coppeliasim_generate_stubs(${CMAKE_CURRENT_BINARY_DIR}/generated XML_FILE ${CMAK
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 set(SOURCES
-    UIFunctions.cpp
-    UIProxy.cpp
+    SIM.cpp
+    UI.cpp
     plugin.cpp
     PersistentOptions.cpp
     qluacommanderwidget.cpp
@@ -52,14 +52,14 @@ set(LIBRARIES
     Qt5::PrintSupport
 )
 
-coppeliasim_add_plugin(simExtLuaCmd SOURCES ${SOURCES})
+coppeliasim_add_plugin(simLuaCmd SOURCES ${SOURCES})
 option(CUSTOM_TOOLTIP_WINDOW "use a custom tooltip window class instead of the default tooltip")
 if(CUSTOM_TOOLTIP_WINDOW)
-    target_compile_definitions(simExtLuaCmd PRIVATE -DCUSTOM_TOOLTIP_WINDOW)
+    target_compile_definitions(simLuaCmd PRIVATE -DCUSTOM_TOOLTIP_WINDOW)
 endif()
 option(USE_LUA_PARSER "use the lua-parser module to determine correct calltip")
 if(USE_LUA_PARSER)
-    target_compile_definitions(simExtLuaCmd PRIVATE -DUSE_LUA_PARSER)
+    target_compile_definitions(simLuaCmd PRIVATE -DUSE_LUA_PARSER)
 endif()
-target_link_libraries(simExtLuaCmd ${LIBRARIES})
+target_link_libraries(simLuaCmd ${LIBRARIES})
 coppeliasim_add_lua(test/getCallContexts.lua)
