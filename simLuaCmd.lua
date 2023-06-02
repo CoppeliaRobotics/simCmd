@@ -1,4 +1,4 @@
-local simLuaCmd=loadPlugin'simLuaCmd'
+local simLuaCmd=loadPlugin'simLuaCmd';
 
 html_help = [[
         <h2>LuaCommander plugin</h2>
@@ -57,6 +57,6 @@ function help()
     end
 end
 
-(require'simLuaCmd-typecheck')(simLuaCmd)
+;(require'simLuaCmd-typecheck')(simLuaCmd)
 
 return simLuaCmd
