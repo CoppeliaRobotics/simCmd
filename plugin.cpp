@@ -268,8 +268,6 @@ public:
 
         if(firstInstancePass)
         {
-            firstInstancePass = false;
-
             int id = qRegisterMetaType< QMap<int,QString> >();
 
             SIM *sim = SIM::getInstance();
@@ -304,10 +302,12 @@ public:
             updateUI();
         }
 
-        if(flags.objectsErased || flags.objectsCreated || flags.modelLoaded || flags.sceneLoaded || flags.undoCalled || flags.redoCalled || flags.sceneSwitched || flags.scriptCreated || flags.scriptErased || flags.simulationStarted || flags.simulationEnded)
+        if(firstInstancePass || flags.objectsErased || flags.objectsCreated || flags.modelLoaded || flags.sceneLoaded || flags.undoCalled || flags.redoCalled || flags.sceneSwitched || flags.scriptCreated || flags.scriptErased || flags.simulationStarted || flags.simulationEnded)
         {
             updateScriptsList();
         }
+
+        firstInstancePass = false;
     }
 
     void setEnabled(setEnabled_in *in, setEnabled_out *out)
