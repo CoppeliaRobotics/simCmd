@@ -24,6 +24,9 @@ class Plugin : public sim::Plugin
 public:
     void onInit() override
     {
+        if(sim::getBoolParam(sim_boolparam_headless))
+            throw std::runtime_error("doesn't work in headless mode");
+
         if(!registerScriptStuff())
             throw std::runtime_error("failed to register script stuff");
 
