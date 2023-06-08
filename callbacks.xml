@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <?xml-stylesheet type="text/xsl" href="callbacks.xsl"?>
 
-<plugin name="LuaCmd" author="federico.ferri.it@gmail.com">
+<plugin name="simLuaCmd" author="federico.ferri.it@gmail.com">
     <description>API functions for LuaCommander plugin.</description>
     <command name="setEnabled">
         <description>Enable/disable the plugin (i.e. show or hide the UI)</description>

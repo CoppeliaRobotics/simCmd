@@ -504,5 +504,5 @@ private:
     static const int itemEnabled = 1, itemChecked = 2, itemCheckable = 4;
 };
 
-SIM_UI_PLUGIN(PLUGIN_NAME, PLUGIN_VERSION, Plugin)
+SIM_UI_PLUGIN(Plugin)
 #include "stubsPlusPlus.cpp"
