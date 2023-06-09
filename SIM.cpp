@@ -672,15 +672,6 @@ QStringList SIM::getCompletionID(int scriptHandleOrType, QString scriptName, QSt
             result << QString::fromStdString(s);
     }
 
-    // filter deprecated symbols:
-    for(QStringList::iterator it = result.begin(); it != result.end(); )
-    {
-        if(sim::isDeprecated(it->toStdString()))
-            it = result.erase(it);
-        else
-            ++it;
-    }
-
 #ifndef NDEBUG
     sim::addLog(sim_verbosity_debug, "dynamic=%d, prefix=%s: ", options.dynamicCompletion, word.toStdString());
     for(int i = 0; i < result.size(); ++i)
