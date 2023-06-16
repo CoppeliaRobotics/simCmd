@@ -184,20 +184,23 @@ std::string escapeSpecialChars(std::string s)
 
 std::string SIM::getStackTopAsString(int stackHandle, const PersistentOptions &opts, int depth, bool quoteStrings, bool insideTable, std::string *strType)
 {
-    if(sim::isStackValueNull(stackHandle) == 1)
+    int itemType = sim::getStackItemType(stackHandle, -1);
+    bool boolValue;
+    double doubleValue;
+    int intValue;
+    long long int int64Value;
+    char *stringValue;
+    int stringSize;
+    int n = sim::getStackTableInfo(stackHandle, 0);
+
+    if(itemType == sim_stackitem_null)
     {
         if(strType)
             *strType = "99|nil";
 
         return "nil";
     }
-
-    bool boolValue;
-    double doubleValue;
-    char *stringValue;
-    int stringSize;
-    int n = sim::getStackTableInfo(stackHandle, 0);
-    if(n == sim_stack_table_map || n >= 0)
+    else if(itemType == sim_stackitem_table && (n == sim_stack_table_map || n >= 0))
     {
         if(strType)
             *strType = "90|table";
@@ -295,7 +298,7 @@ std::string SIM::getStackTopAsString(int stackHandle, const PersistentOptions &o
         ss << "}";
         return ss.str();
     }
-    else if(n == sim_stack_table_circular_ref)
+    else if(itemType == sim_stackitem_table && n == sim_stack_table_circular_ref)
     {
         if(strType)
             *strType = "90|table";
@@ -303,7 +306,7 @@ std::string SIM::getStackTopAsString(int stackHandle, const PersistentOptions &o
         sim::popStackItem(stackHandle, 1);
         return "<...>";
     }
-    else if(sim::getStackBoolValue(stackHandle, &boolValue) == 1)
+    else if(itemType == sim_stackitem_bool && sim::getStackBoolValue(stackHandle, &boolValue) == 1)
     {
         if(strType)
             *strType = "10|bool";
@@ -311,7 +314,23 @@ std::string SIM::getStackTopAsString(int stackHandle, const PersistentOptions &o
         sim::popStackItem(stackHandle, 1);
         return boolValue ? "true" : "false";
     }
-    else if(sim::getStackDoubleValue(stackHandle, &doubleValue) == 1)
+    else if(itemType == sim_stackitem_integer && sim::getStackInt64Value(stackHandle, &int64Value) == 1)
+    {
+        if(strType)
+            *strType = "30|number";
+
+        sim::popStackItem(stackHandle, 1);
+        return std::to_string(int64Value);
+    }
+    else if(itemType == sim_stackitem_integer && sim::getStackInt32Value(stackHandle, &intValue) == 1)
+    {
+        if(strType)
+            *strType = "30|number";
+
+        sim::popStackItem(stackHandle, 1);
+        return std::to_string(intValue);
+    }
+    else if(itemType == sim_stackitem_double && sim::getStackDoubleValue(stackHandle, &doubleValue) == 1)
     {
         if(strType)
             *strType = "30|number";
@@ -319,9 +338,12 @@ std::string SIM::getStackTopAsString(int stackHandle, const PersistentOptions &o
         sim::popStackItem(stackHandle, 1);
         std::ostringstream ss;
         ss << std::setprecision(opts.floatPrecision) << doubleValue;
-        return ss.str();
+        auto ret = ss.str();
+        if(ret.find(".") == std::string::npos)
+            ret += ".0";
+        return ret;
     }
-    else if((stringValue = sim::getStackStringValue(stackHandle, &stringSize)) != NULL)
+    else if(itemType == sim_stackitem_string && (stringValue = sim::getStackStringValue(stackHandle, &stringSize)) != NULL)
     {
         std::string s(stringValue, stringSize);
 
@@ -370,12 +392,48 @@ std::string SIM::getStackTopAsString(int stackHandle, const PersistentOptions &o
 
         return s;
     }
+    else if(itemType == sim_stackitem_func)
+    {
+        if(strType)
+            *strType = "60|function";
+
+        sim::popStackItem(stackHandle, 1);
+
+        return "<<func>>";
+    }
+    else if(itemType == sim_stackitem_userdat)
+    {
+        if(strType)
+            *strType = "70|userdata";
+
+        sim::popStackItem(stackHandle, 1);
+
+        return "<<userdat>>";
+    }
+    else if(itemType == sim_stackitem_thread)
+    {
+        if(strType)
+            *strType = "80|thread";
+
+        sim::popStackItem(stackHandle, 1);
+
+        return "<<thread>>";
+    }
+    else if(itemType == sim_stackitem_lightuserdat)
+    {
+        if(strType)
+            *strType = "75|lightuserdata";
+
+        sim::popStackItem(stackHandle, 1);
+
+        return "<<lightuserdat>>";
+    }
     else
     {
         if(strType)
             *strType = "?";
 
-        sim::addLog(sim_verbosity_errors, "unable to convert stack top. n=%d", n);
+        sim::addLog(sim_verbosity_errors, "unable to convert stack top: itemType=%d, n=%d", itemType, n);
         sim::debugStack(stackHandle, -1);
         sim::popStackItem(stackHandle, 1);
         return "?";
