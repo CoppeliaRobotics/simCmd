@@ -761,8 +761,9 @@ static inline bool isID(QChar c)
 
 void SIM::onAskCallTip(int scriptHandleOrType, QString input, int pos)
 {
-    auto getApiInfo = [=](const int &scriptHandleOrType, const QString &symbol)
+    auto getApiInfo = [=](const int &scriptHandleOrType, const QString &symbol) -> QString
     {
+        if(symbol == "") return "";
         QString tip{QString::fromStdString(sim::getApiInfo(scriptHandleOrType, symbol.toStdString()))};
         return tip;
     };
