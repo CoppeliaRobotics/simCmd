@@ -54,7 +54,7 @@ private:
 
 public slots:
     void onExecCode(QString code, int scriptHandleOrType, QString scriptName);
-    void onAskCompletion(int scriptHandleOrType, QString scriptName, QString token, QChar context);
+    void onAskCompletion(int scriptHandleOrType, QString scriptName, QString token, QChar context, QStringList *cl);
     void onAskCallTip(int scriptHandleOrType, QString input, int pos);
 
 signals:

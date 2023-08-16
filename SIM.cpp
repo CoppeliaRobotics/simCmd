@@ -537,11 +537,12 @@ void SIM::showError(QString s)
         sim::addLog(sim_verbosity_scripterrors|sim_verbosity_undecorated, s.toStdString());
 }
 
-void SIM::onAskCompletion(int scriptHandleOrType, QString scriptName, QString token, QChar context)
+void SIM::onAskCompletion(int scriptHandleOrType, QString scriptName, QString token, QChar context, QStringList *clout)
 {
     ASSERT_THREAD(!UI);
 
     QStringList cl = getCompletion(scriptHandleOrType, scriptName, token, context);
+    if(clout) *clout = cl;
 
     // the QCommandEdit widget wants completions without the initial token part
     QStringList cl2;

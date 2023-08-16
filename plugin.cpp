@@ -14,6 +14,7 @@
 #include "stubs.h"
 #include "config.h"
 #include <QThread>
+#include <QStringList>
 #include <QPlainTextEdit>
 #include <QVBoxLayout>
 #include <QSplitter>
@@ -24,19 +25,43 @@
 class Readline : public QThread
 {
     Q_OBJECT
+
 public:
     Readline(QObject *parent) : QThread(parent)
     {
+        Readline::instance = this;
         QThread::setTerminationEnabled(true);
     }
-    static char **character_name_completion(const char *, int, int)
+
+    static char * gen(const char *txt, int state)
     {
-        rl_attempted_completion_over = 1;
+        if(state < Readline::completions.length())
+            return strdup(Readline::completions[state].toUtf8().data());
+
         return NULL;
     }
+
+    char ** complete(const char *txt, int start, int end)
+    {
+        emit askCompletion(sim_scripttype_sandboxscript, "", QString(txt), 'i', &Readline::completions);
+        rl_attempted_completion_over = 1;
+#if RL_READLINE_VERSION <= 0x04ff
+        rl_completion_append_character = 0; // appears to do what I want, on macOS
+#else
+        rl_completion_suppress_append = 1; // missing on macOS ???
+#endif
+        if(completions.isEmpty()) return NULL;
+        else return rl_completion_matches(txt, &Readline::gen);
+    }
+
+    static char ** complete_s(const char *txt, int start, int end)
+    {
+        return instance->complete(txt, start, end);
+    }
+
     void run() override
     {
-        rl_attempted_completion_function = &Readline::character_name_completion;
+        rl_attempted_completion_function = &Readline::complete_s;
         while(!QThread::currentThread()->isInterruptionRequested())
         {
             char *line = readline("coppeliaSim> ");
@@ -54,9 +79,18 @@ public:
             }
         }
     }
+
 signals:
     void execCode(QString code, int scriptType, QString scriptName);
+    void askCompletion(int scriptHandleOrType, QString scriptName, QString token, QChar context, QStringList *cl);
+
+private:
+    static QStringList completions;
+    static Readline *instance;
 };
+
+QStringList Readline::completions;
+Readline * Readline::instance = nullptr;
 
 #include "plugin.moc"
 
@@ -82,6 +116,7 @@ public:
             auto sim = SIM::getInstance();
             readline = new Readline(sim);
             QObject::connect(readline, &Readline::execCode, sim, &SIM::onExecCode, Qt::BlockingQueuedConnection);
+            QObject::connect(readline, &Readline::askCompletion, sim, &SIM::onAskCompletion, Qt::BlockingQueuedConnection);
             //readline->start(); // start it on first instance pass, so the prompt is clear
         }
         else

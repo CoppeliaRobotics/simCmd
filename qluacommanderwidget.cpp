@@ -226,7 +226,7 @@ void QLuaCommanderWidget::onAskCompletion(const QString &cmd, int cursorPos)
     {
         sim::addLog(sim_verbosity_debug, "cmd=\"%s\", pos=%d, tbc=%s, ctx=%s", cmd.toStdString(), cursorPos, token.toStdString(), context.toLatin1());
 
-        emit askCompletion(type, name, token, context);
+        emit askCompletion(type, name, token, context, nullptr);
     }
 }
 
