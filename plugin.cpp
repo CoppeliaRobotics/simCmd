@@ -93,8 +93,6 @@ public:
 
     void onUIInit() override
     {
-        firstInstancePass = true;
-
         UI::getInstance(); // construct UI here (UI thread)
 
         // find the StatusBar widget (QPlainTextEdit)
