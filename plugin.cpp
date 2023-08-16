@@ -29,8 +29,14 @@ public:
     {
         QThread::setTerminationEnabled(true);
     }
+    static char **character_name_completion(const char *, int, int)
+    {
+        rl_attempted_completion_over = 1;
+        return NULL;
+    }
     void run() override
     {
+        rl_attempted_completion_function = &Readline::character_name_completion;
         while(!QThread::currentThread()->isInterruptionRequested())
         {
             char *line = readline("coppeliaSim> ");
