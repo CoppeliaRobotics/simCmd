@@ -40,6 +40,12 @@ public:
                 emit execCode(QString::fromUtf8(line), sim_scripttype_sandboxscript, "");
                 free(line);
             }
+            else if(!line) // EOF
+            {
+                std::cout << std::endl;
+                sim::quitSimulator();
+                break;
+            }
         }
     }
 signals:
