@@ -11,6 +11,7 @@
 #include <simStack/stackMap.h>
 #include <stdexcept>
 #include <iomanip>
+#include <iostream>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -514,17 +515,26 @@ void SIM::parseStringRenderingFlags(PersistentOptions *popts, const QString &cod
 
 void SIM::showMessage(QString s)
 {
-    sim::addLog(sim_verbosity_msgs|sim_verbosity_undecorated, s.toStdString());
+    if(sim::getBoolParam(sim_boolparam_headless))
+        std::cout << s.toStdString() << std::endl;
+    else
+        sim::addLog(sim_verbosity_msgs|sim_verbosity_undecorated, s.toStdString());
 }
 
 void SIM::showWarning(QString s)
 {
-    sim::addLog(sim_verbosity_scriptwarnings|sim_verbosity_undecorated, s.toStdString());
+    if(sim::getBoolParam(sim_boolparam_headless))
+        std::cout << s.toStdString() << std::endl;
+    else
+        sim::addLog(sim_verbosity_scriptwarnings|sim_verbosity_undecorated, s.toStdString());
 }
 
 void SIM::showError(QString s)
 {
-    sim::addLog(sim_verbosity_scripterrors|sim_verbosity_undecorated, s.toStdString());
+    if(sim::getBoolParam(sim_boolparam_headless))
+        std::cout << s.toStdString() << std::endl;
+    else
+        sim::addLog(sim_verbosity_scripterrors|sim_verbosity_undecorated, s.toStdString());
 }
 
 void SIM::onAskCompletion(int scriptHandleOrType, QString scriptName, QString token, QChar context)
@@ -591,7 +601,8 @@ void SIM::onExecCode(QString code, int scriptHandleOrType, QString scriptName)
 
     int stackHandle = sim::createStack();
 
-    showMessage("> " + code);
+    if(!sim::getBoolParam(sim_boolparam_headless))
+        showMessage("> " + code);
 
     PersistentOptions opts = options;
     try

@@ -13,20 +13,46 @@
 #include "plugin.h"
 #include "stubs.h"
 #include "config.h"
+#include <QThread>
 #include <QPlainTextEdit>
 #include <QVBoxLayout>
 #include <QSplitter>
 #include "PersistentOptions.h"
 #include "qluacommanderwidget.h"
+#include <readline/readline.h>
+
+class Readline : public QThread
+{
+    Q_OBJECT
+public:
+    Readline(QObject *parent) : QThread(parent)
+    {
+        QThread::setTerminationEnabled(true);
+    }
+    void run() override
+    {
+        while(!QThread::currentThread()->isInterruptionRequested())
+        {
+            char *line = readline("coppeliaSim> ");
+            if(line && *line)
+            {
+                add_history(line);
+                emit execCode(QString::fromUtf8(line), sim_scripttype_sandboxscript, "");
+                free(line);
+            }
+        }
+    }
+signals:
+    void execCode(QString code, int scriptType, QString scriptName);
+};
+
+#include "plugin.moc"
 
 class Plugin : public sim::Plugin
 {
 public:
     void onInit() override
     {
-        if(sim::getBoolParam(sim_boolparam_headless))
-            throw std::runtime_error("doesn't work in headless mode");
-
         if(!registerScriptStuff())
             throw std::runtime_error("failed to register script stuff");
 
@@ -38,11 +64,29 @@ public:
         optionsChangedFromGui.store(false);
         optionsChangedFromData.store(false);
 
-        addMenuItems();
+        if(sim::getBoolParam(sim_boolparam_headless))
+        {
+            sim::addLog(sim_verbosity_loadinfos, "running in headless mode, using libreadline");
+            auto sim = SIM::getInstance();
+            readline = new Readline(sim);
+            QObject::connect(readline, &Readline::execCode, sim, &SIM::onExecCode, Qt::BlockingQueuedConnection);
+            readline->start();
+        }
+        else
+        {
+            addMenuItems();
+        }
     }
 
     void onCleanup() override
     {
+        if(readline)
+        {
+            //readline->requestInterruption();
+            readline->terminate();
+            QThread::sleep(1);
+        }
+
         SIM::destroyInstance();
         SIM_THREAD = NULL;
     }
@@ -479,6 +523,7 @@ private:
     std::atomic<bool> optionsChangedFromGui;
     std::atomic<bool> optionsChangedFromData;
     PersistentOptions options;
+    Readline *readline{nullptr};
     bool firstInstancePass = true;
     QPlainTextEdit *statusBar;
     QSplitter *splitter = 0L;

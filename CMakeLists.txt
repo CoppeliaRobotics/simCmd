@@ -20,6 +20,9 @@ list(APPEND CMAKE_MODULE_PATH
     ${COPPELIASIM_INCLUDE_DIR}/cmake)
 find_package(CoppeliaSim 4.5.1.7 REQUIRED)
 
+find_package(Readline REQUIRED)
+include_directories(${Readline_INCLUDE_DIR})
+
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/generated)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external)
 add_definitions(-DQT_COMPIL)
@@ -46,6 +49,7 @@ set(SOURCES
 
 set(LIBRARIES
     Boost::boost
+    ${Readline_LIBRARY}
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
