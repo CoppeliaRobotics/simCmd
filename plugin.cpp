@@ -70,7 +70,7 @@ public:
             auto sim = SIM::getInstance();
             readline = new Readline(sim);
             QObject::connect(readline, &Readline::execCode, sim, &SIM::onExecCode, Qt::BlockingQueuedConnection);
-            readline->start();
+            //readline->start(); // start it on first instance pass, so the prompt is clear
         }
         else
         {
@@ -306,6 +306,19 @@ public:
 
     void onInstancePass(const sim::InstancePassFlags &flags) override
     {
+        if(sim::getBoolParam(sim_boolparam_headless))
+        {
+            // instance pass for headless here
+            if(firstInstancePass)
+            {
+                readline->start();
+                firstInstancePass = false;
+            }
+            return;
+        }
+
+        // instance pass for ui:
+
         if(!commanderWidget) return;
 
         if(firstInstancePass)
