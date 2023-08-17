@@ -49,6 +49,7 @@ set(SOURCES
     PersistentOptions.cpp
     qluacommanderwidget.cpp
     qcommandedit.cpp
+    ConsoleREPL.cpp
     ${COPPELIASIM_INCLUDE_DIR}/simStack/stackObject.cpp
     ${COPPELIASIM_INCLUDE_DIR}/simStack/stackNull.cpp
     ${COPPELIASIM_INCLUDE_DIR}/simStack/stackBool.cpp
