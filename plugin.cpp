@@ -20,56 +20,48 @@
 #include <QSplitter>
 #include "PersistentOptions.h"
 #include "qluacommanderwidget.h"
-#include <readline/readline.h>
+#include <replxx.hxx>
+
+using Replxx = replxx::Replxx;
 
 class Readline : public QThread
 {
     Q_OBJECT
 
 public:
+    Replxx::completions_t hook_completion(const std::string &context, int &contextLen)
+    {
+        auto c2 = context.substr(context.size() - contextLen);
+        QStringList completions;
+        emit askCompletion(sim_scripttype_sandboxscript, "", QString::fromStdString(c2), 'i', &completions);
+        Replxx::completions_t ret;
+        for(const auto &completion : completions)
+            ret.emplace_back(completion.toUtf8().data(), Replxx::Color::DEFAULT);
+        return ret;
+    }
+
     Readline(QObject *parent) : QThread(parent)
     {
-        Readline::instance = this;
         QThread::setTerminationEnabled(true);
-    }
-
-    static char * gen(const char *txt, int state)
-    {
-        if(state < Readline::completions.length())
-            return strdup(Readline::completions[state].toUtf8().data());
-
-        return NULL;
-    }
-
-    char ** complete(const char *txt, int start, int end)
-    {
-        emit askCompletion(sim_scripttype_sandboxscript, "", QString(txt), 'i', &Readline::completions);
-        rl_attempted_completion_over = 1;
-#if RL_READLINE_VERSION <= 0x04ff
-        rl_completion_append_character = 0; // appears to do what I want, on macOS
-#else
-        rl_completion_suppress_append = 1; // missing on macOS ???
-#endif
-        if(completions.isEmpty()) return NULL;
-        else return rl_completion_matches(txt, &Readline::gen);
-    }
-
-    static char ** complete_s(const char *txt, int start, int end)
-    {
-        return instance->complete(txt, start, end);
+        rx.install_window_change_handler();
+        rx.set_max_history_size(128);
+        rx.set_max_hint_rows(3);
+        rx.set_no_color(false);
+        rx.set_word_break_characters(" \n\t,-%!;:=*~^'\"/?<>|[](){}");
+        rx.set_completion_count_cutoff(128);
+        using namespace std::placeholders;
+        rx.set_completion_callback(std::bind(&Readline::hook_completion, this, _1, _2));
     }
 
     void run() override
     {
-        rl_attempted_completion_function = &Readline::complete_s;
         while(!QThread::currentThread()->isInterruptionRequested())
         {
-            char *line = readline("coppeliaSim> ");
+            const char *line = rx.input("coppeliaSim> ");
             if(line && *line)
             {
-                add_history(line);
+                rx.history_add(line);
                 emit execCode(QString::fromUtf8(line), sim_scripttype_sandboxscript, "");
-                free(line);
             }
             else if(!line) // EOF
             {
@@ -85,12 +77,8 @@ signals:
     void askCompletion(int scriptHandleOrType, QString scriptName, QString token, QChar context, QStringList *cl);
 
 private:
-    static QStringList completions;
-    static Readline *instance;
+    Replxx rx;
 };
-
-QStringList Readline::completions;
-Readline * Readline::instance = nullptr;
 
 #include "plugin.moc"
 

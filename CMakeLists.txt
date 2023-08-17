@@ -20,8 +20,19 @@ list(APPEND CMAKE_MODULE_PATH
     ${COPPELIASIM_INCLUDE_DIR}/cmake)
 find_package(CoppeliaSim 4.5.1.7 REQUIRED)
 
-find_package(Readline REQUIRED)
-include_directories(${Readline_INCLUDE_DIR})
+include(ExternalProject)
+set(REPLXX_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/replxx-ext-prefix)
+set(REPLXX_SRC_DIR ${REPLXX_PREFIX}/src/replxx-ext)
+set(REPLXX_BUILD_DIR ${REPLXX_PREFIX}/src/replxx-ext-build)
+ExternalProject_Add(replxx-ext
+    GIT_REPOSITORY https://github.com/AmokHuginnsson/replxx
+    GIT_TAG master
+    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} -DREPLXX_BUILD_EXAMPLES=OFF -DREPLXX_BUILD_PACKAGE=OFF
+    BUILD_COMMAND ${CMAKE_COMMAND} --build ${REPLXX_BUILD_DIR} --config ${CMAKE_BUILD_TYPE}
+    INSTALL_COMMAND ""
+)
+include_directories(${REPLXX_SRC_DIR}/include)
+link_directories(${REPLXX_BUILD_DIR})
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/generated)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external)
@@ -49,14 +60,15 @@ set(SOURCES
 
 set(LIBRARIES
     Boost::boost
-    ${Readline_LIBRARY}
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
     Qt5::PrintSupport
+    replxx
 )
 
 coppeliasim_add_plugin(simLuaCmd SOURCES ${SOURCES})
+add_dependencies(simLuaCmd replxx-ext)
 option(CUSTOM_TOOLTIP_WINDOW "use a custom tooltip window class instead of the default tooltip")
 if(CUSTOM_TOOLTIP_WINDOW)
     target_compile_definitions(simLuaCmd PRIVATE -DCUSTOM_TOOLTIP_WINDOW)
