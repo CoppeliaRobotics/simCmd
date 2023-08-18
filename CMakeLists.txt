@@ -40,7 +40,6 @@ endif()
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/generated)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external)
-add_definitions(-DQT_COMPIL)
 
 coppeliasim_generate_stubs(${CMAKE_CURRENT_BINARY_DIR}/generated XML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/callbacks.xml LUA_FILE ${CMAKE_CURRENT_SOURCE_DIR}/simLuaCmd.lua)
 
@@ -73,14 +72,16 @@ set(LIBRARIES
 )
 
 coppeliasim_add_plugin(simLuaCmd SOURCES ${SOURCES})
+target_compile_definitions(simLuaCmd PRIVATE QT_COMPIL)
 add_dependencies(simLuaCmd replxx-ext)
 option(CUSTOM_TOOLTIP_WINDOW "use a custom tooltip window class instead of the default tooltip")
 if(CUSTOM_TOOLTIP_WINDOW)
-    target_compile_definitions(simLuaCmd PRIVATE -DCUSTOM_TOOLTIP_WINDOW)
+    target_compile_definitions(simLuaCmd PRIVATE CUSTOM_TOOLTIP_WINDOW)
 endif()
 option(USE_LUA_PARSER "use the lua-parser module to determine correct calltip")
 if(USE_LUA_PARSER)
-    target_compile_definitions(simLuaCmd PRIVATE -DUSE_LUA_PARSER)
+    target_compile_definitions(simLuaCmd PRIVATE USE_LUA_PARSER)
 endif()
+target_compile_definitions(simLuaCmd PRIVATE REPLXX_STATIC)
 target_link_libraries(simLuaCmd ${LIBRARIES})
 coppeliasim_add_lua(test/getCallContexts.lua)
