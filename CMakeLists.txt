@@ -32,7 +32,11 @@ ExternalProject_Add(replxx-ext
     INSTALL_COMMAND ""
 )
 include_directories(${REPLXX_SRC_DIR}/include)
-link_directories(${REPLXX_BUILD_DIR})
+if(WIN32)
+    set(REPLXX_LIBRARY ${REPLXX_BUILD_DIR}/${CMAKE_BUILD_TYPE}/replxx-static.lib)
+else()
+    set(REPLXX_LIBRARY ${REPLXX_BUILD_DIR}/libreplxx.a)
+endif()
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/generated)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external)
@@ -65,7 +69,7 @@ set(LIBRARIES
     Qt5::Gui
     Qt5::Widgets
     Qt5::PrintSupport
-    replxx
+    ${REPLXX_LIBRARY}
 )
 
 coppeliasim_add_plugin(simLuaCmd SOURCES ${SOURCES})
