@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.16.3)
 project(simLuaCmd)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -88,5 +88,5 @@ if(USE_LUA_PARSER)
     target_compile_definitions(simLuaCmd PRIVATE USE_LUA_PARSER)
 endif()
 target_compile_definitions(simLuaCmd PRIVATE REPLXX_STATIC)
-target_link_libraries(simLuaCmd ${LIBRARIES})
+target_link_libraries(simLuaCmd PRIVATE ${LIBRARIES})
 coppeliasim_add_lua(test/getCallContexts.lua)
