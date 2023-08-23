@@ -69,10 +69,10 @@ set(SOURCES
 
 set(LIBRARIES
     Boost::boost
-    ${Qt}::Core
-    ${Qt}::Gui
-    ${Qt}::Widgets
-    ${Qt}::PrintSupport
+    Qt::Core
+    Qt::Gui
+    Qt::Widgets
+    Qt::PrintSupport
     ${REPLXX_LIBRARY}
 )
 
