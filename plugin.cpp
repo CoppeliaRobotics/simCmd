@@ -503,6 +503,11 @@ public:
         optionsChangedFromData.store(true);
     }
 
+    void setExecWrapper(setExecWrapper_in *in, setExecWrapper_out *out)
+    {
+        SIM::getInstance()->setExecWrapper(QString::fromStdString(in->wrapperFunc));
+    }
+
 private:
     std::atomic<bool> optionsChangedFromGui;
     std::atomic<bool> optionsChangedFromData;

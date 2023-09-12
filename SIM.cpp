@@ -617,11 +617,20 @@ void SIM::onExecCode(QString code, int scriptHandleOrType, QString scriptName)
     }
 
     setConvenienceVars(scriptHandleOrType, scriptName, stackHandle, false);
-    QString s = QString("%1@%2").arg(code, scriptName);
     bool err = false;
     try
     {
-        sim::executeScriptString(scriptHandleOrType, s.toStdString(), stackHandle);
+        if(!execWrapper.isEmpty())
+        {
+            QString s = QString("%1@%2").arg(execWrapper, scriptName);
+            sim::pushStringOntoStack(stackHandle, code.toStdString());
+            sim::callScriptFunctionEx(scriptHandleOrType, s.toStdString(), stackHandle);
+        }
+        else
+        {
+            QString s = QString("%1@%2").arg(code, scriptName);
+            sim::executeScriptString(scriptHandleOrType, s.toStdString(), stackHandle);
+        }
     }
     catch(sim::api_error &ex)
     {
@@ -889,4 +898,9 @@ void SIM::onAskCallTip(int scriptHandleOrType, QString input, int pos)
     symbol = symbol.mid(j + 1);
     emit setCallTip(getApiInfo(scriptHandleOrType, symbol));
 #endif // USE_LUA_PARSER
+}
+
+void SIM::setExecWrapper(const QString &wrapperFunc)
+{
+    execWrapper = wrapperFunc;
 }
