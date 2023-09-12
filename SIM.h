@@ -46,20 +46,20 @@ private:
     QStringList getMatchingStringRenderingFlags(QString shortFlag);
     void parseStringRenderingFlags(PersistentOptions *popts, const QString &code);
 
-    QStringList getCompletion(int scriptHandleOrType, QString scriptName, QString word, QChar context);
-    QStringList getCompletionID(int scriptHandleOrType, QString scriptName, QString word);
+    QStringList getCompletion(int scriptHandle, QString word, QChar context);
+    QStringList getCompletionID(int scriptHandle, QString word);
     QStringList getCompletionObjName(QString word);
 
-    void setConvenienceVars(int scriptHandleOrType, QString scriptName, int stackHandle, bool check);
+    void setConvenienceVars(int scriptHandle, int stackHandle, bool check);
 
 public slots:
-    void onExecCode(QString code, int scriptHandleOrType, QString scriptName);
-    void onAskCompletion(int scriptHandleOrType, QString scriptName, QString token, QChar context, QStringList *cl);
-    void onAskCallTip(int scriptHandleOrType, QString input, int pos);
+    void onExecCode(QString code, int scriptHandle);
+    void onAskCompletion(int scriptHandle, QString token, QChar context, QStringList *cl);
+    void onAskCallTip(int scriptHandle, QString input, int pos);
     void setExecWrapper(const QString &wrapperFunc);
 
 signals:
-    void scriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning);
+    void scriptListChanged(int sandboxScript, int mainScript, QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning);
     void setCompletion(QStringList s);
     void setCallTip(QString s);
     void historyChanged(QStringList history);

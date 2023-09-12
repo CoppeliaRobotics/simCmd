@@ -42,7 +42,7 @@ public:
 public slots:
 
 signals:
-    void execCode(QString code, int scriptHandleOrType, QString scriptName);
+    void execCode(QString code, int scriptHandle);
     void clearHistory();
 };
 

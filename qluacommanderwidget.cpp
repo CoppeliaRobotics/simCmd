@@ -199,26 +199,19 @@ void QLuaCommanderWidget::setOptions(const PersistentOptions &options_)
     editor->setShowMatchingHistory(options.showMatchingHistory);
 }
 
-bool QLuaCommanderWidget::getSelectedScriptInfo(int &type, int &handle, QString &name)
+int QLuaCommanderWidget::getSelectedScriptHandle()
 {
     if(scriptCombo->currentIndex() >= 0)
     {
         QVariantList data = scriptCombo->itemData(scriptCombo->currentIndex()).toList();
-        type = data[0].toInt();
-        handle = data[1].toInt();
-        name = data[2].toString();
-        return true;
+        return data[1].toInt();
     }
-    else return false;
+    return -1;
 }
 
 void QLuaCommanderWidget::onAskCompletion(const QString &cmd, int cursorPos)
 {
-    int type = sim_scripttype_sandboxscript;
-    int handle = -1;
-    QString name;
-    getSelectedScriptInfo(type, handle, name);
-
+    int scriptHandle = getSelectedScriptHandle();
     QString token;
     QChar context;
     int startPos;
@@ -226,26 +219,20 @@ void QLuaCommanderWidget::onAskCompletion(const QString &cmd, int cursorPos)
     {
         sim::addLog(sim_verbosity_debug, "cmd=\"%s\", pos=%d, tbc=%s, ctx=%s", cmd.toStdString(), cursorPos, token.toStdString(), context.toLatin1());
 
-        emit askCompletion(type, name, token, context, nullptr);
+        emit askCompletion(scriptHandle, token, context, nullptr);
     }
 }
 
 void QLuaCommanderWidget::onAskCallTip(QString input, int pos)
 {
-    int type = sim_scripttype_sandboxscript;
-    int handle = -1;
-    QString name;
-    getSelectedScriptInfo(type, handle, name);
-    emit askCallTip(type, input, pos);
+    int scriptHandle = getSelectedScriptHandle();
+    emit askCallTip(scriptHandle, input, pos);
 }
 
 void QLuaCommanderWidget::onExecute(const QString &cmd)
 {
-    int type = sim_scripttype_sandboxscript;
-    int handle = -1;
-    QString name;
-    getSelectedScriptInfo(type, handle, name);
-    emit execCode(cmd, type, name);
+    int scriptHandle = getSelectedScriptHandle();
+    emit execCode(cmd, scriptHandle);
     editor->clear();
     onSetCallTip("");
 }
@@ -360,7 +347,7 @@ void QLuaCommanderWidget::onSetCallTip(const QString &tip)
 #endif // CUSTOM_TOOLTIP_WINDOW
 }
 
-void QLuaCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning)
+void QLuaCommanderWidget::onScriptListChanged(int sandboxScript, int mainScript, QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning)
 {
     // save current item:
     QVariant old = scriptCombo->itemData(scriptCombo->currentIndex());
@@ -369,12 +356,10 @@ void QLuaCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QM
     while(scriptCombo->count()) scriptCombo->removeItem(0);
 
     // populate combo box:
-    static boost::format childScriptFmt("Child script of '%s'");
-    static boost::format customizationScriptFmt("Customization script of '%s'");
     int index = 0, selectedIndex = -1;
     {
         QVariantList data;
-        data << sim_scripttype_sandboxscript << 0 << QString();
+        data << sim_scripttype_sandboxscript << sandboxScript << QString();
         scriptCombo->addItem("Sandbox script", data);
         if(data == old) selectedIndex = index;
         index++;
@@ -382,32 +367,28 @@ void QLuaCommanderWidget::onScriptListChanged(QMap<int,QString> childScripts, QM
     if(simRunning)
     {
         QVariantList data;
-        data << sim_scripttype_mainscript << 0 << QString();
+        data << sim_scripttype_mainscript << mainScript << QString();
         scriptCombo->addItem("Main script", data);
         if(data == old) selectedIndex = index;
         index++;
     }
     if(simRunning)
     {
-        QMapIterator<int,QString> i(childScripts);
-        while(i.hasNext())
+        for(const auto &e : childScripts.toStdMap())
         {
-            i.next();
             QVariantList data;
-            data << sim_scripttype_childscript << i.key() << i.value();
-            scriptCombo->addItem((childScriptFmt % i.value().toStdString()).str().c_str(), data);
+            data << sim_scripttype_childscript << e.first << e.second;
+            scriptCombo->addItem(QString("Child script of '%1'").arg(e.second), data);
             if(data == old) selectedIndex = index;
             index++;
         }
     }
     {
-        QMapIterator<int,QString> i(customizationScripts);
-        while(i.hasNext())
+        for(const auto &e : customizationScripts.toStdMap())
         {
-            i.next();
             QVariantList data;
-            data << sim_scripttype_customizationscript << i.key() << i.value();
-            scriptCombo->addItem((customizationScriptFmt % i.value().toStdString()).str().c_str(), data);
+            data << sim_scripttype_customizationscript << e.first << e.second;
+            scriptCombo->addItem(QString("Customization script of '%1'").arg(e.second), data);
             if(data == old) selectedIndex = index;
             index++;
         }

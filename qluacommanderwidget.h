@@ -69,7 +69,7 @@ protected:
     QLabel *calltipLabel;
 
 public:
-    bool getSelectedScriptInfo(int &type, int &handle, QString &name);
+    int getSelectedScriptHandle();
 
 private slots:
     void onAskCompletion(const QString &cmd, int cursorPos);
@@ -90,13 +90,13 @@ private slots:
 public slots:
     void onSetCompletion(const QStringList &comp);
     void onSetCallTip(const QString &tip);
-    void onScriptListChanged(QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning);
+    void onScriptListChanged(int sandboxScript, int mainScript, QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning);
     void setHistory(QStringList history);
 
 signals:
-    void askCompletion(int scriptHandleOrType, QString scriptName, QString token, QChar context, QStringList *cl);
-    void askCallTip(int scriptHandleOrType, QString input, int pos);
-    void execCode(QString code, int scriptHandleOrType, QString scriptName);
+    void askCompletion(int scriptHandle, QString token, QChar context, QStringList *cl);
+    void askCallTip(int scriptHandle, QString input, int pos);
+    void execCode(QString code, int scriptHandle);
 
 public:
     std::atomic<bool> closeFlag;

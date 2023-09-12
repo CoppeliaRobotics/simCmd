@@ -249,22 +249,25 @@ public:
     void updateScriptsList()
     {
         bool isRunning = sim::getSimulationState() == sim_simulation_advancing_running;
+        int sandboxScript = sim::getScriptHandleEx(sim_scripttype_sandboxscript, -1);
+        int mainScript = sim::getScriptHandleEx(sim_scripttype_mainscript, -1);
         QMap<int, QString> childScripts;
         QMap<int, QString> customizationScripts;
-        for(int handle : sim::getObjects(sim_handle_all))
+        for(int objectHandle : sim::getObjects(sim_handle_all))
         {
-            QString name = QString::fromStdString(sim::getObjectAlias(handle, 5));
+            QString name = QString::fromStdString(sim::getObjectAlias(objectHandle, 5));
+            int scriptHandle;
             if(isRunning)
             {
-                int childScript = sim::getScriptHandleEx(sim_scripttype_childscript, handle);
-                if(childScript != -1)
-                    childScripts[handle] = name;
+                scriptHandle = sim::getScriptHandleEx(sim_scripttype_childscript, objectHandle);
+                if(scriptHandle != -1)
+                    childScripts[scriptHandle] = name;
             }
-            int customizationScript = sim::getScriptHandleEx(sim_scripttype_customizationscript, handle);
-            if(customizationScript != -1)
-                customizationScripts[handle] = name;
+            scriptHandle = sim::getScriptHandleEx(sim_scripttype_customizationscript, objectHandle);
+            if(scriptHandle != -1)
+                customizationScripts[scriptHandle] = name;
         }
-        SIM::getInstance()->scriptListChanged(childScripts, customizationScripts, isRunning);
+        SIM::getInstance()->scriptListChanged(sandboxScript, mainScript, childScripts, customizationScripts, isRunning);
     }
 
     void onUIPass() override

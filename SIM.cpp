@@ -537,11 +537,11 @@ void SIM::showError(QString s)
         sim::addLog(sim_verbosity_scripterrors|sim_verbosity_undecorated, s.toStdString());
 }
 
-void SIM::onAskCompletion(int scriptHandleOrType, QString scriptName, QString token, QChar context, QStringList *clout)
+void SIM::onAskCompletion(int scriptHandle, QString token, QChar context, QStringList *clout)
 {
     ASSERT_THREAD(!UI);
 
-    QStringList cl = getCompletion(scriptHandleOrType, scriptName, token, context);
+    QStringList cl = getCompletion(scriptHandle, token, context);
     if(clout) *clout = cl;
 
     // the QCommandEdit widget wants completions without the initial token part
@@ -554,14 +554,13 @@ void SIM::onAskCompletion(int scriptHandleOrType, QString scriptName, QString to
     emit setCompletion(cl2);
 }
 
-void SIM::setConvenienceVars(int scriptHandleOrType, QString scriptName, int stackHandle, bool check)
+void SIM::setConvenienceVars(int scriptHandle, int stackHandle, bool check)
 {
     if(check)
     {
-        QString Hcheck = QString("H==sim.getObject@%1").arg(scriptName);
         try
         {
-            sim::executeScriptString(scriptHandleOrType, Hcheck.toStdString(), stackHandle);
+            sim::executeScriptString(scriptHandle, "H==sim.getObject", stackHandle);
             bool boolValue;
             if(sim::getStackBoolValue(stackHandle, &boolValue) == 1)
             {
@@ -579,14 +578,9 @@ void SIM::setConvenienceVars(int scriptHandleOrType, QString scriptName, int sta
 
     try
     {
-        QString H = QString("H=sim.getObject@%1").arg(scriptName);
-        sim::executeScriptString(scriptHandleOrType, H.toStdString(), stackHandle);
-
-        QString sel = QString("SEL=sim.getObjectSel()@%1").arg(scriptName);
-        sim::executeScriptString(scriptHandleOrType, sel.toStdString(), stackHandle);
-
-        QString sel0 = QString("SEL1=SEL[#SEL]@%1").arg(scriptName);
-        sim::executeScriptString(scriptHandleOrType, sel0.toStdString(), stackHandle);
+        sim::executeScriptString(scriptHandle, "H=sim.getObject", stackHandle);
+        sim::executeScriptString(scriptHandle, "SEL=sim.getObjectSel()", stackHandle);
+        sim::executeScriptString(scriptHandle, "SEL1=SEL[#SEL]", stackHandle);
     }
     catch(sim::api_error &ex)
     {
@@ -594,7 +588,7 @@ void SIM::setConvenienceVars(int scriptHandleOrType, QString scriptName, int sta
     }
 }
 
-void SIM::onExecCode(QString code, int scriptHandleOrType, QString scriptName)
+void SIM::onExecCode(QString code, int scriptHandle)
 {
     ASSERT_THREAD(!UI);
 
@@ -616,20 +610,18 @@ void SIM::onExecCode(QString code, int scriptHandleOrType, QString scriptName)
         showWarning(m);
     }
 
-    setConvenienceVars(scriptHandleOrType, scriptName, stackHandle, false);
+    setConvenienceVars(scriptHandle, stackHandle, false);
     bool err = false;
     try
     {
         if(!execWrapper.isEmpty())
         {
-            QString s = QString("%1@%2").arg(execWrapper, scriptName);
             sim::pushStringOntoStack(stackHandle, code.toStdString());
-            sim::callScriptFunctionEx(scriptHandleOrType, s.toStdString(), stackHandle);
+            sim::callScriptFunctionEx(scriptHandle, execWrapper.toStdString(), stackHandle);
         }
         else
         {
-            QString s = QString("%1@%2").arg(code, scriptName);
-            sim::executeScriptString(scriptHandleOrType, s.toStdString(), stackHandle);
+            sim::executeScriptString(scriptHandle, code.toStdString(), stackHandle);
         }
     }
     catch(sim::api_error &ex)
@@ -661,7 +653,7 @@ void SIM::onExecCode(QString code, int scriptHandleOrType, QString scriptName)
             result.append(QString::fromStdString(stackTopStr));
         }
 
-        setConvenienceVars(scriptHandleOrType, scriptName, stackHandle, true);
+        setConvenienceVars(scriptHandle, stackHandle, true);
 
         if(size > 0)
             showMessage(result);
@@ -678,11 +670,11 @@ void SIM::onExecCode(QString code, int scriptHandleOrType, QString scriptName)
     }
 }
 
-QStringList SIM::getCompletion(int scriptHandleOrType, QString scriptName, QString word, QChar context)
+QStringList SIM::getCompletion(int scriptHandle, QString word, QChar context)
 {
     QStringList result;
 
-    if(context == 'i') result = getCompletionID(scriptHandleOrType, scriptName, word);
+    if(context == 'i') result = getCompletionID(scriptHandle, word);
     else if(context == 'H') result = getCompletionObjName(word);
 
     result.sort();
@@ -690,7 +682,7 @@ QStringList SIM::getCompletion(int scriptHandleOrType, QString scriptName, QStri
     return result;
 }
 
-QStringList SIM::getCompletionID(int scriptHandleOrType, QString scriptName, QString word)
+QStringList SIM::getCompletionID(int scriptHandle, QString word)
 {
     ASSERT_THREAD(!UI);
 
@@ -706,10 +698,9 @@ QStringList SIM::getCompletionID(int scriptHandleOrType, QString scriptName, QSt
         QString parent = global ? "_G" : word.left(dotIdx);
         QString child = global ? word : word.mid(dotIdx + 1);
 
-        QString s = QString("%1@%2").arg(parent, scriptName);
         try
         {
-            sim::executeScriptString(scriptHandleOrType, s.toStdString(), stackHandle);
+            sim::executeScriptString(scriptHandle, parent.toStdString(), stackHandle);
         }
         catch(sim::api_error &ex)
         {
@@ -746,7 +737,7 @@ QStringList SIM::getCompletionID(int scriptHandleOrType, QString scriptName, QSt
     }
     else
     {
-        std::vector<std::string> funcs = sim::getApiFunc(scriptHandleOrType, word.toStdString());
+        std::vector<std::string> funcs = sim::getApiFunc(scriptHandle, word.toStdString());
         for(const auto &s : funcs)
             result << QString::fromStdString(s);
     }
@@ -780,12 +771,12 @@ static inline bool isID(QChar c)
     return c.isLetterOrNumber() || c == '_' || c == '.';
 }
 
-void SIM::onAskCallTip(int scriptHandleOrType, QString input, int pos)
+void SIM::onAskCallTip(int scriptHandle, QString input, int pos)
 {
-    auto getApiInfo = [=](const int &scriptHandleOrType, const QString &symbol) -> QString
+    auto getApiInfo = [=](const int &scriptHandle, const QString &symbol) -> QString
     {
         if(symbol == "") return "";
-        QString tip{QString::fromStdString(sim::getApiInfo(scriptHandleOrType, symbol.toStdString()))};
+        QString tip{QString::fromStdString(sim::getApiInfo(scriptHandle, symbol.toStdString()))};
         return tip;
     };
 #ifdef USE_LUA_PARSER
@@ -849,7 +840,7 @@ void SIM::onAskCallTip(int scriptHandleOrType, QString input, int pos)
     QStringList calltips;
     for(int i = 0; i < symbols.length(); i++)
     {
-        QString txt{getApiInfo(scriptHandleOrType, symbols[i])};
+        QString txt{getApiInfo(scriptHandle, symbols[i])};
         for(QString tip : txt.split('\n'))
         {
             if(tip == "") break;
@@ -896,7 +887,7 @@ void SIM::onAskCallTip(int scriptHandleOrType, QString input, int pos)
     int j = symbol.length() - 1;
     while(j >= 0 && isID(symbol[j])) j--;
     symbol = symbol.mid(j + 1);
-    emit setCallTip(getApiInfo(scriptHandleOrType, symbol));
+    emit setCallTip(getApiInfo(scriptHandle, symbol));
 #endif // USE_LUA_PARSER
 }
 
