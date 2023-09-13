@@ -614,10 +614,11 @@ void SIM::onExecCode(QString code, int scriptHandle)
     bool err = false;
     try
     {
-        if(!execWrapper.isEmpty())
+        auto i = execWrapper.find(scriptHandle);
+        if(i != execWrapper.end())
         {
             sim::pushStringOntoStack(stackHandle, code.toStdString());
-            sim::callScriptFunctionEx(scriptHandle, execWrapper.toStdString(), stackHandle);
+            sim::callScriptFunctionEx(scriptHandle, i.value().toStdString(), stackHandle);
         }
         else
         {
@@ -891,7 +892,10 @@ void SIM::onAskCallTip(int scriptHandle, QString input, int pos)
 #endif // USE_LUA_PARSER
 }
 
-void SIM::setExecWrapper(const QString &wrapperFunc)
+void SIM::setExecWrapper(int scriptHandle, const QString &wrapperFunc)
 {
-    execWrapper = wrapperFunc;
+    if(wrapperFunc.isEmpty())
+        execWrapper.remove(scriptHandle);
+    else
+        execWrapper.insert(scriptHandle, wrapperFunc);
 }

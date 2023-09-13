@@ -508,7 +508,7 @@ public:
 
     void setExecWrapper(setExecWrapper_in *in, setExecWrapper_out *out)
     {
-        SIM::getInstance()->setExecWrapper(QString::fromStdString(in->wrapperFunc));
+        SIM::getInstance()->setExecWrapper(in->_.scriptID, QString::fromStdString(in->wrapperFunc));
     }
 
 private:

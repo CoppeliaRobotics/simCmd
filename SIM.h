@@ -56,7 +56,7 @@ public slots:
     void onExecCode(QString code, int scriptHandle);
     void onAskCompletion(int scriptHandle, QString token, QChar context, QStringList *cl);
     void onAskCallTip(int scriptHandle, QString input, int pos);
-    void setExecWrapper(const QString &wrapperFunc);
+    void setExecWrapper(int scriptHandle, const QString &wrapperFunc);
 
 signals:
     void scriptListChanged(int sandboxScript, int mainScript, QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning);
@@ -70,7 +70,7 @@ signals:
 private:
     PersistentOptions options;
     QStringList stringRenderingFlags;
-    QString execWrapper;
+    QMap<int, QString> execWrapper;
 };
 
 #endif // UIFUNCTIONS_H_INCLUDED
