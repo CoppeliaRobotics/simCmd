@@ -610,7 +610,8 @@ void SIM::onExecCode(QString code, int scriptHandle)
         showWarning(m);
     }
 
-    setConvenienceVars(scriptHandle, stackHandle, false);
+    if(opts.setConvenienceVars)
+        setConvenienceVars(scriptHandle, stackHandle, false);
     bool err = false;
     try
     {
@@ -654,7 +655,8 @@ void SIM::onExecCode(QString code, int scriptHandle)
             result.append(QString::fromStdString(stackTopStr));
         }
 
-        setConvenienceVars(scriptHandle, stackHandle, true);
+        if(opts.setConvenienceVars)
+            setConvenienceVars(scriptHandle, stackHandle, true);
 
         if(size > 0)
             showMessage(result);

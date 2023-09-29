@@ -127,6 +127,7 @@ public:
         MENUITEM_HISTORY_REMOVE_DUPS = addMenuItem("History: remove duplicates", itemEnabled|itemCheckable);
         MENUITEM_SHOW_MATCHING_HISTORY = addMenuItem("History: show matching entries (select with UP)", itemEnabled|itemCheckable);
         MENUITEM_DYNAMIC_COMPLETION = addMenuItem("Dynamic completion", itemEnabled|itemCheckable);
+        MENUITEM_SET_CONVENIENCE_VARS = addMenuItem("Set convenience vars", itemEnabled|itemCheckable);
         MENUITEM_AUTO_ACCEPT_COMMON_COMPLETION_PREFIX = addMenuItem("Auto-accept common completion prefix", itemEnabled|itemCheckable);
         MENUITEM_RESIZE_STATUSBAR_WHEN_FOCUSED = addMenuItem("Resize statusbar when focused", itemEnabled|itemCheckable);
     }
@@ -147,6 +148,7 @@ public:
         sim::moduleEntry(MENUITEM_HISTORY_REMOVE_DUPS, (options.enabled ? itemEnabled : 0) + (options.historyRemoveDups ? itemChecked : 0));
         sim::moduleEntry(MENUITEM_SHOW_MATCHING_HISTORY, (options.enabled ? itemEnabled : 0) + (options.showMatchingHistory ? itemChecked : 0));
         sim::moduleEntry(MENUITEM_DYNAMIC_COMPLETION, (options.enabled ? itemEnabled : 0) + (options.autoAcceptCommonCompletionPrefix ? itemChecked : 0));
+        sim::moduleEntry(MENUITEM_SET_CONVENIENCE_VARS, (options.enabled ? itemEnabled : 0) + (options.setConvenienceVars ? itemChecked : 0));
         sim::moduleEntry(MENUITEM_AUTO_ACCEPT_COMMON_COMPLETION_PREFIX, (options.enabled ? itemEnabled : 0) + (options.dynamicCompletion ? itemChecked : 0));
         sim::moduleEntry(MENUITEM_RESIZE_STATUSBAR_WHEN_FOCUSED, (options.enabled ? itemEnabled : 0) + (options.resizeStatusbarWhenFocused ? itemChecked : 0));
     }
@@ -238,6 +240,10 @@ public:
         else if(itemHandle == MENUITEM_RESIZE_STATUSBAR_WHEN_FOCUSED)
         {
             options.resizeStatusbarWhenFocused = !options.resizeStatusbarWhenFocused;
+        }
+        else if(itemHandle == MENUITEM_SET_CONVENIENCE_VARS)
+        {
+            options.setConvenienceVars = !options.setConvenienceVars;
         }
         else return;
 
@@ -490,6 +496,14 @@ public:
         optionsChangedFromData.store(true);
     }
 
+    void setConvenienceVars(setConvenienceVars_in *in, setConvenienceVars_out *out)
+    {
+        options.setConvenienceVars = in->enabled;
+        options.save();
+        SIM::getInstance()->setOptions(options);
+        optionsChangedFromData.store(true);
+    }
+
     void setAutoAcceptCommonCompletionPrefix(setAutoAcceptCommonCompletionPrefix_in *in, setAutoAcceptCommonCompletionPrefix_out *out)
     {
         options.autoAcceptCommonCompletionPrefix = in->b;
@@ -538,6 +552,7 @@ private:
     int MENUITEM_DYNAMIC_COMPLETION;
     int MENUITEM_AUTO_ACCEPT_COMMON_COMPLETION_PREFIX;
     int MENUITEM_RESIZE_STATUSBAR_WHEN_FOCUSED;
+    int MENUITEM_SET_CONVENIENCE_VARS;
     static const int itemEnabled = 1, itemChecked = 2, itemCheckable = 4;
 };
 

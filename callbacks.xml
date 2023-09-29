@@ -220,4 +220,14 @@
         <return>
         </return>
     </command>
+    <command name="setConvenienceVars">
+        <description>With this option enabled a few convenience vars will be set before executing code (H, SEL, SEL1).</description>
+        <params>
+            <param name="enabled" type="bool">
+                <description></description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
 </plugin>
