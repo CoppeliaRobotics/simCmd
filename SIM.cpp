@@ -606,8 +606,10 @@ void SIM::onExecCode(QString code, int scriptHandle)
     }
     catch(std::exception &ex)
     {
+#ifdef LOCAL_RESULT_RENDERING
         QString m(ex.what());
         showWarning(m);
+#endif // LOCAL_RESULT_RENDERING
     }
 
     if(opts.setConvenienceVars)
@@ -628,16 +630,19 @@ void SIM::onExecCode(QString code, int scriptHandle)
     }
     catch(sim::api_error &ex)
     {
+#ifdef LOCAL_RESULT_RENDERING
         PersistentOptions optsE(opts);
         optsE.stringEscapeSpecials = false;
         std::string s = getStackTopAsString(stackHandle, optsE, 0, false);
         QString m = QString::fromStdString(s);
         showError(m);
         err = true;
+#endif // LOCAL_RESULT_RENDERING
     }
 
     if(!err)
     {
+#ifdef LOCAL_RESULT_RENDERING
         int size = sim::getStackSize(stackHandle);
         if(!opts.printAllReturnedValues && size > 1)
         {
@@ -654,12 +659,15 @@ void SIM::onExecCode(QString code, int scriptHandle)
             if(i) result.append(", ");
             result.append(QString::fromStdString(stackTopStr));
         }
+#endif // LOCAL_RESULT_RENDERING
 
         if(opts.setConvenienceVars)
             setConvenienceVars(scriptHandle, stackHandle, true);
 
+#ifdef LOCAL_RESULT_RENDERING
         if(size > 0)
             showMessage(result);
+#endif // LOCAL_RESULT_RENDERING
     }
 
     sim::releaseStack(stackHandle);
