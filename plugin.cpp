@@ -118,6 +118,20 @@ public:
 
     void updateScriptsList()
     {
+        auto getScriptLabel = [](int type, int scriptHandle, const QString &name) -> QString {
+            QString ret = "";
+            if(type == sim_scripttype_childscript)
+                ret += "Child script of ";
+            if(type == sim_scripttype_customizationscript)
+                ret += "Customization script of ";
+            ret += "'";
+            ret += name;
+            ret += "'";
+            int lang = sim::getScriptInt32Param(scriptHandle, sim_scriptintparam_lang);
+            if(lang == 0) ret += " (Lua)";
+            if(lang == 1) ret += " (Python)";
+            return ret;
+        };
         bool isRunning = sim::getSimulationState() == sim_simulation_advancing_running;
         int sandboxScript = sim::getScriptHandleEx(sim_scripttype_sandboxscript, -1);
         int mainScript = sim::getScriptHandleEx(sim_scripttype_mainscript, -1);
@@ -131,11 +145,11 @@ public:
             {
                 scriptHandle = sim::getScriptHandleEx(sim_scripttype_childscript, objectHandle);
                 if(scriptHandle != -1)
-                    childScripts[scriptHandle] = name;
+                    childScripts[scriptHandle] = getScriptLabel(sim_scripttype_childscript, scriptHandle, name);
             }
             scriptHandle = sim::getScriptHandleEx(sim_scripttype_customizationscript, objectHandle);
             if(scriptHandle != -1)
-                customizationScripts[scriptHandle] = name;
+                customizationScripts[scriptHandle] = getScriptLabel(sim_scripttype_customizationscript, scriptHandle, name);
         }
         SIM::getInstance()->scriptListChanged(sandboxScript, mainScript, childScripts, customizationScripts, isRunning);
     }

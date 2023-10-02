@@ -117,7 +117,7 @@ QLuaCommanderWidget::QLuaCommanderWidget(QWidget *parent)
     calltipLabel->setVisible(false);
 #endif // CUSTOM_TOOLTIP_WINDOW
     editor = new QLuaCommanderEdit(this);
-    editor->setPlaceholderText("Input Lua code here, or type \"help()\" (use TAB for auto-completion)");
+    editor->setPlaceholderText("Input code here, or type \"help()\" (use TAB for auto-completion)");
     editor->setFont(QFont("Courier", 12));
     scriptCombo = new QComboBox(this);
     scriptCombo->setSizeAdjustPolicy(QComboBox::AdjustToContents);
@@ -337,7 +337,7 @@ void QLuaCommanderWidget::onScriptListChanged(int sandboxScript, int mainScript,
         {
             QVariantList data;
             data << sim_scripttype_childscript << e.first << e.second << QString();
-            scriptCombo->addItem(QString("Child script of '%1'").arg(e.second), data);
+            scriptCombo->addItem(e.second, data);
             if(data == old) selectedIndex = index;
             index++;
         }
@@ -347,7 +347,7 @@ void QLuaCommanderWidget::onScriptListChanged(int sandboxScript, int mainScript,
         {
             QVariantList data;
             data << sim_scripttype_customizationscript << e.first << e.second << QString();
-            scriptCombo->addItem(QString("Customization script of '%1'").arg(e.second), data);
+            scriptCombo->addItem(e.second, data);
             if(data == old) selectedIndex = index;
             index++;
         }
