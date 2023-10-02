@@ -128,8 +128,8 @@ public:
             ret += name;
             ret += "'";
             int lang = sim::getScriptInt32Param(scriptHandle, sim_scriptintparam_lang);
-            if(lang == 0) ret += " (Lua)";
-            if(lang == 1) ret += " (Python)";
+            if(lang == sim_lang_lua) ret += " (Lua)";
+            if(lang == sim_lang_python) ret += " (Python)";
             return ret;
         };
         bool isRunning = sim::getSimulationState() == sim_simulation_advancing_running;
