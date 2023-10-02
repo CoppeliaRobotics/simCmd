@@ -112,9 +112,7 @@ void QLuaCommanderEdit::keyPressEvent(QKeyEvent *event)
     {
         acceptCompletion();
 
-#ifndef USE_LUA_PARSER
         emit askCallTip(text(), cursorPosition());
-#endif // USE_LUA_PARSER
     }
     else if(event->key() == Qt::Key_Period)
     {
@@ -122,16 +120,12 @@ void QLuaCommanderEdit::keyPressEvent(QKeyEvent *event)
     }
     else if(event->key() == Qt::Key_Comma)
     {
-#ifndef USE_LUA_PARSER
         // reshow last tooltip when comma is pressed
         w->onSetCallTip(toolTip());
-#endif // USE_LUA_PARSER
     }
     else if(event->key() == Qt::Key_ParenRight)
     {
-#ifndef USE_LUA_PARSER
         w->onSetCallTip("");
-#endif // USE_LUA_PARSER
     }
     else if(event->key() == Qt::Key_L && event->modifiers().testFlag(Q_REAL_CTRL))
     {
@@ -219,7 +213,7 @@ void QLuaCommanderWidget::onAskCompletion(const QString &cmd, int cursorPos)
     {
         sim::addLog(sim_verbosity_debug, "cmd=\"%s\", pos=%d, tbc=%s, ctx=%s", cmd.toStdString(), cursorPos, token.toStdString(), context.toLatin1());
 
-        emit askCompletion(scriptHandle, token, context, nullptr);
+        emit askCompletion(scriptHandle, cmd, cursorPos, token, context, nullptr);
     }
 }
 

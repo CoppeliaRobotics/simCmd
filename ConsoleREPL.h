@@ -18,7 +18,7 @@ public:
 
 signals:
     void execCode(QString code, int scriptHandle);
-    void askCompletion(int scriptHandle, QString token, QChar context, QStringList *cl);
+    void askCompletion(int scriptHandle, QString input, int pos, QString token, QChar context, QStringList *cl);
 
 private:
     Replxx rx;

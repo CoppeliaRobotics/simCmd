@@ -27,10 +27,6 @@ public:
     void loadHistory();
     void appendHistory(QString code);
 
-    void showMessage(QString s);
-    void showWarning(QString s);
-    void showError(QString s);
-
 public slots:
     void clearHistory();
 
@@ -40,21 +36,11 @@ private:
 
     static SIM *instance;
 
-    std::string getStackTopAsString(int stackHandle, const PersistentOptions &opts, int depth = 0, bool quoteStrings = true, bool insideTable = false, std::string *strType = nullptr);
-
-    void initStringRenderingFlags();
-    QStringList getMatchingStringRenderingFlags(QString shortFlag);
-    void parseStringRenderingFlags(PersistentOptions *popts, const QString &code);
-
-    QStringList getCompletion(int scriptHandle, QString word, QChar context);
-    QStringList getCompletionID(int scriptHandle, QString word);
-    QStringList getCompletionObjName(QString word);
-
-    void setConvenienceVars(int scriptHandle, int stackHandle, bool check);
+    QStringList getCompletion(int scriptHandle, QString input, int pos, QString word, QChar context);
 
 public slots:
     void onExecCode(QString code, int scriptHandle);
-    void onAskCompletion(int scriptHandle, QString token, QChar context, QStringList *cl);
+    void onAskCompletion(int scriptHandle, QString input, int pos, QString token, QChar context, QStringList *clout);
     void onAskCallTip(int scriptHandle, QString input, int pos);
     void setExecWrapper(int scriptHandle, const QString &wrapperFunc);
 

@@ -94,7 +94,7 @@ public slots:
     void setHistory(QStringList history);
 
 signals:
-    void askCompletion(int scriptHandle, QString token, QChar context, QStringList *cl);
+    void askCompletion(int scriptHandle, QString input, int pos, QString token, QChar context, QStringList *clout);
     void askCallTip(int scriptHandle, QString input, int pos);
     void execCode(QString code, int scriptHandle);
 
