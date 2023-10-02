@@ -164,16 +164,11 @@ void SIM::onExecCode(int scriptHandle, QString langSuffix, QString code)
     try
     {
         int stackHandle = sim::createStack();
+        QString ewFunc = "_execEval";
         auto i = execWrapper.find(scriptHandle);
-        if(i != execWrapper.end())
-        {
-            sim::pushStringOntoStack(stackHandle, code.toStdString());
-            sim::callScriptFunctionEx(scriptHandle, (i.value() + langSuffix).toStdString(), stackHandle);
-        }
-        else
-        {
-            sim::executeScriptString(scriptHandle, (code + langSuffix).toStdString(), stackHandle);
-        }
+        if(i != execWrapper.end()) ewFunc = i.value();
+        sim::pushStringOntoStack(stackHandle, code.toStdString());
+        sim::callScriptFunctionEx(scriptHandle, (ewFunc + langSuffix).toStdString(), stackHandle);
         sim::releaseStack(stackHandle);
     }
     catch(std::exception &ex)
