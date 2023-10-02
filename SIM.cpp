@@ -164,7 +164,7 @@ void SIM::onExecCode(int scriptHandle, QString langSuffix, QString code)
     try
     {
         int stackHandle = sim::createStack();
-        QString ewFunc = "_execEval";
+        QString ewFunc = "_evalExec";
         auto i = execWrapper.find(scriptHandle);
         if(i != execWrapper.end()) ewFunc = i.value();
         sim::pushStringOntoStack(stackHandle, code.toStdString());
