@@ -203,9 +203,9 @@ QStringList SIM::getCompletion(int scriptHandle, QString input, int pos, QString
     int stackHandle = sim::createStack();
     writeToStack(input.toStdString(), stackHandle);
     writeToStack(pos, stackHandle);
-    sim::callScriptFunctionEx(scriptHandle, "_getCompletion", stackHandle);
     try
     {
+        sim::callScriptFunctionEx(scriptHandle, "_getCompletion", stackHandle);
         std::vector<std::string> r;
         readFromStack(stackHandle, &r);
 
@@ -223,9 +223,9 @@ void SIM::onAskCallTip(int scriptHandle, QString input, int pos)
     int stackHandle = sim::createStack();
     writeToStack(input.toStdString(), stackHandle);
     writeToStack(pos, stackHandle);
-    sim::callScriptFunctionEx(scriptHandle, "_getCalltip", stackHandle);
     try
     {
+        sim::callScriptFunctionEx(scriptHandle, "_getCalltip", stackHandle);
         std::string r;
         readFromStack(stackHandle, &r);
         emit setCallTip(QString::fromStdString(r));
