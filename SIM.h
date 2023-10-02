@@ -8,7 +8,6 @@
 #include <QMap>
 
 #include "stubs.h"
-#include "PersistentOptions.h"
 
 class SIM : public QObject
 {
@@ -21,8 +20,6 @@ public:
     static void destroyInstance();
 
     void connectSignals();
-
-    void setOptions(const PersistentOptions &options);
 
     void loadHistory();
     void appendHistory(QString code);
@@ -49,13 +46,11 @@ signals:
     void setCompletion(QStringList s);
     void setCallTip(QString s);
     void historyChanged(QStringList history);
-    void addStatusbarMessage(const QString &s, bool html);
-    void addStatusbarWarning(const QString &s, bool html);
-    void addStatusbarError(const QString &s, bool html);
+    void setResizeStatusbarWhenFocused(bool b);
+    void setAutoAcceptCommonCompletionPrefix(bool b);
+    void setShowMatchingHistory(bool b);
 
 private:
-    PersistentOptions options;
-    QStringList stringRenderingFlags;
     QMap<int, QString> execWrapper;
 };
 

@@ -11,7 +11,6 @@
 #include <QPushButton>
 #include <QLabel>
 #include "qcommandedit.h"
-#include "PersistentOptions.h"
 
 class QLuaCommanderWidget;
 class QLuaCommanderEdit;
@@ -60,7 +59,6 @@ public:
     ~QLuaCommanderWidget();
 
     inline QLuaCommanderEdit * editor_() {return editor;}
-    void setOptions(const PersistentOptions &options);
 
 protected:
     QLuaCommanderEdit *editor;
@@ -92,6 +90,9 @@ public slots:
     void onSetCallTip(const QString &tip);
     void onScriptListChanged(int sandboxScript, int mainScript, QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning);
     void setHistory(QStringList history);
+    void setResizeStatusbarWhenFocused(bool b);
+    void setAutoAcceptCommonCompletionPrefix(bool b);
+    void setShowMatchingHistory(bool b);
 
 signals:
     void askCompletion(int scriptHandle, QString input, int pos, QString token, QChar context, QStringList *clout);
@@ -102,7 +103,7 @@ public:
     std::atomic<bool> closeFlag;
 
 private:
-    PersistentOptions options;
+    bool resizeStatusbarWhenFocused = false;
     QList<int> statusbarSize;
     QList<int> statusbarSizeFocused;
     bool statusbarExpanded = false;

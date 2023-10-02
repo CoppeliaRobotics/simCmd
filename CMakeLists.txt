@@ -54,7 +54,6 @@ set(SOURCES
     SIM.cpp
     UI.cpp
     plugin.cpp
-    PersistentOptions.cpp
     qluacommanderwidget.cpp
     qcommandedit.cpp
     ConsoleREPL.cpp
@@ -85,4 +84,4 @@ if(CUSTOM_TOOLTIP_WINDOW)
 endif()
 target_compile_definitions(simLuaCmd PRIVATE REPLXX_STATIC)
 target_link_libraries(simLuaCmd PRIVATE ${LIBRARIES})
-coppeliasim_add_lua(test/getCallContexts.lua)
+coppeliasim_add_addon("simAddOnLua Commander.lua")

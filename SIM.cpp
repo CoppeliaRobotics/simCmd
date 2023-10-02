@@ -126,19 +126,23 @@ void SIM::appendHistory(QString cmd)
 {
     QStringList hist = loadHistoryData();
 
-    if(!options.historySkipRepeated || hist.isEmpty() || hist[hist.size() - 1] != cmd)
+    bool historySkipRepeated = sim::getNamedBoolParam("simLuaCmd.historySkipRepeated").value_or(true);
+    bool historyRemoveDups = sim::getNamedBoolParam("simLuaCmd.historyRemoveDups").value_or(false);
+    int historySize = sim::getNamedInt32Param("simLuaCmd.historySize").value_or(1000);
+
+    if(!historySkipRepeated || hist.isEmpty() || hist[hist.size() - 1] != cmd)
         hist << cmd;
 
-    if(options.historyRemoveDups)
+    if(historyRemoveDups)
     {
         reverse(hist);
         hist.removeDuplicates();
         reverse(hist);
     }
 
-    if(options.historySize >= 0)
+    if(historySize >= 0)
     {
-        int numToRemove = hist.size() - options.historySize;
+        int numToRemove = hist.size() - historySize;
         if(numToRemove > 0)
             hist.erase(hist.begin(), hist.begin() + numToRemove);
     }
@@ -146,11 +150,6 @@ void SIM::appendHistory(QString cmd)
     saveHistoryData(hist);
 
     emit historyChanged(hist);
-}
-
-void SIM::setOptions(const PersistentOptions &options)
-{
-    this->options = options;
 }
 
 void SIM::onAskCompletion(int scriptHandle, QString input, int pos, QString token, QChar context, QStringList *clout)
@@ -179,20 +178,25 @@ void SIM::onExecCode(QString code, int scriptHandle)
     if(!sim::getBoolParam(sim_boolparam_headless))
         sim::addLog(sim_verbosity_msgs|sim_verbosity_undecorated, "> %s", code.toStdString());
 
-    PersistentOptions opts = options;
-
-    int stackHandle = sim::createStack();
-    auto i = execWrapper.find(scriptHandle);
-    if(i != execWrapper.end())
+    try
     {
-        sim::pushStringOntoStack(stackHandle, code.toStdString());
-        sim::callScriptFunctionEx(scriptHandle, i.value().toStdString(), stackHandle);
+        int stackHandle = sim::createStack();
+        auto i = execWrapper.find(scriptHandle);
+        if(i != execWrapper.end())
+        {
+            sim::pushStringOntoStack(stackHandle, code.toStdString());
+            sim::callScriptFunctionEx(scriptHandle, i.value().toStdString(), stackHandle);
+        }
+        else
+        {
+            sim::executeScriptString(scriptHandle, code.toStdString(), stackHandle);
+        }
+        sim::releaseStack(stackHandle);
     }
-    else
+    catch(std::exception &ex)
     {
-        sim::executeScriptString(scriptHandle, code.toStdString(), stackHandle);
+        sim::addLog(sim_verbosity_errors, "Code evaluation failed.");
     }
-    sim::releaseStack(stackHandle);
 
     sim::announceSceneContentChange();
 }

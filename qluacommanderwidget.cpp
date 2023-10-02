@@ -187,12 +187,6 @@ QLuaCommanderWidget::~QLuaCommanderWidget()
 {
 }
 
-void QLuaCommanderWidget::setOptions(const PersistentOptions &options_)
-{
-    options = options_;
-    editor->setShowMatchingHistory(options.showMatchingHistory);
-}
-
 int QLuaCommanderWidget::getSelectedScriptHandle()
 {
     if(scriptCombo->currentIndex() >= 0)
@@ -263,13 +257,13 @@ void QLuaCommanderWidget::onClearConsole()
 
 void QLuaCommanderWidget::onFocusIn()
 {
-    if(options.resizeStatusbarWhenFocused)
+    if(resizeStatusbarWhenFocused)
         expandStatusbar();
 }
 
 void QLuaCommanderWidget::onFocusOut()
 {
-    if(options.resizeStatusbarWhenFocused)
+    if(resizeStatusbarWhenFocused)
         contractStatusbar();
 }
 
@@ -297,7 +291,7 @@ void QLuaCommanderWidget::onGlobalFocusChanged(QWidget *old, QWidget *now)
 {
     /* treat the statusbar focus as our own focus
      * why:
-     * when options.resizeStatusbarWhenFocused is active, and we want to copy
+     * when resizeStatusbarWhenFocused is active, and we want to copy
      * text from the statusbar, we don't want to resize the statusbar as if
      * the widget has lost focus. */
 
@@ -399,3 +393,17 @@ void QLuaCommanderWidget::setHistory(QStringList hist)
     editor->setHistory(hist);
 }
 
+void QLuaCommanderWidget::setResizeStatusbarWhenFocused(bool b)
+{
+    resizeStatusbarWhenFocused = b;
+}
+
+void QLuaCommanderWidget::setAutoAcceptCommonCompletionPrefix(bool b)
+{
+    editor->setAutoAcceptLongestCommonCompletionPrefix(b);
+}
+
+void QLuaCommanderWidget::setShowMatchingHistory(bool b)
+{
+    editor->setShowMatchingHistory(b);
+}
