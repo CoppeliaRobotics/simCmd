@@ -195,6 +195,10 @@ function sysCall_moduleEntry(inData)
     updateMenuItems()
 end
 
+function sysCall_addOnScriptSuspend()
+    return {cmd='cleanup'}
+end
+
 function sysCall_cleanup()
     unloadPlugin(simLuaCmd.pluginHandle)
 end
