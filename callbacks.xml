@@ -3,6 +3,16 @@
 
 <plugin name="simLuaCmd" author="federico.ferri.it@gmail.com">
     <description>API functions for LuaCommander plugin.</description>
+    <command name="setVisible">
+        <description>Show or hide the widget</description>
+        <params>
+            <param name="b" type="bool">
+                <description>if true the widget will be shown, otherwise it will be hidden</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
     <command name="clearHistory">
         <description>Clear command history</description>
         <params>

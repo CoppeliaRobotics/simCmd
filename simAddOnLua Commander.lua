@@ -171,11 +171,12 @@ function updateMenuItems()
 end
 
 function sysCall_info()
-    return {menu='Developer tools\nLua Commander\n(addon)'}
+    return {autoStart=sim.getNamedBoolParam('simLuaCmd.autoStart')~=false,menu='Developer tools\nLua Commander\n(addon)'}
 end
 
 function sysCall_init()
     simLuaCmd=require'simLuaCmd'
+    simLuaCmd.setVisible(true)
     for i,menu in ipairs(menus) do
         menu.handle=sim.moduleEntry(-1,'Developer tools\nLua Commander\n'..menu.label,menuItemState(menu))
     end
@@ -200,5 +201,6 @@ function sysCall_addOnScriptSuspend()
 end
 
 function sysCall_cleanup()
-    unloadPlugin(simLuaCmd.pluginHandle)
+    simLuaCmd.setVisible(false)
+    unloadPlugin(simLuaCmd)
 end

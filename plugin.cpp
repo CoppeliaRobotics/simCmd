@@ -75,7 +75,6 @@ public:
         layout->setContentsMargins(0,0,0,0);
         splitterChild->setLayout(layout);
         commanderWidget = new QLuaCommanderWidget();
-        commanderWidget->setVisible(true);
         layout->addWidget(statusBar);
         layout->addWidget(commanderWidget);
         splitterChild->setMaximumHeight(600);
@@ -180,6 +179,7 @@ public:
             QObject::connect(commanderWidget, &QLuaCommanderWidget::execCode, sim, &SIM::onExecCode);
             QObject::connect(commanderWidget, &QLuaCommanderWidget::askCompletion, sim, &SIM::onAskCompletion);
             QObject::connect(commanderWidget, &QLuaCommanderWidget::askCallTip, sim, &SIM::onAskCallTip);
+            QObject::connect(sim, &SIM::setVisible, commanderWidget, &QLuaCommanderWidget::setVisible);
             QObject::connect(sim, &SIM::scriptListChanged, commanderWidget, &QLuaCommanderWidget::onScriptListChanged);
             QObject::connect(sim, &SIM::setCompletion, commanderWidget, &QLuaCommanderWidget::onSetCompletion);
             QObject::connect(sim, &SIM::setCallTip, commanderWidget, &QLuaCommanderWidget::onSetCallTip);
@@ -205,6 +205,11 @@ public:
         }
 
         firstInstancePass = false;
+    }
+
+    void setVisible(setVisible_in *in, setVisible_out *out)
+    {
+        SIM::getInstance()->setVisible(in->b);
     }
 
     void clearHistory(clearHistory_in *in, clearHistory_out *out)

@@ -40,6 +40,7 @@ public slots:
     void setExecWrapper(int scriptHandle, const QString &wrapperFunc);
 
 signals:
+    void setVisible(bool visible);
     void scriptListChanged(int sandboxScript, int mainScript, QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning);
     void setCompletion(QStringList s);
     void setCallTip(QString s);
