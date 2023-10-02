@@ -152,24 +152,7 @@ void SIM::appendHistory(QString cmd)
     emit historyChanged(hist);
 }
 
-void SIM::onAskCompletion(int scriptHandle, QString input, int pos, QString token, QChar context, QStringList *clout)
-{
-    ASSERT_THREAD(!UI);
-
-    QStringList cl = getCompletion(scriptHandle, input, pos, token, context);
-    if(clout) *clout = cl;
-
-    // the QCommandEdit widget wants completions without the initial token part
-    QStringList cl2;
-    for(const QString &s : cl)
-    {
-        if(s.startsWith(token))
-            cl2 << s.mid(token.length());
-    }
-    emit setCompletion(cl2);
-}
-
-void SIM::onExecCode(QString code, int scriptHandle)
+void SIM::onExecCode(int scriptHandle, QString langSuffix, QString code)
 {
     ASSERT_THREAD(!UI);
 
@@ -185,11 +168,11 @@ void SIM::onExecCode(QString code, int scriptHandle)
         if(i != execWrapper.end())
         {
             sim::pushStringOntoStack(stackHandle, code.toStdString());
-            sim::callScriptFunctionEx(scriptHandle, i.value().toStdString(), stackHandle);
+            sim::callScriptFunctionEx(scriptHandle, (i.value() + langSuffix).toStdString(), stackHandle);
         }
         else
         {
-            sim::executeScriptString(scriptHandle, code.toStdString(), stackHandle);
+            sim::executeScriptString(scriptHandle, (code + langSuffix).toStdString(), stackHandle);
         }
         sim::releaseStack(stackHandle);
     }
@@ -201,35 +184,51 @@ void SIM::onExecCode(QString code, int scriptHandle)
     sim::announceSceneContentChange();
 }
 
-QStringList SIM::getCompletion(int scriptHandle, QString input, int pos, QString word, QChar context)
+void SIM::onAskCompletion(int scriptHandle, QString langSuffix, QString input, int pos, QStringList *clout)
 {
-    QStringList result;
+    ASSERT_THREAD(!UI);
+
+    QStringList cl;
     int stackHandle = sim::createStack();
     writeToStack(input.toStdString(), stackHandle);
     writeToStack(pos, stackHandle);
     try
     {
-        sim::callScriptFunctionEx(scriptHandle, "_getCompletion", stackHandle);
+        sim::callScriptFunctionEx(scriptHandle, "_getCompletion" + langSuffix.toStdString(), stackHandle);
         std::vector<std::string> r;
         readFromStack(stackHandle, &r);
 
         for(const auto &x : r)
-            result << QString::fromStdString(x);
-        result.sort();
+            cl << QString::fromStdString(x);
+        cl.sort();
     }
     catch(std::exception &ex) {}
     sim::releaseStack(stackHandle);
-    return result;
+
+    if(clout) *clout = cl;
+
+#if 0
+    // the QCommandEdit widget wants completions without the initial token part
+    QStringList cl2;
+    for(const QString &s : cl)
+    {
+        if(s.startsWith(token))
+            cl2 << s.mid(token.length());
+    }
+    emit setCompletion(cl2);
+#else
+    emit setCompletion(cl);
+#endif
 }
 
-void SIM::onAskCallTip(int scriptHandle, QString input, int pos)
+void SIM::onAskCallTip(int scriptHandle, QString langSuffix, QString input, int pos)
 {
     int stackHandle = sim::createStack();
     writeToStack(input.toStdString(), stackHandle);
     writeToStack(pos, stackHandle);
     try
     {
-        sim::callScriptFunctionEx(scriptHandle, "_getCalltip", stackHandle);
+        sim::callScriptFunctionEx(scriptHandle, "_getCalltip" + langSuffix.toStdString(), stackHandle);
         std::string r;
         readFromStack(stackHandle, &r);
         emit setCallTip(QString::fromStdString(r));

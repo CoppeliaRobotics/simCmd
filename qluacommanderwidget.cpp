@@ -54,44 +54,6 @@ static inline bool isID(QChar c)
     return c.isLetterOrNumber() || c == '_' || c == '.';
 }
 
-bool tokenBehindCursor(const QString &cmd, int cursorPos, QString *tok, QChar *ctx, int *pos)
-{
-    QString before = cmd.left(cursorPos);
-    QString after = cmd.mid(cursorPos);
-
-    // will not complete if in the middle of a symbol
-    if(!after.isEmpty() && isID(after[0]))
-        return false;
-
-    int j = before.length() - 1;
-    while(j >= 0 && isID(before[j])) j--;
-    *pos = ++j;
-    *tok = before.mid(j);
-    *ctx = 'i'; // identifier
-
-    // check if we are inside a string...
-    QChar prev{0}, inStr{0};
-    int strStart = -1;
-    for(int i = 0; i < before.length(); i++)
-    {
-        QChar c{before[i]};
-        if(inStr != 0 && prev == '\\') goto breakChecks;
-        if(inStr != 0 && c == inStr) inStr = 0;
-        if(inStr == 0 && (c == '\'' || c == '"')) {inStr = c; strStart = i;}
-breakChecks:
-        prev = c;
-    }
-
-    if(inStr != 0 && strStart > 0 && before[strStart - 1] == 'H')
-    {
-        *pos = strStart + 1;
-        *tok = before.mid(strStart + 1);
-        *ctx = 'H';
-    }
-
-    return true;
-}
-
 QLuaCommanderEdit::QLuaCommanderEdit(QLuaCommanderWidget *parent)
     : QCommandEdit(parent),
       commander(parent)
@@ -187,40 +149,41 @@ QLuaCommanderWidget::~QLuaCommanderWidget()
 {
 }
 
-int QLuaCommanderWidget::getSelectedScriptHandle()
+void QLuaCommanderWidget::getSelectedScriptInfo(int &handle, QString &langSuffix)
 {
+    handle = -1;
+    langSuffix = "";
+
     if(scriptCombo->currentIndex() >= 0)
     {
         QVariantList data = scriptCombo->itemData(scriptCombo->currentIndex()).toList();
-        return data[1].toInt();
+        handle = data[1].toInt();
+        langSuffix = data[3].toString();
     }
-    return -1;
 }
 
 void QLuaCommanderWidget::onAskCompletion(const QString &cmd, int cursorPos)
 {
-    int scriptHandle = getSelectedScriptHandle();
-    QString token;
-    QChar context;
-    int startPos;
-    if(tokenBehindCursor(cmd, cursorPos, &token, &context, &startPos))
-    {
-        sim::addLog(sim_verbosity_debug, "cmd=\"%s\", pos=%d, tbc=%s, ctx=%s", cmd.toStdString(), cursorPos, token.toStdString(), context.toLatin1());
-
-        emit askCompletion(scriptHandle, cmd, cursorPos, token, context, nullptr);
-    }
+    int scriptHandle;
+    QString langSuffix;
+    getSelectedScriptInfo(scriptHandle, langSuffix);
+    emit askCompletion(scriptHandle, langSuffix, cmd, cursorPos, nullptr);
 }
 
 void QLuaCommanderWidget::onAskCallTip(QString input, int pos)
 {
-    int scriptHandle = getSelectedScriptHandle();
-    emit askCallTip(scriptHandle, input, pos);
+    int scriptHandle;
+    QString langSuffix;
+    getSelectedScriptInfo(scriptHandle, langSuffix);
+    emit askCallTip(scriptHandle, langSuffix, input, pos);
 }
 
 void QLuaCommanderWidget::onExecute(const QString &cmd)
 {
-    int scriptHandle = getSelectedScriptHandle();
-    emit execCode(cmd, scriptHandle);
+    int scriptHandle;
+    QString langSuffix;
+    getSelectedScriptInfo(scriptHandle, langSuffix);
+    emit execCode(scriptHandle, langSuffix, cmd);
     editor->clear();
     onSetCallTip("");
 }
@@ -345,17 +308,19 @@ void QLuaCommanderWidget::onScriptListChanged(int sandboxScript, int mainScript,
 
     // populate combo box:
     int index = 0, selectedIndex = -1;
+    QMap<QString, QString> sandboxLangs{{"Lua", "@lua"}, {"Python", "@python"}};
+    for(const auto &e : sandboxLangs.toStdMap())
     {
         QVariantList data;
-        data << sim_scripttype_sandboxscript << sandboxScript << QString();
-        scriptCombo->addItem("Sandbox script", data);
+        data << sim_scripttype_sandboxscript << sandboxScript << QString() << e.second;
+        scriptCombo->addItem(QString("Sandbox script (%1)").arg(e.first), data);
         if(data == old) selectedIndex = index;
         index++;
     }
     if(simRunning)
     {
         QVariantList data;
-        data << sim_scripttype_mainscript << mainScript << QString();
+        data << sim_scripttype_mainscript << mainScript << QString() << QString();
         scriptCombo->addItem("Main script", data);
         if(data == old) selectedIndex = index;
         index++;
@@ -365,7 +330,7 @@ void QLuaCommanderWidget::onScriptListChanged(int sandboxScript, int mainScript,
         for(const auto &e : childScripts.toStdMap())
         {
             QVariantList data;
-            data << sim_scripttype_childscript << e.first << e.second;
+            data << sim_scripttype_childscript << e.first << e.second << QString();
             scriptCombo->addItem(QString("Child script of '%1'").arg(e.second), data);
             if(data == old) selectedIndex = index;
             index++;
@@ -375,7 +340,7 @@ void QLuaCommanderWidget::onScriptListChanged(int sandboxScript, int mainScript,
         for(const auto &e : customizationScripts.toStdMap())
         {
             QVariantList data;
-            data << sim_scripttype_customizationscript << e.first << e.second;
+            data << sim_scripttype_customizationscript << e.first << e.second << QString();
             scriptCombo->addItem(QString("Customization script of '%1'").arg(e.second), data);
             if(data == old) selectedIndex = index;
             index++;

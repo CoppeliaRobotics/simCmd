@@ -17,8 +17,8 @@ public:
     Replxx::completions_t hook_completion(const std::string &context, int &contextLen);
 
 signals:
-    void execCode(QString code, int scriptHandle);
-    void askCompletion(int scriptHandle, QString input, int pos, QString token, QChar context, QStringList *cl);
+    void execCode(int scriptHandle, QString langSuffix, QString code);
+    void askCompletion(int scriptHandle, QString langSuffix, QString input, int pos, QStringList *cl);
 
 private:
     Replxx rx;

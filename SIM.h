@@ -33,12 +33,10 @@ private:
 
     static SIM *instance;
 
-    QStringList getCompletion(int scriptHandle, QString input, int pos, QString word, QChar context);
-
 public slots:
-    void onExecCode(QString code, int scriptHandle);
-    void onAskCompletion(int scriptHandle, QString input, int pos, QString token, QChar context, QStringList *clout);
-    void onAskCallTip(int scriptHandle, QString input, int pos);
+    void onExecCode(int scriptHandle, QString langSuffix, QString code);
+    void onAskCompletion(int scriptHandle, QString langSuffix, QString input, int pos, QStringList *clout);
+    void onAskCallTip(int scriptHandle, QString langSuffix, QString input, int pos);
     void setExecWrapper(int scriptHandle, const QString &wrapperFunc);
 
 signals:

@@ -67,7 +67,7 @@ protected:
     QLabel *calltipLabel;
 
 public:
-    int getSelectedScriptHandle();
+    void getSelectedScriptInfo(int &handle, QString &langSuffix);
 
 private slots:
     void onAskCompletion(const QString &cmd, int cursorPos);
@@ -95,9 +95,9 @@ public slots:
     void setShowMatchingHistory(bool b);
 
 signals:
-    void askCompletion(int scriptHandle, QString input, int pos, QString token, QChar context, QStringList *clout);
-    void askCallTip(int scriptHandle, QString input, int pos);
-    void execCode(QString code, int scriptHandle);
+    void askCompletion(int scriptHandle, QString langSuffix, QString input, int pos, QStringList *clout);
+    void askCallTip(int scriptHandle, QString langSuffix, QString input, int pos);
+    void execCode(int scriptHandle, QString langSuffix, QString code);
 
 public:
     std::atomic<bool> closeFlag;
