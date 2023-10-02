@@ -146,6 +146,9 @@ public:
         sim->setResizeStatusbarWhenFocused(
             sim::getNamedBoolParam("simLuaCmd.resizeStatusbarWhenFocused").value_or(false)
         );
+        sim->setPreferredSandboxLang(
+            QString::fromStdString(sim::getNamedStringParam("simLuaCmd.preferredSandboxLang").value_or(""))
+        );
         sim->setAutoAcceptCommonCompletionPrefix(
             sim::getNamedBoolParam("simLuaCmd.autoAcceptCommonCompletionPrefix").value_or(true)
         );
@@ -185,6 +188,7 @@ public:
             QObject::connect(sim, &SIM::setCallTip, commanderWidget, &QLuaCommanderWidget::onSetCallTip);
             QObject::connect(sim, &SIM::historyChanged, commanderWidget, &QLuaCommanderWidget::setHistory);
             QObject::connect(sim, &SIM::setResizeStatusbarWhenFocused, commanderWidget, &QLuaCommanderWidget::setResizeStatusbarWhenFocused);
+            QObject::connect(sim, &SIM::setPreferredSandboxLang, commanderWidget, &QLuaCommanderWidget::setPreferredSandboxLang);
             QObject::connect(sim, &SIM::setAutoAcceptCommonCompletionPrefix, commanderWidget, &QLuaCommanderWidget::setAutoAcceptCommonCompletionPrefix);
             QObject::connect(sim, &SIM::setShowMatchingHistory, commanderWidget, &QLuaCommanderWidget::setShowMatchingHistory);
             sim->loadHistory();

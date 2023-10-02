@@ -309,13 +309,19 @@ void QLuaCommanderWidget::onScriptListChanged(int sandboxScript, int mainScript,
     // populate combo box:
     int index = 0, selectedIndex = -1;
     QMap<QString, QString> sandboxLangs{{"Lua", "@lua"}, {"Python", "@python"}};
-    for(const auto &e : sandboxLangs.toStdMap())
+    for(int i = 0; i < 2; i++)
     {
-        QVariantList data;
-        data << sim_scripttype_sandboxscript << sandboxScript << QString() << e.second;
-        scriptCombo->addItem(QString("Sandbox script (%1)").arg(e.first), data);
-        if(data == old) selectedIndex = index;
-        index++;
+        for(const auto &e : sandboxLangs.toStdMap())
+        {
+            QString lang = e.first;
+            if((i == 0) ^ (lang == preferredSandboxLang)) continue;
+            QString suffix = e.second;
+            QVariantList data;
+            data << sim_scripttype_sandboxscript << sandboxScript << QString() << suffix;
+            scriptCombo->addItem(QString("Sandbox script (%1)").arg(lang), data);
+            if(data == old) selectedIndex = index;
+            index++;
+        }
     }
     if(simRunning)
     {
@@ -361,6 +367,11 @@ void QLuaCommanderWidget::setHistory(QStringList hist)
 void QLuaCommanderWidget::setResizeStatusbarWhenFocused(bool b)
 {
     resizeStatusbarWhenFocused = b;
+}
+
+void QLuaCommanderWidget::setPreferredSandboxLang(const QString &lang)
+{
+    preferredSandboxLang = lang;
 }
 
 void QLuaCommanderWidget::setAutoAcceptCommonCompletionPrefix(bool b)

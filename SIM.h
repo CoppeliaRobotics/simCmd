@@ -46,6 +46,7 @@ signals:
     void setCallTip(QString s);
     void historyChanged(QStringList history);
     void setResizeStatusbarWhenFocused(bool b);
+    void setPreferredSandboxLang(QString lang);
     void setAutoAcceptCommonCompletionPrefix(bool b);
     void setShowMatchingHistory(bool b);
 

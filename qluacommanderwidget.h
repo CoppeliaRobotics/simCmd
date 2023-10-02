@@ -91,6 +91,7 @@ public slots:
     void onScriptListChanged(int sandboxScript, int mainScript, QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning);
     void setHistory(QStringList history);
     void setResizeStatusbarWhenFocused(bool b);
+    void setPreferredSandboxLang(const QString &lang);
     void setAutoAcceptCommonCompletionPrefix(bool b);
     void setShowMatchingHistory(bool b);
 
@@ -104,6 +105,8 @@ public:
 
 private:
     bool resizeStatusbarWhenFocused = false;
+    QString preferredSandboxLang;
+
     QList<int> statusbarSize;
     QList<int> statusbarSizeFocused;
     bool statusbarExpanded = false;
