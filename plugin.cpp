@@ -33,7 +33,6 @@ public:
 
         if(sim::getBoolParam(sim_boolparam_headless))
         {
-            sim::addLog(sim_verbosity_loadinfos, "running in headless mode, using libreadline");
             auto sim = SIM::getInstance();
             readline = new Readline(sim);
             QObject::connect(readline, &Readline::execCode, sim, &SIM::onExecCode, Qt::BlockingQueuedConnection);
