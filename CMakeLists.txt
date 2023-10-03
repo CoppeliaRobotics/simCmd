@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16.3)
-project(simLuaCmd)
+project(simCmd)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
@@ -46,7 +46,7 @@ endif()
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/generated)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external)
 
-coppeliasim_generate_stubs(${CMAKE_CURRENT_BINARY_DIR}/generated XML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/callbacks.xml LUA_FILE ${CMAKE_CURRENT_SOURCE_DIR}/simLuaCmd.lua)
+coppeliasim_generate_stubs(${CMAKE_CURRENT_BINARY_DIR}/generated XML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/callbacks.xml LUA_FILE ${CMAKE_CURRENT_SOURCE_DIR}/simCmd.lua)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
@@ -54,16 +54,9 @@ set(SOURCES
     SIM.cpp
     UI.cpp
     plugin.cpp
-    qluacommanderwidget.cpp
+    qcommanderwidget.cpp
     qcommandedit.cpp
     ConsoleREPL.cpp
-    ${COPPELIASIM_INCLUDE_DIR}/simStack/stackObject.cpp
-    ${COPPELIASIM_INCLUDE_DIR}/simStack/stackNull.cpp
-    ${COPPELIASIM_INCLUDE_DIR}/simStack/stackBool.cpp
-    ${COPPELIASIM_INCLUDE_DIR}/simStack/stackNumber.cpp
-    ${COPPELIASIM_INCLUDE_DIR}/simStack/stackString.cpp
-    ${COPPELIASIM_INCLUDE_DIR}/simStack/stackArray.cpp
-    ${COPPELIASIM_INCLUDE_DIR}/simStack/stackMap.cpp
 )
 
 set(LIBRARIES
@@ -75,13 +68,13 @@ set(LIBRARIES
     ${REPLXX_LIBRARY}
 )
 
-coppeliasim_add_plugin(simLuaCmd SOURCES ${SOURCES})
-target_compile_definitions(simLuaCmd PRIVATE QT_COMPIL)
-add_dependencies(simLuaCmd replxx-ext)
+coppeliasim_add_plugin(simCmd SOURCES ${SOURCES})
+target_compile_definitions(simCmd PRIVATE QT_COMPIL)
+add_dependencies(simCmd replxx-ext)
 option(CUSTOM_TOOLTIP_WINDOW "use a custom tooltip window class instead of the default tooltip")
 if(CUSTOM_TOOLTIP_WINDOW)
-    target_compile_definitions(simLuaCmd PRIVATE CUSTOM_TOOLTIP_WINDOW)
+    target_compile_definitions(simCmd PRIVATE CUSTOM_TOOLTIP_WINDOW)
 endif()
-target_compile_definitions(simLuaCmd PRIVATE REPLXX_STATIC)
-target_link_libraries(simLuaCmd PRIVATE ${LIBRARIES})
-coppeliasim_add_addon("simAddOnLua Commander.lua")
+target_compile_definitions(simCmd PRIVATE REPLXX_STATIC)
+target_link_libraries(simCmd PRIVATE ${LIBRARIES})
+coppeliasim_add_addon("simAddOnCommander.lua")

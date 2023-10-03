@@ -1,8 +1,8 @@
-local simLuaCmd=loadPlugin'simLuaCmd';
+local simCmd=loadPlugin'simCmd';
 
 html_help = [[
-        <h2>LuaCommander plugin</h2>
-        <p>Use this plugin for quick evaluation of Lua expressions.</p>
+        <h2>Commander plugin</h2>
+        <p>Use this plugin for quick evaluation of expressions.</p>
 
         <h3>Completion</h3>
         <p>Begin to type the name of a function (e.g. "sim.getObjectHa") and press TAB to automatically complete it. If there are multiple matches, repeatedly press TAB to cycle through completions, and Shift+TAB to cycle back.</p>
@@ -53,10 +53,10 @@ function help()
         simUI.destroy(ui)
         ui = nil
     else
-        ui = simUI.create('<ui title="LuaCommander Plugin" closeable="true" on-close="help" modal="true" size="440,520"><text-browser text="'..string.gsub(html_help,'"','&quot;')..'" /></ui>')
+        ui = simUI.create('<ui title="Commander Plugin" closeable="true" on-close="help" modal="true" size="440,520"><text-browser text="'..string.gsub(html_help,'"','&quot;')..'" /></ui>')
     end
 end
 
-;(require'simLuaCmd-typecheck')(simLuaCmd)
+;(require'simCmd-typecheck')(simCmd)
 
-return simLuaCmd
+return simCmd

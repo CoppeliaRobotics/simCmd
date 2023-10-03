@@ -1,4 +1,4 @@
-#include "qluacommanderwidget.h"
+#include "qcommanderwidget.h"
 #include "UI.h"
 #include "SIM.h"
 #include <boost/format.hpp>
@@ -17,7 +17,7 @@
 
 QGlobalEventFilter * QGlobalEventFilter::instance_ = NULL;
 
-QGlobalEventFilter::QGlobalEventFilter(QLuaCommanderWidget *commander, QLuaCommanderEdit *widget)
+QGlobalEventFilter::QGlobalEventFilter(QCommanderWidget *commander, QCommanderEdit *widget)
     : commander_(commander), widget_(widget)
 {
 }
@@ -37,7 +37,7 @@ bool QGlobalEventFilter::eventFilter(QObject *object, QEvent *event)
     return QObject::eventFilter(object, event);
 }
 
-void QGlobalEventFilter::install(QLuaCommanderWidget *commander, QLuaCommanderEdit *widget)
+void QGlobalEventFilter::install(QCommanderWidget *commander, QCommanderEdit *widget)
 {
     instance_ = new QGlobalEventFilter(commander, widget);
     QCoreApplication::instance()->installEventFilter(instance_);
@@ -54,21 +54,21 @@ static inline bool isID(QChar c)
     return c.isLetterOrNumber() || c == '_' || c == '.';
 }
 
-QLuaCommanderEdit::QLuaCommanderEdit(QLuaCommanderWidget *parent)
+QCommanderEdit::QCommanderEdit(QCommanderWidget *parent)
     : QCommandEdit(parent),
       commander(parent)
 {
     QGlobalEventFilter::install(parent, this);
 }
 
-QLuaCommanderEdit::~QLuaCommanderEdit()
+QCommanderEdit::~QCommanderEdit()
 {
     QGlobalEventFilter::uninstall();
 }
 
-void QLuaCommanderEdit::keyPressEvent(QKeyEvent *event)
+void QCommanderEdit::keyPressEvent(QKeyEvent *event)
 {
-    auto w = static_cast<QLuaCommanderWidget*>(parent());
+    auto w = static_cast<QCommanderWidget*>(parent());
 
     if(event->key() == Qt::Key_ParenLeft)
     {
@@ -97,7 +97,7 @@ void QLuaCommanderEdit::keyPressEvent(QKeyEvent *event)
     QCommandEdit::keyPressEvent(event);
 }
 
-QLuaCommanderWidget::QLuaCommanderWidget(QWidget *parent)
+QCommanderWidget::QCommanderWidget(QWidget *parent)
     : QWidget(parent)
 {
     statusbarSize = UI::getInstance()->getStatusbarSize();
@@ -116,7 +116,7 @@ QLuaCommanderWidget::QLuaCommanderWidget(QWidget *parent)
     calltipLabel = new QLabel(this);
     calltipLabel->setVisible(false);
 #endif // CUSTOM_TOOLTIP_WINDOW
-    editor = new QLuaCommanderEdit(this);
+    editor = new QCommanderEdit(this);
     editor->setPlaceholderText("Input code here, or type \"help()\" (use TAB for auto-completion)");
     editor->setFont(QFont("Courier", 12));
     scriptCombo = new QComboBox(this);
@@ -133,23 +133,23 @@ QLuaCommanderWidget::QLuaCommanderWidget(QWidget *parent)
     grid->addWidget(scriptCombo, 1, 1);
     grid->addWidget(closeButton, 1, 2);
 
-    connect(editor, &QLuaCommanderEdit::askCompletion, this, &QLuaCommanderWidget::onAskCompletion);
-    connect(editor, &QLuaCommanderEdit::askCallTip, this, &QLuaCommanderWidget::onAskCallTip);
-    connect(editor, &QLuaCommanderEdit::execute, this, &QLuaCommanderWidget::onExecute);
-    connect(editor, &QLuaCommanderEdit::escape, this, &QLuaCommanderWidget::onEscape);
-    connect(editor, &QLuaCommanderEdit::editorCleared, this, &QLuaCommanderWidget::onEditorCleared);
-    connect(editor, &QLuaCommanderEdit::textChanged, this, &QLuaCommanderWidget::onEditorChanged);
-    connect(editor, &QLuaCommanderEdit::cursorPositionChanged, this, &QLuaCommanderWidget::onEditorCursorChanged);
-    connect(editor, &QLuaCommanderEdit::clearConsole, this, &QLuaCommanderWidget::onClearConsole);
-    connect(closeButton, &QPushButton::clicked, this, &QLuaCommanderWidget::onClose);
+    connect(editor, &QCommanderEdit::askCompletion, this, &QCommanderWidget::onAskCompletion);
+    connect(editor, &QCommanderEdit::askCallTip, this, &QCommanderWidget::onAskCallTip);
+    connect(editor, &QCommanderEdit::execute, this, &QCommanderWidget::onExecute);
+    connect(editor, &QCommanderEdit::escape, this, &QCommanderWidget::onEscape);
+    connect(editor, &QCommanderEdit::editorCleared, this, &QCommanderWidget::onEditorCleared);
+    connect(editor, &QCommanderEdit::textChanged, this, &QCommanderWidget::onEditorChanged);
+    connect(editor, &QCommanderEdit::cursorPositionChanged, this, &QCommanderWidget::onEditorCursorChanged);
+    connect(editor, &QCommanderEdit::clearConsole, this, &QCommanderWidget::onClearConsole);
+    connect(closeButton, &QPushButton::clicked, this, &QCommanderWidget::onClose);
     connect(QApplication::instance(), SIGNAL(focusChanged(QWidget*,QWidget*)), this, SLOT(onGlobalFocusChanged(QWidget*,QWidget*)));
 }
 
-QLuaCommanderWidget::~QLuaCommanderWidget()
+QCommanderWidget::~QCommanderWidget()
 {
 }
 
-void QLuaCommanderWidget::getSelectedScriptInfo(int &handle, QString &langSuffix)
+void QCommanderWidget::getSelectedScriptInfo(int &handle, QString &langSuffix)
 {
     handle = -1;
     langSuffix = "";
@@ -162,7 +162,7 @@ void QLuaCommanderWidget::getSelectedScriptInfo(int &handle, QString &langSuffix
     }
 }
 
-void QLuaCommanderWidget::onAskCompletion(const QString &cmd, int cursorPos)
+void QCommanderWidget::onAskCompletion(const QString &cmd, int cursorPos)
 {
     int scriptHandle;
     QString langSuffix;
@@ -170,7 +170,7 @@ void QLuaCommanderWidget::onAskCompletion(const QString &cmd, int cursorPos)
     emit askCompletion(scriptHandle, langSuffix, cmd, cursorPos, nullptr);
 }
 
-void QLuaCommanderWidget::onAskCallTip(QString input, int pos)
+void QCommanderWidget::onAskCallTip(QString input, int pos)
 {
     int scriptHandle;
     QString langSuffix;
@@ -178,7 +178,7 @@ void QLuaCommanderWidget::onAskCallTip(QString input, int pos)
     emit askCallTip(scriptHandle, langSuffix, input, pos);
 }
 
-void QLuaCommanderWidget::onExecute(const QString &cmd)
+void QCommanderWidget::onExecute(const QString &cmd)
 {
     int scriptHandle;
     QString langSuffix;
@@ -188,49 +188,49 @@ void QLuaCommanderWidget::onExecute(const QString &cmd)
     onSetCallTip("");
 }
 
-void QLuaCommanderWidget::onEscape()
+void QCommanderWidget::onEscape()
 {
     editor->clearFocus();
 }
 
-void QLuaCommanderWidget::onEditorCleared()
+void QCommanderWidget::onEditorCleared()
 {
     onSetCallTip("");
 }
 
-void QLuaCommanderWidget::onEditorChanged(QString text)
+void QCommanderWidget::onEditorChanged(QString text)
 {
     onAskCallTip(text, editor->cursorPosition());
 }
 
-void QLuaCommanderWidget::onEditorCursorChanged(int oldPos, int newPos)
+void QCommanderWidget::onEditorCursorChanged(int oldPos, int newPos)
 {
     onAskCallTip(editor->text(), newPos);
 }
 
-void QLuaCommanderWidget::onClose()
+void QCommanderWidget::onClose()
 {
     closeFlag.store(true);
 }
 
-void QLuaCommanderWidget::onClearConsole()
+void QCommanderWidget::onClearConsole()
 {
     sim::addLog({}, 0, {});
 }
 
-void QLuaCommanderWidget::onFocusIn()
+void QCommanderWidget::onFocusIn()
 {
     if(resizeStatusbarWhenFocused)
         expandStatusbar();
 }
 
-void QLuaCommanderWidget::onFocusOut()
+void QCommanderWidget::onFocusOut()
 {
     if(resizeStatusbarWhenFocused)
         contractStatusbar();
 }
 
-void QLuaCommanderWidget::expandStatusbar()
+void QCommanderWidget::expandStatusbar()
 {
     if(!statusbarExpanded)
     {
@@ -240,7 +240,7 @@ void QLuaCommanderWidget::expandStatusbar()
     }
 }
 
-void QLuaCommanderWidget::contractStatusbar()
+void QCommanderWidget::contractStatusbar()
 {
     if(statusbarExpanded)
     {
@@ -250,7 +250,7 @@ void QLuaCommanderWidget::contractStatusbar()
     }
 }
 
-void QLuaCommanderWidget::onGlobalFocusChanged(QWidget *old, QWidget *now)
+void QCommanderWidget::onGlobalFocusChanged(QWidget *old, QWidget *now)
 {
     /* treat the statusbar focus as our own focus
      * why:
@@ -276,12 +276,12 @@ void QLuaCommanderWidget::onGlobalFocusChanged(QWidget *old, QWidget *now)
     }
 }
 
-void QLuaCommanderWidget::onSetCompletion(const QStringList &comp)
+void QCommanderWidget::onSetCompletion(const QStringList &comp)
 {
     editor->setCompletion(comp);
 }
 
-void QLuaCommanderWidget::onSetCallTip(const QString &tip)
+void QCommanderWidget::onSetCallTip(const QString &tip)
 {
 #ifdef CUSTOM_TOOLTIP_WINDOW
     if(tip.isEmpty())
@@ -298,7 +298,7 @@ void QLuaCommanderWidget::onSetCallTip(const QString &tip)
 #endif // CUSTOM_TOOLTIP_WINDOW
 }
 
-void QLuaCommanderWidget::onScriptListChanged(int sandboxScript, int mainScript, QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning)
+void QCommanderWidget::onScriptListChanged(int sandboxScript, int mainScript, QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning)
 {
     // save current item:
     QVariant old = scriptCombo->itemData(scriptCombo->currentIndex());
@@ -359,27 +359,27 @@ void QLuaCommanderWidget::onScriptListChanged(int sandboxScript, int mainScript,
         scriptCombo->setCurrentIndex(0);
 }
 
-void QLuaCommanderWidget::setHistory(QStringList hist)
+void QCommanderWidget::setHistory(QStringList hist)
 {
     editor->setHistory(hist);
 }
 
-void QLuaCommanderWidget::setResizeStatusbarWhenFocused(bool b)
+void QCommanderWidget::setResizeStatusbarWhenFocused(bool b)
 {
     resizeStatusbarWhenFocused = b;
 }
 
-void QLuaCommanderWidget::setPreferredSandboxLang(const QString &lang)
+void QCommanderWidget::setPreferredSandboxLang(const QString &lang)
 {
     preferredSandboxLang = lang;
 }
 
-void QLuaCommanderWidget::setAutoAcceptCommonCompletionPrefix(bool b)
+void QCommanderWidget::setAutoAcceptCommonCompletionPrefix(bool b)
 {
     editor->setAutoAcceptLongestCommonCompletionPrefix(b);
 }
 
-void QLuaCommanderWidget::setShowMatchingHistory(bool b)
+void QCommanderWidget::setShowMatchingHistory(bool b)
 {
     editor->setShowMatchingHistory(b);
 }

@@ -35,4 +35,4 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------
 
-The Lua Commander plugin is courtesy of Federico Ferri.
+The Commander plugin is courtesy of Federico Ferri.

@@ -73,7 +73,7 @@ QStringList loadHistoryData()
     QStringList hist;
     try
     {
-        std::string pdata = sim::persistentDataRead("LuaCommander.history");
+        std::string pdata = sim::persistentDataRead("Commander.history");
         QString s = QString::fromStdString(pdata);
         hist = s.split(QRegExp("(\\r\\n)|(\\n\\r)|\\r|\\n"),
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
@@ -95,7 +95,7 @@ void saveHistoryData(QStringList hist)
     QString histStr = hist.join("\n");
     try
     {
-        sim::persistentDataWrite("LuaCommander.history", histStr.toStdString(), 1);
+        sim::persistentDataWrite("Commander.history", histStr.toStdString(), 1);
     }
     catch(sim::api_error &ex)
     {
@@ -126,9 +126,9 @@ void SIM::appendHistory(QString cmd)
 {
     QStringList hist = loadHistoryData();
 
-    bool historySkipRepeated = sim::getNamedBoolParam("simLuaCmd.historySkipRepeated").value_or(true);
-    bool historyRemoveDups = sim::getNamedBoolParam("simLuaCmd.historyRemoveDups").value_or(false);
-    int historySize = sim::getNamedInt32Param("simLuaCmd.historySize").value_or(1000);
+    bool historySkipRepeated = sim::getNamedBoolParam("simCmd.historySkipRepeated").value_or(true);
+    bool historyRemoveDups = sim::getNamedBoolParam("simCmd.historyRemoveDups").value_or(false);
+    int historySize = sim::getNamedInt32Param("simCmd.historySize").value_or(1000);
 
     if(!historySkipRepeated || hist.isEmpty() || hist[hist.size() - 1] != cmd)
         hist << cmd;

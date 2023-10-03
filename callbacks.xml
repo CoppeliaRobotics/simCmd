@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <?xml-stylesheet type="text/xsl" href="callbacks.xsl"?>
 
-<plugin name="simLuaCmd" author="federico.ferri.it@gmail.com">
-    <description>API functions for LuaCommander plugin.</description>
+<plugin name="simCmd" author="federico.ferri.it@gmail.com">
+    <description>API functions for the Commander plugin.</description>
     <command name="setVisible">
         <description>Show or hide the widget</description>
         <params>

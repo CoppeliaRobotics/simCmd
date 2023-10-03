@@ -1,5 +1,5 @@
-#ifndef QLUACOMMANDERWIDGET_H_INCLUDED
-#define QLUACOMMANDERWIDGET_H_INCLUDED
+#ifndef QCOMMANDERWIDGET_H_INCLUDED
+#define QCOMMANDERWIDGET_H_INCLUDED
 
 #include <atomic>
 
@@ -12,31 +12,31 @@
 #include <QLabel>
 #include "qcommandedit.h"
 
-class QLuaCommanderWidget;
-class QLuaCommanderEdit;
+class QCommanderWidget;
+class QCommanderEdit;
 
 class QGlobalEventFilter : public QObject
 {
     Q_OBJECT
 
 private:
-    QGlobalEventFilter(QLuaCommanderWidget *commander, QLuaCommanderEdit *widget);
-    QLuaCommanderWidget *commander_;
-    QLuaCommanderEdit *widget_;
+    QGlobalEventFilter(QCommanderWidget *commander, QCommanderEdit *widget);
+    QCommanderWidget *commander_;
+    QCommanderEdit *widget_;
     static QGlobalEventFilter *instance_;
 
 public:
     bool eventFilter(QObject *object, QEvent *event);
-    static void install(QLuaCommanderWidget *commander, QLuaCommanderEdit *widget);
+    static void install(QCommanderWidget *commander, QCommanderEdit *widget);
     static void uninstall();
 };
 
-class QLuaCommanderEdit : public QCommandEdit
+class QCommanderEdit : public QCommandEdit
 {
     Q_OBJECT
 public:
-    explicit QLuaCommanderEdit(QLuaCommanderWidget *parent = 0);
-    ~QLuaCommanderEdit();
+    explicit QCommanderEdit(QCommanderWidget *parent = 0);
+    ~QCommanderEdit();
 
     void keyPressEvent(QKeyEvent *event);
 
@@ -47,21 +47,21 @@ signals:
 public slots:
 
 private:
-    QLuaCommanderWidget *commander;
+    QCommanderWidget *commander;
 };
 
-class QLuaCommanderWidget : public QWidget
+class QCommanderWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit QLuaCommanderWidget(QWidget *parent = 0);
-    ~QLuaCommanderWidget();
+    explicit QCommanderWidget(QWidget *parent = 0);
+    ~QCommanderWidget();
 
-    inline QLuaCommanderEdit * editor_() {return editor;}
+    inline QCommanderEdit * editor_() {return editor;}
 
 protected:
-    QLuaCommanderEdit *editor;
+    QCommanderEdit *editor;
     QComboBox *scriptCombo;
     QPushButton *closeButton;
     QLabel *calltipLabel;
@@ -114,5 +114,5 @@ private:
     friend class QGlobalEventFilter;
 };
 
-#endif // QLUACOMMANDERWIDGET_H_INCLUDED
+#endif // QCOMMANDERWIDGET_H_INCLUDED
 

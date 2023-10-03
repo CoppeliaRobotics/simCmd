@@ -11,7 +11,7 @@ menus={
         label='Clear command history',
         enabled=true,
         callback=function(self)
-            simLuaCmd.clearHistory()
+            simCmd.clearHistory()
         end,
     },
     {
@@ -20,11 +20,11 @@ menus={
     },
     --[[
     -- non-boolean options:
-    --     "simLuaCmd.historySize" [int]
-    --     "simLuaCmd.arrayMaxItemsDisplayed" [int]
-    --     "simLuaCmd.stringLongLimit" [int]
-    --     "simLuaCmd.floatPrecision" [int]
-    --     "simLuaCmd.mapMaxDepth" [int]
+    --     "simCmd.historySize" [int]
+    --     "simCmd.arrayMaxItemsDisplayed" [int]
+    --     "simCmd.stringLongLimit" [int]
+    --     "simCmd.floatPrecision" [int]
+    --     "simCmd.mapMaxDepth" [int]
     --]]
     {
         label='Print all returned values',
@@ -32,7 +32,7 @@ menus={
         checkable=true,
         checked=true,
         callback=function(self)
-            sim.setNamedBoolParam('simLuaCmd.printAllReturnedValues',self.checked)
+            sim.setNamedBoolParam('simCmd.printAllReturnedValues',self.checked)
         end,
     },
     {
@@ -41,7 +41,7 @@ menus={
         checkable=true,
         checked=true,
         callback=function(self)
-            sim.setNamedBoolParam('simLuaCmd.warnAboutMultipleReturnedValues',self.checked)
+            sim.setNamedBoolParam('simCmd.warnAboutMultipleReturnedValues',self.checked)
         end,
     },
     {
@@ -50,7 +50,7 @@ menus={
         checkable=true,
         checked=true,
         callback=function(self)
-            sim.setNamedBoolParam('simLuaCmd.stringEscapeSpecials',self.checked)
+            sim.setNamedBoolParam('simCmd.stringEscapeSpecials',self.checked)
         end,
     },
     {
@@ -59,7 +59,7 @@ menus={
         checkable=true,
         checked=true,
         callback=function(self)
-            sim.setNamedBoolParam('simLuaCmd.mapSortKeysByName',self.checked)
+            sim.setNamedBoolParam('simCmd.mapSortKeysByName',self.checked)
         end,
     },
     {
@@ -68,7 +68,7 @@ menus={
         checkable=true,
         checked=true,
         callback=function(self)
-            sim.setNamedBoolParam('simLuaCmd.mapSortKeysByType',self.checked)
+            sim.setNamedBoolParam('simCmd.mapSortKeysByType',self.checked)
         end,
     },
     {
@@ -77,7 +77,7 @@ menus={
         checkable=true,
         checked=true,
         callback=function(self)
-            sim.setNamedBoolParam('simLuaCmd.mapShadowLongStrings',self.checked)
+            sim.setNamedBoolParam('simCmd.mapShadowLongStrings',self.checked)
         end,
     },
     {
@@ -86,7 +86,7 @@ menus={
         checkable=true,
         checked=true,
         callback=function(self)
-            sim.setNamedBoolParam('simLuaCmd.mapShadowBufferStrings',self.checked)
+            sim.setNamedBoolParam('simCmd.mapShadowBufferStrings',self.checked)
         end,
     },
     {
@@ -95,7 +95,7 @@ menus={
         checkable=true,
         checked=true,
         callback=function(self)
-            sim.setNamedBoolParam('simLuaCmd.mapShadowSpecialStrings',self.checked)
+            sim.setNamedBoolParam('simCmd.mapShadowSpecialStrings',self.checked)
         end,
     },
     {
@@ -104,7 +104,7 @@ menus={
         checkable=true,
         checked=true,
         callback=function(self)
-            sim.setNamedBoolParam('simLuaCmd.historySkipRepeated',self.checked)
+            sim.setNamedBoolParam('simCmd.historySkipRepeated',self.checked)
         end,
     },
     {
@@ -113,7 +113,7 @@ menus={
         checkable=true,
         checked=true,
         callback=function(self)
-            sim.setNamedBoolParam('simLuaCmd.historyRemoveDups',self.checked)
+            sim.setNamedBoolParam('simCmd.historyRemoveDups',self.checked)
         end,
     },
     {
@@ -122,7 +122,7 @@ menus={
         checkable=true,
         checked=false,
         callback=function(self)
-            sim.setNamedBoolParam('simLuaCmd.showMatchingHistory',self.checked)
+            sim.setNamedBoolParam('simCmd.showMatchingHistory',self.checked)
         end,
     },
     {
@@ -131,7 +131,7 @@ menus={
         checkable=true,
         checked=true,
         callback=function(self)
-            sim.setNamedBoolParam('simLuaCmd.setConvenienceVars',self.checked)
+            sim.setNamedBoolParam('simCmd.setConvenienceVars',self.checked)
         end,
     },
     {
@@ -140,7 +140,7 @@ menus={
         checkable=true,
         checked=true,
         callback=function(self)
-            sim.setNamedBoolParam('simLuaCmd.autoAcceptCommonCompletionPrefix',self.checked)
+            sim.setNamedBoolParam('simCmd.autoAcceptCommonCompletionPrefix',self.checked)
         end,
     },
     {
@@ -149,7 +149,7 @@ menus={
         checkable=true,
         checked=false,
         callback=function(self)
-            sim.setNamedBoolParam('simLuaCmd.resizeStatusbarWhenFocused',self.checked)
+            sim.setNamedBoolParam('simCmd.resizeStatusbarWhenFocused',self.checked)
         end,
     },
 }
@@ -171,14 +171,14 @@ function updateMenuItems()
 end
 
 function sysCall_info()
-    return {autoStart=sim.getNamedBoolParam('simLuaCmd.autoStart')~=false,menu='Developer tools\nLua Commander\n(addon)'}
+    return {autoStart=sim.getNamedBoolParam('simCmd.autoStart')~=false,menu='Developer tools\nCommander\nCommander'}
 end
 
 function sysCall_init()
-    simLuaCmd=require'simLuaCmd'
-    simLuaCmd.setVisible(true)
+    simCmd=require'simCmd'
+    simCmd.setVisible(true)
     for i,menu in ipairs(menus) do
-        menu.handle=sim.moduleEntry(-1,'Developer tools\nLua Commander\n'..menu.label,menuItemState(menu))
+        menu.handle=sim.moduleEntry(-1,'Developer tools\nCommander\n'..menu.label,menuItemState(menu))
     end
 end
 
@@ -201,6 +201,6 @@ function sysCall_addOnScriptSuspend()
 end
 
 function sysCall_cleanup()
-    simLuaCmd.setVisible(false)
-    unloadPlugin(simLuaCmd)
+    simCmd.setVisible(false)
+    unloadPlugin(simCmd)
 end

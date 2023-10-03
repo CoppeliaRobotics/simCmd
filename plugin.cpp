@@ -15,7 +15,7 @@
 #include <QPlainTextEdit>
 #include <QVBoxLayout>
 #include <QSplitter>
-#include "qluacommanderwidget.h"
+#include "qcommanderwidget.h"
 #include "ConsoleREPL.h"
 
 class Plugin : public sim::Plugin
@@ -74,7 +74,7 @@ public:
         layout->setMargin(0);
         layout->setContentsMargins(0,0,0,0);
         splitterChild->setLayout(layout);
-        commanderWidget = new QLuaCommanderWidget();
+        commanderWidget = new QCommanderWidget();
         layout->addWidget(statusBar);
         layout->addWidget(commanderWidget);
         splitterChild->setMaximumHeight(600);
@@ -158,16 +158,16 @@ public:
     {
         SIM *sim = SIM::getInstance();
         sim->setResizeStatusbarWhenFocused(
-            sim::getNamedBoolParam("simLuaCmd.resizeStatusbarWhenFocused").value_or(false)
+            sim::getNamedBoolParam("simCmd.resizeStatusbarWhenFocused").value_or(false)
         );
         sim->setPreferredSandboxLang(
-            QString::fromStdString(sim::getNamedStringParam("simLuaCmd.preferredSandboxLang").value_or(""))
+            QString::fromStdString(sim::getNamedStringParam("simCmd.preferredSandboxLang").value_or(""))
         );
         sim->setAutoAcceptCommonCompletionPrefix(
-            sim::getNamedBoolParam("simLuaCmd.autoAcceptCommonCompletionPrefix").value_or(true)
+            sim::getNamedBoolParam("simCmd.autoAcceptCommonCompletionPrefix").value_or(true)
         );
         sim->setShowMatchingHistory(
-            sim::getNamedBoolParam("simLuaCmd.showMatchingHistory").value_or(false)
+            sim::getNamedBoolParam("simCmd.showMatchingHistory").value_or(false)
         );
     }
 
@@ -193,18 +193,18 @@ public:
             int id = qRegisterMetaType< QMap<int,QString> >();
 
             SIM *sim = SIM::getInstance();
-            QObject::connect(commanderWidget, &QLuaCommanderWidget::execCode, sim, &SIM::onExecCode);
-            QObject::connect(commanderWidget, &QLuaCommanderWidget::askCompletion, sim, &SIM::onAskCompletion);
-            QObject::connect(commanderWidget, &QLuaCommanderWidget::askCallTip, sim, &SIM::onAskCallTip);
-            QObject::connect(sim, &SIM::setVisible, commanderWidget, &QLuaCommanderWidget::setVisible);
-            QObject::connect(sim, &SIM::scriptListChanged, commanderWidget, &QLuaCommanderWidget::onScriptListChanged);
-            QObject::connect(sim, &SIM::setCompletion, commanderWidget, &QLuaCommanderWidget::onSetCompletion);
-            QObject::connect(sim, &SIM::setCallTip, commanderWidget, &QLuaCommanderWidget::onSetCallTip);
-            QObject::connect(sim, &SIM::historyChanged, commanderWidget, &QLuaCommanderWidget::setHistory);
-            QObject::connect(sim, &SIM::setResizeStatusbarWhenFocused, commanderWidget, &QLuaCommanderWidget::setResizeStatusbarWhenFocused);
-            QObject::connect(sim, &SIM::setPreferredSandboxLang, commanderWidget, &QLuaCommanderWidget::setPreferredSandboxLang);
-            QObject::connect(sim, &SIM::setAutoAcceptCommonCompletionPrefix, commanderWidget, &QLuaCommanderWidget::setAutoAcceptCommonCompletionPrefix);
-            QObject::connect(sim, &SIM::setShowMatchingHistory, commanderWidget, &QLuaCommanderWidget::setShowMatchingHistory);
+            QObject::connect(commanderWidget, &QCommanderWidget::execCode, sim, &SIM::onExecCode);
+            QObject::connect(commanderWidget, &QCommanderWidget::askCompletion, sim, &SIM::onAskCompletion);
+            QObject::connect(commanderWidget, &QCommanderWidget::askCallTip, sim, &SIM::onAskCallTip);
+            QObject::connect(sim, &SIM::setVisible, commanderWidget, &QCommanderWidget::setVisible);
+            QObject::connect(sim, &SIM::scriptListChanged, commanderWidget, &QCommanderWidget::onScriptListChanged);
+            QObject::connect(sim, &SIM::setCompletion, commanderWidget, &QCommanderWidget::onSetCompletion);
+            QObject::connect(sim, &SIM::setCallTip, commanderWidget, &QCommanderWidget::onSetCallTip);
+            QObject::connect(sim, &SIM::historyChanged, commanderWidget, &QCommanderWidget::setHistory);
+            QObject::connect(sim, &SIM::setResizeStatusbarWhenFocused, commanderWidget, &QCommanderWidget::setResizeStatusbarWhenFocused);
+            QObject::connect(sim, &SIM::setPreferredSandboxLang, commanderWidget, &QCommanderWidget::setPreferredSandboxLang);
+            QObject::connect(sim, &SIM::setAutoAcceptCommonCompletionPrefix, commanderWidget, &QCommanderWidget::setAutoAcceptCommonCompletionPrefix);
+            QObject::connect(sim, &SIM::setShowMatchingHistory, commanderWidget, &QCommanderWidget::setShowMatchingHistory);
             sim->loadHistory();
         }
 
@@ -247,7 +247,7 @@ private:
     QSplitter *splitter = 0L;
     QWidget *splitterChild = 0L;
     QVBoxLayout *layout = 0L;
-    QLuaCommanderWidget *commanderWidget = 0L;
+    QCommanderWidget *commanderWidget = 0L;
 };
 
 SIM_UI_PLUGIN(Plugin)
