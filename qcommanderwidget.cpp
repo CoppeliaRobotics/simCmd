@@ -383,3 +383,20 @@ void QCommanderWidget::setShowMatchingHistory(bool b)
 {
     editor->setShowMatchingHistory(b);
 }
+
+void QCommanderWidget::setSelectedScript(int scriptHandle, QString lang)
+{
+    int index = -1;
+    for(int i = 0; i < scriptCombo->count(); i++)
+    {
+        QVariantList data = scriptCombo->itemData(i).toList();
+        int h = data[1].toInt();
+        if(scriptHandle != -1 && scriptHandle != h) continue;
+        QString suffix = data[3].toString();
+        if(lang != "" && ("@" + lang.toLower()) != suffix) continue;
+        index = i;
+        break;
+    }
+    if(index != -1)
+        scriptCombo->setCurrentIndex(index);
+}

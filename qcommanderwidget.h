@@ -94,6 +94,7 @@ public slots:
     void setPreferredSandboxLang(const QString &lang);
     void setAutoAcceptCommonCompletionPrefix(bool b);
     void setShowMatchingHistory(bool b);
+    void setSelectedScript(int scriptHandle, QString lang);
 
 signals:
     void askCompletion(int scriptHandle, QString langSuffix, QString input, int pos, QStringList *clout);

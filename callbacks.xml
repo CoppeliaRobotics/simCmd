@@ -30,4 +30,17 @@
         <return>
         </return>
     </command>
+    <command name="setSelectedScript">
+        <description>Change the selected script (combo box).</description>
+        <params>
+            <param name="scriptHandle" type="int">
+                <description>handle of the script</description>
+            </param>
+            <param name="lang" type="string" default='""'>
+                <description>language (only applies to sandbox)</description>
+            </param>
+        </params>
+        <return>
+        </return>
+    </command>
 </plugin>

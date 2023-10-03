@@ -204,6 +204,7 @@ public:
             QObject::connect(sim, &SIM::setPreferredSandboxLang, commanderWidget, &QCommanderWidget::setPreferredSandboxLang);
             QObject::connect(sim, &SIM::setAutoAcceptCommonCompletionPrefix, commanderWidget, &QCommanderWidget::setAutoAcceptCommonCompletionPrefix);
             QObject::connect(sim, &SIM::setShowMatchingHistory, commanderWidget, &QCommanderWidget::setShowMatchingHistory);
+            QObject::connect(sim, &SIM::setSelectedScript, commanderWidget, &QCommanderWidget::setSelectedScript);
             sim->loadHistory();
         }
 
@@ -237,6 +238,11 @@ public:
     void setExecWrapper(setExecWrapper_in *in, setExecWrapper_out *out)
     {
         SIM::getInstance()->setExecWrapper(in->_.scriptID, QString::fromStdString(in->wrapperFunc));
+    }
+
+    void setSelectedScript(setSelectedScript_in *in, setSelectedScript_out *out)
+    {
+        SIM::getInstance()->setSelectedScript(in->scriptHandle, QString::fromStdString(in->lang));
     }
 
 private:

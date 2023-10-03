@@ -49,6 +49,7 @@ signals:
     void setPreferredSandboxLang(QString lang);
     void setAutoAcceptCommonCompletionPrefix(bool b);
     void setShowMatchingHistory(bool b);
+    void setSelectedScript(int scriptHandle, QString lang);
 
 private:
     QMap<int, QString> execWrapper;
