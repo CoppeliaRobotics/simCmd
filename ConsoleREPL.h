@@ -15,6 +15,7 @@ public:
     Readline(QObject *parent);
     void run() override;
     Replxx::completions_t hook_completion(const std::string &context, int &contextLen);
+    void setPreferredSandboxLanguage(const QString &lang);
     void printCurrentLanguage();
 
 signals:

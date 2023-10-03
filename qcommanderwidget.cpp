@@ -314,7 +314,7 @@ void QCommanderWidget::onScriptListChanged(int sandboxScript, int mainScript, QM
         for(const auto &e : sandboxLangs.toStdMap())
         {
             QString lang = e.first;
-            if((i == 0) ^ (lang == preferredSandboxLang)) continue;
+            if((i == 0) ^ (lang.toLower() == preferredSandboxLang.toLower())) continue;
             QString suffix = e.second;
             QVariantList data;
             data << sim_scripttype_sandboxscript << sandboxScript << QString() << suffix;
@@ -371,7 +371,7 @@ void QCommanderWidget::setResizeStatusbarWhenFocused(bool b)
 
 void QCommanderWidget::setPreferredSandboxLang(const QString &lang)
 {
-    preferredSandboxLang = lang;
+    preferredSandboxLang = lang.left(1).toUpper() + lang.mid(1).toLower();
 }
 
 void QCommanderWidget::setAutoAcceptCommonCompletionPrefix(bool b)

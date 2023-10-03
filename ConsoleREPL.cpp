@@ -11,9 +11,9 @@ Readline::Readline(QObject *parent) : QThread(parent)
     if(preferredSandboxLang == "")
     {
         sim::addLog(sim_verbosity_warnings, "You haven't configured a preferred scripting language for the sandbox.");
-        preferredSandboxLang = "Lua";
+        setPreferredSandboxLanguage("Lua");
     }
-    printCurrentLanguage();
+    else printCurrentLanguage();
     sim::addLog(sim_verbosity_warnings, "You can switch it by typing @lua or @python.");
     QThread::setTerminationEnabled(true);
     rx.install_window_change_handler();
@@ -37,13 +37,11 @@ void Readline::run()
             QString line_ = QString::fromUtf8(line);
             if(line_ == "@lua")
             {
-                preferredSandboxLang = "Lua";
-                printCurrentLanguage();
+                setPreferredSandboxLanguage("Lua");
             }
             else if(line_ == "@py" || line_ == "@python")
             {
-                preferredSandboxLang = "Python";
-                printCurrentLanguage();
+                setPreferredSandboxLanguage("Python");
             }
             else
             {
@@ -70,6 +68,12 @@ Replxx::completions_t Readline::hook_completion(const std::string &context, int 
     for(const auto &completion : completions)
         ret.emplace_back(completion.toUtf8().data(), Replxx::Color::DEFAULT);
     return ret;
+}
+
+void Readline::setPreferredSandboxLanguage(const QString &lang)
+{
+    preferredSandboxLang = lang.left(1).toUpper() + lang.mid(1).toLower();
+    printCurrentLanguage();
 }
 
 void Readline::printCurrentLanguage()
