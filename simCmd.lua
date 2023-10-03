@@ -49,6 +49,7 @@ html_help = [[
 ]]
 
 function help()
+    local simUI = require 'simUI'
     if ui then
         simUI.destroy(ui)
         ui = nil
