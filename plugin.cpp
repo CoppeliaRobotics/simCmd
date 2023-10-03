@@ -160,7 +160,7 @@ public:
             sim::getNamedBoolParam("simCmd.resizeStatusbarWhenFocused").value_or(false)
         );
         sim->setPreferredSandboxLang(
-            QString::fromStdString(sim::getNamedStringParam("simCmd.preferredSandboxLang").value_or(""))
+            QString::fromStdString(sim::getStringParam(sim_stringparam_sandboxlang))
         );
         sim->setAutoAcceptCommonCompletionPrefix(
             sim::getNamedBoolParam("simCmd.autoAcceptCommonCompletionPrefix").value_or(true)
