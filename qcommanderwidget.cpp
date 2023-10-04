@@ -105,8 +105,6 @@ QCommanderWidget::QCommanderWidget(QWidget *parent)
     statusbarSizeFocused.push_back(statusbarSize[0] - k);
     statusbarSizeFocused.push_back(statusbarSize[1] + k);
 
-    closeFlag.store(false);
-
     QGridLayout *grid = new QGridLayout(this);
     grid->setSpacing(0);
     grid->setMargin(0);
@@ -121,17 +119,12 @@ QCommanderWidget::QCommanderWidget(QWidget *parent)
     editor->setFont(QFont("Courier", 12));
     scriptCombo = new QComboBox(this);
     scriptCombo->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-    closeButton = new QPushButton(this);
-    closeButton->setIcon(style()->standardIcon(QStyle::SP_TitleBarCloseButton));
-    closeButton->setFlat(true);
-    closeButton->setStyleSheet("margin-left: 5px; margin-right: 5px; font-size: 14pt;");
 
 #ifdef CUSTOM_TOOLTIP_WINDOW
     grid->addWidget(calltipLabel, 0, 0);
 #endif // CUSTOM_TOOLTIP_WINDOW
     grid->addWidget(editor, 1, 0);
     grid->addWidget(scriptCombo, 1, 1);
-    grid->addWidget(closeButton, 1, 2);
 
     connect(editor, &QCommanderEdit::askCompletion, this, &QCommanderWidget::onAskCompletion);
     connect(editor, &QCommanderEdit::askCallTip, this, &QCommanderWidget::onAskCallTip);
@@ -141,7 +134,6 @@ QCommanderWidget::QCommanderWidget(QWidget *parent)
     connect(editor, &QCommanderEdit::textChanged, this, &QCommanderWidget::onEditorChanged);
     connect(editor, &QCommanderEdit::cursorPositionChanged, this, &QCommanderWidget::onEditorCursorChanged);
     connect(editor, &QCommanderEdit::clearConsole, this, &QCommanderWidget::onClearConsole);
-    connect(closeButton, &QPushButton::clicked, this, &QCommanderWidget::onClose);
     connect(QApplication::instance(), SIGNAL(focusChanged(QWidget*,QWidget*)), this, SLOT(onGlobalFocusChanged(QWidget*,QWidget*)));
 }
 
@@ -232,11 +224,6 @@ void QCommanderWidget::onEditorChanged(QString text)
 void QCommanderWidget::onEditorCursorChanged(int oldPos, int newPos)
 {
     onAskCallTip(editor->text(), newPos);
-}
-
-void QCommanderWidget::onClose()
-{
-    closeFlag.store(true);
 }
 
 void QCommanderWidget::onClearConsole()

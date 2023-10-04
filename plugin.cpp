@@ -209,13 +209,6 @@ public:
             sim->loadHistory();
         }
 
-        if(commanderWidget->closeFlag.load())
-        {
-            commanderWidget->closeFlag.store(false);
-            //options.enabled = false;
-            updateUI();
-        }
-
         updateWidgetOptions();
 
         if(firstInstancePass || flags.objectsErased || flags.objectsCreated || flags.modelLoaded || flags.sceneLoaded || flags.undoCalled || flags.redoCalled || flags.sceneSwitched || flags.scriptCreated || flags.scriptErased || flags.simulationStarted || flags.simulationEnded)
