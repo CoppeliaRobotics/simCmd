@@ -67,7 +67,7 @@ protected:
     QLabel *calltipLabel;
 
 public:
-    void getSelectedScriptInfo(int &handle, QString &langSuffix);
+    void getSelectedScriptInfo(int &type, int &handle, QString &langSuffix);
 
 private slots:
     void onAskCompletion(const QString &cmd, int cursorPos);

@@ -149,14 +149,16 @@ QCommanderWidget::~QCommanderWidget()
 {
 }
 
-void QCommanderWidget::getSelectedScriptInfo(int &handle, QString &langSuffix)
+void QCommanderWidget::getSelectedScriptInfo(int &type, int &handle, QString &langSuffix)
 {
+    type = -1;
     handle = -1;
     langSuffix = "";
 
     if(scriptCombo->currentIndex() >= 0)
     {
         QVariantList data = scriptCombo->itemData(scriptCombo->currentIndex()).toList();
+        type = data[0].toInt();
         handle = data[1].toInt();
         langSuffix = data[3].toString();
     }
@@ -164,26 +166,50 @@ void QCommanderWidget::getSelectedScriptInfo(int &handle, QString &langSuffix)
 
 void QCommanderWidget::onAskCompletion(const QString &cmd, int cursorPos)
 {
+    int scriptType;
     int scriptHandle;
     QString langSuffix;
-    getSelectedScriptInfo(scriptHandle, langSuffix);
+    getSelectedScriptInfo(scriptType, scriptHandle, langSuffix);
     emit askCompletion(scriptHandle, langSuffix, cmd, cursorPos, nullptr);
 }
 
 void QCommanderWidget::onAskCallTip(QString input, int pos)
 {
+    int scriptType;
     int scriptHandle;
     QString langSuffix;
-    getSelectedScriptInfo(scriptHandle, langSuffix);
+    getSelectedScriptInfo(scriptType, scriptHandle, langSuffix);
     emit askCallTip(scriptHandle, langSuffix, input, pos);
 }
 
 void QCommanderWidget::onExecute(const QString &cmd)
 {
+    int scriptType;
     int scriptHandle;
     QString langSuffix;
-    getSelectedScriptInfo(scriptHandle, langSuffix);
-    emit execCode(scriptHandle, langSuffix, cmd);
+    getSelectedScriptInfo(scriptType, scriptHandle, langSuffix);
+
+    if(cmd == "@lua")
+    {
+        if(scriptType == sim_scripttype_sandboxscript)
+        {
+            setSelectedScript(-1, "Lua");
+            emit addLog(sim_verbosity_warnings, "Sandbox language: Lua");
+        }
+    }
+    else if(cmd == "@py" || cmd == "@python")
+    {
+        if(scriptType == sim_scripttype_sandboxscript)
+        {
+            setSelectedScript(-1, "Python");
+            emit addLog(sim_verbosity_warnings, "Sandbox language: Python");
+        }
+    }
+    else
+    {
+        emit execCode(scriptHandle, langSuffix, cmd);
+    }
+
     editor->clear();
     onSetCallTip("");
 }
