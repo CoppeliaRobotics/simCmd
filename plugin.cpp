@@ -243,7 +243,11 @@ public:
 
     void setSelectedScript(setSelectedScript_in *in, setSelectedScript_out *out)
     {
-        SIM::getInstance()->setSelectedScript(in->scriptHandle, QString::fromStdString(in->lang));
+        QString lang = QString::fromStdString(in->lang);
+        if(sim::getBoolParam(sim_boolparam_headless))
+            readline->setSelectedScript(in->scriptHandle, lang);
+        else
+            SIM::getInstance()->setSelectedScript(in->scriptHandle, lang);
     }
 
 private:
