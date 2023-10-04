@@ -49,12 +49,16 @@ html_help = [[
 ]]
 
 function help()
-    local simUI = require 'simUI'
+    simUI = require 'simUI'
+    if ui == nil then
+        ui = simUI.create('<ui title="Commander Plugin" closeable="true" on-close="_helpClose" modal="true" size="440,520"><text-browser text="'..string.gsub(html_help,'"','&quot;')..'" /></ui>')
+    end
+end
+
+function _helpClose()
     if ui then
         simUI.destroy(ui)
         ui = nil
-    else
-        ui = simUI.create('<ui title="Commander Plugin" closeable="true" on-close="help" modal="true" size="440,520"><text-browser text="'..string.gsub(html_help,'"','&quot;')..'" /></ui>')
     end
 end
 
