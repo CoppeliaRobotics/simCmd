@@ -152,6 +152,11 @@ void SIM::appendHistory(QString cmd)
     emit historyChanged(hist);
 }
 
+void SIM::addLog(int verbosity, QString message)
+{
+    sim::addLog(verbosity, message.toStdString());
+}
+
 void SIM::onExecCode(int scriptHandle, QString langSuffix, QString code)
 {
     ASSERT_THREAD(!UI);
@@ -224,17 +229,4 @@ void SIM::onAskCallTip(int scriptHandle, QString langSuffix, QString input, int 
     }
     catch(sim::exception &ex) {}
     sim::releaseStack(stackHandle);
-}
-
-void SIM::setExecWrapper(int scriptHandle, const QString &wrapperFunc)
-{
-    if(wrapperFunc.isEmpty())
-        execWrapper.remove(scriptHandle);
-    else
-        execWrapper.insert(scriptHandle, wrapperFunc);
-}
-
-void SIM::addLog(int verbosity, QString message)
-{
-    sim::addLog(verbosity, message.toStdString());
 }

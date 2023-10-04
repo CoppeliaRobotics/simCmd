@@ -236,11 +236,6 @@ public:
         SIM::getInstance()->clearHistory();
     }
 
-    void setExecWrapper(setExecWrapper_in *in, setExecWrapper_out *out)
-    {
-        SIM::getInstance()->setExecWrapper(in->_.scriptID, QString::fromStdString(in->wrapperFunc));
-    }
-
     void setSelectedScript(setSelectedScript_in *in, setSelectedScript_out *out)
     {
         QString lang = QString::fromStdString(in->lang);
