@@ -239,3 +239,8 @@ void SIM::setExecWrapper(int scriptHandle, const QString &wrapperFunc)
     else
         execWrapper.insert(scriptHandle, wrapperFunc);
 }
+
+void SIM::addLog(int verbosity, QString message)
+{
+    sim::addLog(verbosity, message.toStdString());
+}

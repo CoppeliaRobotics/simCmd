@@ -38,6 +38,7 @@ public slots:
     void onAskCompletion(int scriptHandle, QString langSuffix, QString input, int pos, QStringList *clout);
     void onAskCallTip(int scriptHandle, QString langSuffix, QString input, int pos);
     void setExecWrapper(int scriptHandle, const QString &wrapperFunc);
+    void addLog(int verbosity, QString message);
 
 signals:
     void setVisible(bool visible);

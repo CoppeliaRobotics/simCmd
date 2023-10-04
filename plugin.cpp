@@ -195,6 +195,7 @@ public:
             QObject::connect(commanderWidget, &QCommanderWidget::execCode, sim, &SIM::onExecCode);
             QObject::connect(commanderWidget, &QCommanderWidget::askCompletion, sim, &SIM::onAskCompletion);
             QObject::connect(commanderWidget, &QCommanderWidget::askCallTip, sim, &SIM::onAskCallTip);
+            QObject::connect(commanderWidget, &QCommanderWidget::addLog, sim, &SIM::addLog);
             QObject::connect(sim, &SIM::setVisible, commanderWidget, &QCommanderWidget::setVisible);
             QObject::connect(sim, &SIM::scriptListChanged, commanderWidget, &QCommanderWidget::onScriptListChanged);
             QObject::connect(sim, &SIM::setCompletion, commanderWidget, &QCommanderWidget::onSetCompletion);

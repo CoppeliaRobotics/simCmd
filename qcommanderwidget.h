@@ -100,6 +100,7 @@ signals:
     void askCompletion(int scriptHandle, QString langSuffix, QString input, int pos, QStringList *clout);
     void askCallTip(int scriptHandle, QString langSuffix, QString input, int pos);
     void execCode(int scriptHandle, QString langSuffix, QString code);
+    void addLog(int verbosity, QString message);
 
 public:
     std::atomic<bool> closeFlag;
