@@ -60,7 +60,7 @@ end
 
 function help()
     if sim.getBoolParam(sim.boolparam_headless) then
-        print(helpText())
+        print(string.stripmarkdown(helpText()))
     else
         simUI = require 'simUI'
         if not ui then
