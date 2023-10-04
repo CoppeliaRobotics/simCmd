@@ -200,20 +200,14 @@ void SIM::onAskCompletion(int scriptHandle, QString langSuffix, QString input, i
     catch(std::exception &ex) {}
     sim::releaseStack(stackHandle);
 
-    if(clout) *clout = cl;
-
-#if 0
-    // the QCommandEdit widget wants completions without the initial token part
-    QStringList cl2;
-    for(const QString &s : cl)
+    if(clout)
     {
-        if(s.startsWith(token))
-            cl2 << s.mid(token.length());
+        // clout used by replxx, wants also the context in the completion
+        for(const QString &s : cl)
+            *clout << (input + s);
     }
-    emit setCompletion(cl2);
-#else
+
     emit setCompletion(cl);
-#endif
 }
 
 void SIM::onAskCallTip(int scriptHandle, QString langSuffix, QString input, int pos)

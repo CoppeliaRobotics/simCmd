@@ -67,10 +67,10 @@ void Readline::run()
 Replxx::completions_t Readline::hook_completion(const std::string &context, int &contextLen)
 {
     QString input = QString::fromStdString(context);
-    int pos = context.size() - contextLen;
-    //auto c2 = context.substr(context.size() - contextLen);
     QStringList completions;
-    emit askCompletion(sim_scripttype_sandboxscript, "", input, pos, &completions);
+    QString langSuffix;
+    if(lang != "") langSuffix = "@" + lang.toLower();
+    emit askCompletion(scriptHandle, langSuffix, input, contextLen, &completions);
     Replxx::completions_t ret;
     for(const auto &completion : completions)
         ret.emplace_back(completion.toUtf8().data(), Replxx::Color::DEFAULT);
