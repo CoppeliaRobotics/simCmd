@@ -37,14 +37,14 @@ void Readline::run()
         {
             rx.history_add(line);
             QString line_ = QString::fromUtf8(line);
-            if(line_ == "@lua")
+            if(line_.length() > 1 && QString("@lua").startsWith(line_))
             {
                 if(scriptHandle == sandboxScript)
                     setSelectedScript(-1, "Lua");
                 else
                     sim::addLog(sim_verbosity_errors, "Only works when sandbox script is selected.");
             }
-            else if(line_ == "@py" || line_ == "@python")
+            else if(line_.length() > 1 && QString("@python").startsWith(line_))
             {
                 if(scriptHandle == sandboxScript)
                     setSelectedScript(-1, "Python");

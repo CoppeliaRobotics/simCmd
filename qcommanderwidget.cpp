@@ -183,12 +183,12 @@ void QCommanderWidget::onExecute(const QString &cmd)
     QString langSuffix;
     getSelectedScriptInfo(scriptType, scriptHandle, langSuffix);
 
-    if(cmd == "@lua")
+    if(cmd.length() > 1 && QString("@lua").startsWith(cmd))
     {
         if(scriptType == sim_scripttype_sandboxscript)
             setSelectedScript(-1, "Lua");
     }
-    else if(cmd == "@py" || cmd == "@python")
+    else if(cmd.length() > 1 && QString("@python").startsWith(cmd))
     {
         if(scriptType == sim_scripttype_sandboxscript)
             setSelectedScript(-1, "Python");
