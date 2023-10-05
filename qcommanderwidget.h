@@ -66,7 +66,7 @@ protected:
     QLabel *calltipLabel;
 
 public:
-    void getSelectedScriptInfo(int &type, int &handle, QString &langSuffix);
+    void getSelectedScriptInfo(int &type, int &handle, QString &lang);
 
 private slots:
     void onAskCompletion(const QString &cmd, int cursorPos);
@@ -92,7 +92,7 @@ public slots:
     void setPreferredSandboxLang(const QString &lang);
     void setAutoAcceptCommonCompletionPrefix(bool b);
     void setShowMatchingHistory(bool b);
-    void setSelectedScript(int scriptHandle, QString lang);
+    void setSelectedScript(int scriptHandle, QString lang, bool silent);
 
 signals:
     void askCompletion(int scriptHandle, QString langSuffix, QString input, int pos, QStringList *clout);

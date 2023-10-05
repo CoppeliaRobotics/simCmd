@@ -15,7 +15,7 @@ Readline::Readline(QObject *parent) : QThread(parent)
         preferredSandboxLang = "Lua";
         sim::addLog(sim_verbosity_warnings, "You haven't configured a preferred scripting language for the sandbox. Using %s.", preferredSandboxLang.toStdString());
     }
-    setSelectedScript(-1, preferredSandboxLang);
+    setSelectedScript(sandboxScript, preferredSandboxLang);
 
     QThread::setTerminationEnabled(true);
     rx.install_window_change_handler();
@@ -40,16 +40,12 @@ void Readline::run()
             if(line_.length() > 1 && QString("@lua").startsWith(line_))
             {
                 if(scriptHandle == sandboxScript)
-                    setSelectedScript(-1, "Lua");
-                else
-                    sim::addLog(sim_verbosity_errors, "Only works when sandbox script is selected.");
+                    setSelectedScript(sandboxScript, "Lua");
             }
             else if(line_.length() > 1 && QString("@python").startsWith(line_))
             {
                 if(scriptHandle == sandboxScript)
-                    setSelectedScript(-1, "Python");
-                else
-                    sim::addLog(sim_verbosity_errors, "Only works when sandbox script is selected.");
+                    setSelectedScript(sandboxScript, "Python");
             }
             else
             {
@@ -80,16 +76,18 @@ Replxx::completions_t Readline::hook_completion(const std::string &context, int 
 
 void Readline::setSelectedScript(int newScriptHandle, QString newLang)
 {
+    if(newScriptHandle == -1)
+        newScriptHandle = sandboxScript;
+
+    if(newScriptHandle == sandboxScript && newLang == "")
+        newLang = preferredSandboxLang;
+
     if(newLang.toLower() == "python" && !havePython)
     {
         sim::addLog(sim_verbosity_errors, "Python is not available.");
-        return;
+        if(newScriptHandle == sandboxScript)
+            newLang = "Lua";
     }
-
-    if(newScriptHandle == -1)
-        newScriptHandle = sandboxScript;
-    if(newScriptHandle == sandboxScript && newLang == "")
-        newLang = preferredSandboxLang;
 
     if(scriptHandle != newScriptHandle || newLang.toLower() != lang.toLower())
     {

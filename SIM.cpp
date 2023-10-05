@@ -157,7 +157,7 @@ void SIM::addLog(int verbosity, QString message)
     sim::addLog(verbosity, message.toStdString());
 }
 
-void SIM::onExecCode(int scriptHandle, QString langSuffix, QString code)
+void SIM::onExecCode(int scriptHandle, QString lang, QString code)
 {
     ASSERT_THREAD(!UI);
 
@@ -173,7 +173,9 @@ void SIM::onExecCode(int scriptHandle, QString langSuffix, QString code)
         auto i = execWrapper.find(scriptHandle);
         if(i != execWrapper.end()) ewFunc = i.value();
         sim::pushStringOntoStack(stackHandle, code.toStdString());
-        sim::callScriptFunctionEx(scriptHandle, (ewFunc + langSuffix).toStdString(), stackHandle);
+        if(lang != "")
+            ewFunc += "@" + lang.toLower();
+        sim::callScriptFunctionEx(scriptHandle, ewFunc.toStdString(), stackHandle);
         sim::releaseStack(stackHandle);
     }
     catch(std::exception &ex)
@@ -184,7 +186,7 @@ void SIM::onExecCode(int scriptHandle, QString langSuffix, QString code)
     sim::announceSceneContentChange();
 }
 
-void SIM::onAskCompletion(int scriptHandle, QString langSuffix, QString input, int pos, QStringList *clout)
+void SIM::onAskCompletion(int scriptHandle, QString lang, QString input, int pos, QStringList *clout)
 {
     ASSERT_THREAD(!UI);
 
@@ -194,7 +196,10 @@ void SIM::onAskCompletion(int scriptHandle, QString langSuffix, QString input, i
     writeToStack(pos, stackHandle);
     try
     {
-        sim::callScriptFunctionEx(scriptHandle, "_getCompletion" + langSuffix.toStdString(), stackHandle);
+        QString func = "_getCompletion";
+        if(lang != "")
+            func += "@" + lang.toLower();
+        sim::callScriptFunctionEx(scriptHandle, func.toStdString(), stackHandle);
         std::vector<std::string> r;
         readFromStack(stackHandle, &r);
 
@@ -215,14 +220,17 @@ void SIM::onAskCompletion(int scriptHandle, QString langSuffix, QString input, i
     emit setCompletion(cl);
 }
 
-void SIM::onAskCallTip(int scriptHandle, QString langSuffix, QString input, int pos)
+void SIM::onAskCallTip(int scriptHandle, QString lang, QString input, int pos)
 {
     int stackHandle = sim::createStack();
     writeToStack(input.toStdString(), stackHandle);
     writeToStack(pos, stackHandle);
     try
     {
-        sim::callScriptFunctionEx(scriptHandle, "_getCalltip" + langSuffix.toStdString(), stackHandle);
+        QString func = "_getCalltip";
+        if(lang != "")
+            func += "@" + lang.toLower();
+        sim::callScriptFunctionEx(scriptHandle, func.toStdString(), stackHandle);
         std::string r;
         readFromStack(stackHandle, &r);
         emit setCallTip(QString::fromStdString(r));

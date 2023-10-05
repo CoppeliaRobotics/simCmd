@@ -35,9 +35,9 @@ private:
 
 public slots:
     void addLog(int verbosity, QString message);
-    void onExecCode(int scriptHandle, QString langSuffix, QString code);
-    void onAskCompletion(int scriptHandle, QString langSuffix, QString input, int pos, QStringList *clout);
-    void onAskCallTip(int scriptHandle, QString langSuffix, QString input, int pos);
+    void onExecCode(int scriptHandle, QString lang, QString code);
+    void onAskCompletion(int scriptHandle, QString lang, QString input, int pos, QStringList *clout);
+    void onAskCallTip(int scriptHandle, QString lang, QString input, int pos);
 
 signals:
     void setVisible(bool visible);
@@ -49,7 +49,7 @@ signals:
     void setPreferredSandboxLang(QString lang);
     void setAutoAcceptCommonCompletionPrefix(bool b);
     void setShowMatchingHistory(bool b);
-    void setSelectedScript(int scriptHandle, QString lang);
+    void setSelectedScript(int scriptHandle, QString lang, bool silent);
 
 private:
     QMap<int, QString> execWrapper;

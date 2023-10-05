@@ -235,7 +235,7 @@ public:
         if(sim::getBoolParam(sim_boolparam_headless))
             readline->setSelectedScript(in->scriptHandle, lang);
         else
-            SIM::getInstance()->setSelectedScript(in->scriptHandle, lang);
+            SIM::getInstance()->setSelectedScript(in->scriptHandle, lang, false);
     }
 
 private:
