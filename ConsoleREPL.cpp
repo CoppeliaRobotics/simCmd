@@ -31,7 +31,7 @@ void Readline::run()
 {
     while(!QThread::currentThread()->isInterruptionRequested())
     {
-        const char *line = rx.input("coppeliaSim> ");
+        const char *line = rx.input("> ");
         if(line && *line)
         {
             rx.history_add(line);
