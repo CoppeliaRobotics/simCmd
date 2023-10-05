@@ -6,7 +6,7 @@
 
 Readline::Readline(QObject *parent) : QThread(parent)
 {
-    havePython = !sim::getNamedBoolParam("pythonSandboxInitFailed").value();
+    havePython = !sim::getNamedBoolParam("pythonSandboxInitFailed").value_or(false);
     scriptHandle = -1;
     sandboxScript = sim::getScriptHandleEx(sim_scripttype_sandboxscript, -1);
     preferredSandboxLang = QString::fromStdString(sim::getStringParam(sim_stringparam_sandboxlang));

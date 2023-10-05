@@ -150,7 +150,7 @@ public:
             if(scriptHandle != -1)
                 customizationScripts[scriptHandle] = getScriptLabel(sim_scripttype_customizationscript, scriptHandle, name);
         }
-        SIM::getInstance()->scriptListChanged(sandboxScript, mainScript, childScripts, customizationScripts, isRunning, !sim::getNamedBoolParam("pythonSandboxInitFailed").value());
+        SIM::getInstance()->scriptListChanged(sandboxScript, mainScript, childScripts, customizationScripts, isRunning, !sim::getNamedBoolParam("pythonSandboxInitFailed").value_or(false));
     }
 
     void updateWidgetOptions()
