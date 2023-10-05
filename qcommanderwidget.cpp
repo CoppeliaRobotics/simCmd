@@ -335,9 +335,7 @@ void QCommanderWidget::onScriptListChanged(int sandboxScript_, int mainScript, Q
             if(lang == "Python" && !havePython)
             {
                 QStandardItemModel *model = qobject_cast<QStandardItemModel*>(scriptCombo->model());
-                Q_ASSERT(model != nullptr);
-                QStandardItem *item = model->item(index);
-                item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
+                model->item(index)->setEnabled(false);
             }
             index++;
         }
