@@ -41,7 +41,7 @@ public slots:
 
 signals:
     void setVisible(bool visible);
-    void scriptListChanged(int sandboxScript, int mainScript, QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning);
+    void scriptListChanged(int sandboxScript, int mainScript, QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning, bool havePython);
     void setCompletion(QStringList s);
     void setCallTip(QString s);
     void historyChanged(QStringList history);

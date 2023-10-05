@@ -86,7 +86,7 @@ private slots:
 public slots:
     void onSetCompletion(const QStringList &comp);
     void onSetCallTip(const QString &tip);
-    void onScriptListChanged(int sandboxScript, int mainScript, QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning);
+    void onScriptListChanged(int sandboxScript, int mainScript, QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning, bool havePython);
     void setHistory(QStringList history);
     void setResizeStatusbarWhenFocused(bool b);
     void setPreferredSandboxLang(const QString &lang);
@@ -103,6 +103,8 @@ signals:
 private:
     bool resizeStatusbarWhenFocused = false;
     QString preferredSandboxLang;
+    int sandboxScript = -1;
+    bool havePython = false;
 
     QList<int> statusbarSize;
     QList<int> statusbarSizeFocused;

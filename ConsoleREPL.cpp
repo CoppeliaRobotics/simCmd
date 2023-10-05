@@ -6,6 +6,7 @@
 
 Readline::Readline(QObject *parent) : QThread(parent)
 {
+    havePython = !sim::getNamedBoolParam("pythonSandboxInitFailed").value();
     scriptHandle = -1;
     sandboxScript = sim::getScriptHandleEx(sim_scripttype_sandboxscript, -1);
     preferredSandboxLang = QString::fromStdString(sim::getStringParam(sim_stringparam_sandboxlang));
@@ -79,6 +80,12 @@ Replxx::completions_t Readline::hook_completion(const std::string &context, int 
 
 void Readline::setSelectedScript(int newScriptHandle, QString newLang)
 {
+    if(newLang.toLower() == "python" && !havePython)
+    {
+        sim::addLog(sim_verbosity_errors, "Python is not available.");
+        return;
+    }
+
     if(newScriptHandle == -1)
         newScriptHandle = sandboxScript;
     if(newScriptHandle == sandboxScript && newLang == "")

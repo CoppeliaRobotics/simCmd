@@ -29,4 +29,5 @@ private:
     QString preferredSandboxLang;
     int scriptHandle;
     QString lang;
+    bool havePython;
 };

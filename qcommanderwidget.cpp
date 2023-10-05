@@ -8,6 +8,8 @@
 #include <QToolTip>
 #include <QApplication>
 #include <QLabel>
+#include <QStandardItem>
+#include <QStandardItemModel>
 
 #ifdef Q_OS_MACOS
 #define Q_REAL_CTRL Qt::MetaModifier
@@ -184,18 +186,12 @@ void QCommanderWidget::onExecute(const QString &cmd)
     if(cmd == "@lua")
     {
         if(scriptType == sim_scripttype_sandboxscript)
-        {
             setSelectedScript(-1, "Lua");
-            emit addLog(sim_verbosity_warnings, "Sandbox language: Lua");
-        }
     }
     else if(cmd == "@py" || cmd == "@python")
     {
         if(scriptType == sim_scripttype_sandboxscript)
-        {
             setSelectedScript(-1, "Python");
-            emit addLog(sim_verbosity_warnings, "Sandbox language: Python");
-        }
     }
     else
     {
@@ -311,8 +307,11 @@ void QCommanderWidget::onSetCallTip(const QString &tip)
 #endif // CUSTOM_TOOLTIP_WINDOW
 }
 
-void QCommanderWidget::onScriptListChanged(int sandboxScript, int mainScript, QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning)
+void QCommanderWidget::onScriptListChanged(int sandboxScript_, int mainScript, QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning, bool havePython_)
 {
+    havePython = havePython_;
+    sandboxScript = sandboxScript_;
+
     // save current item:
     QVariant old = scriptCombo->itemData(scriptCombo->currentIndex());
 
@@ -333,6 +332,13 @@ void QCommanderWidget::onScriptListChanged(int sandboxScript, int mainScript, QM
             data << sim_scripttype_sandboxscript << sandboxScript << QString() << suffix;
             scriptCombo->addItem(QString("Sandbox script (%1)").arg(lang), data);
             if(data == old) selectedIndex = index;
+            if(lang == "Python" && !havePython)
+            {
+                QStandardItemModel *model = qobject_cast<QStandardItemModel*>(scriptCombo->model());
+                Q_ASSERT(model != nullptr);
+                QStandardItem *item = model->item(index);
+                item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
+            }
             index++;
         }
     }
@@ -399,6 +405,14 @@ void QCommanderWidget::setShowMatchingHistory(bool b)
 
 void QCommanderWidget::setSelectedScript(int scriptHandle, QString lang)
 {
+    lang = lang.left(1).toUpper() + lang.mid(1).toLower();
+
+    if(lang.toLower() == "python" && !havePython)
+    {
+        emit addLog(sim_verbosity_errors, "Python is not available");
+        return;
+    }
+
     int index = -1;
     for(int i = 0; i < scriptCombo->count(); i++)
     {
@@ -410,6 +424,10 @@ void QCommanderWidget::setSelectedScript(int scriptHandle, QString lang)
         index = i;
         break;
     }
-    if(index != -1)
+    if(index != -1 && index != scriptCombo->currentIndex())
+    {
         scriptCombo->setCurrentIndex(index);
+        if(scriptHandle == sandboxScript)
+            emit addLog(sim_verbosity_warnings, "Sandbox language: " + lang);
+    }
 }
