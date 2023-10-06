@@ -7,19 +7,23 @@ Use this plugin for quick evaluation of expressions.
 
 ### Completion
 
-Begin to type the name of a function (e.g. "sim.getObjectHa") and press TAB to automatically complete it. If there are multiple matches, repeatedly press TAB to cycle through completions, and Shift+TAB to cycle back.
+]]
+    if sim.getBoolParam(sim.boolparam_headless) then
+    txt=txt..[[Begin to type the name of a function (e.g. "sim.getObjectHa") and press TAB to complete it.
 
 ]]
-    if not sim.getBoolParam(sim.boolparam_headless) then
-        txt=txt..[[### Keyboard Shortcuts
+    else
+        txt=txt..[[Begin to type the name of a function (e.g. "sim.getObjectHa") and press TAB to automatically complete it. If there are multiple matches, repeatedly press TAB to cycle through completions, and Shift+TAB to cycle back.
 
-**Ctrl+Alt+C**: focus the text input.
-**TAB**: complete symbol / cycle to next completion.
-**Shift+TAB**: cycle to previous completion.
-**Enter**: accept completion (also works with '(' and '.').
-**Esc**: clear text field.
-**Up/Down** arrows: navigate/search through command history.
-**Ctrl+L**: clear statusbar.
+### Keyboard Shortcuts
+
+- **Ctrl+Alt+C**: focus the text input.
+- **TAB**: complete symbol / cycle to next completion.
+- **Shift+TAB**: cycle to previous completion.
+- **Enter**: accept completion (also works with '(' and '.').
+- **Esc**: clear text field.
+- **Up/Down** arrows: navigate/search through command history.
+- **Ctrl+L**: clear statusbar.
 
 ]]
     end
