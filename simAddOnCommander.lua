@@ -26,6 +26,7 @@ menus={
     --     "simCmd.floatPrecision" [int]
     --     "simCmd.mapMaxDepth" [int]
     --]]
+    --[[
     {
         label='Print all returned values',
         enabled=true,
@@ -98,6 +99,7 @@ menus={
             sim.setNamedBoolParam('simCmd.mapShadowSpecialStrings',self.checked)
         end,
     },
+    ]]--
     {
         label='History: skip repeated commands',
         enabled=true,
