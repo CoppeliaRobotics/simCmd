@@ -1,6 +1,6 @@
 local simCmd=loadPlugin'simCmd';
 
-function helpText()
+function simCmd.helpText()
     local txt=[[## Commander plugin
 
 Use this plugin for quick evaluation of expressions.
@@ -62,18 +62,18 @@ Some special variables are set automatically before each evaluation:
     return txt
 end
 
-function help()
+function simCmd.help()
     if sim.getBoolParam(sim.boolparam_headless) then
-        print(string.stripmarkdown(helpText()))
+        print(string.stripmarkdown(simCmd.helpText()))
     else
         simUI = require 'simUI'
         if not ui then
-            ui = simUI.create('<ui title="Commander Plugin" closeable="true" on-close="helpClose" modal="true" size="440,520"><text-browser text="'..string.gsub(helpText(),'"','&quot;')..'" type="markdown" /></ui>')
+            ui = simUI.create('<ui title="Commander Plugin" closeable="true" on-close="simCmd.helpClose" modal="true" size="440,520"><text-browser text="'..string.gsub(simCmd.helpText(),'"','&quot;')..'" type="markdown" /></ui>')
         end
     end
 end
 
-function helpClose()
+function simCmd.helpClose()
     if ui then
         simUI.destroy(ui)
         ui = nil
