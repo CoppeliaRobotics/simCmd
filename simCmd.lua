@@ -1,7 +1,7 @@
-local simCmd=loadPlugin'simCmd';
+local simCmd = loadPlugin 'simCmd';
 
 function simCmd.helpText()
-    local txt=[[## Commander plugin
+    local txt = [[## Commander plugin
 
 Use this plugin for quick evaluation of expressions.
 
@@ -9,11 +9,13 @@ Use this plugin for quick evaluation of expressions.
 
 ]]
     if sim.getBoolParam(sim.boolparam_headless) then
-    txt=txt..[[Begin to type the name of a function (e.g. "sim.getObjectHa") and press TAB to complete it.
+        txt = txt ..
+                  [[Begin to type the name of a function (e.g. "sim.getObjectHa") and press TAB to complete it.
 
 ]]
     else
-        txt=txt..[[Begin to type the name of a function (e.g. "sim.getObjectHa") and press TAB to automatically complete it. If there are multiple matches, repeatedly press TAB to cycle through completions, and Shift+TAB to cycle back.
+        txt = txt ..
+                  [[Begin to type the name of a function (e.g. "sim.getObjectHa") and press TAB to automatically complete it. If there are multiple matches, repeatedly press TAB to cycle through completions, and Shift+TAB to cycle back.
 
 ### Keyboard Shortcuts
 
@@ -28,7 +30,7 @@ Use this plugin for quick evaluation of expressions.
 ]]
     end
     if false then
-        txt=txt..[[### String Rendering Flags
+        txt = txt .. [[### String Rendering Flags
 
 There are some flags that control how the results are displayed. Those are input by adding a comment at the end of the line, containing as comma separated list of key=value pairs, e.g.: "luaExpression --flag1=10,flag2=test". Flags can be abbreviated by typing only the initial part, e.g. "pre" instead of "precision", down to any length, provided it is not ambiguous.
 
@@ -44,7 +46,7 @@ There are some flags that control how the results are displayed. Those are input
 
 ]]
     end
-    txt=txt..[[### Special variables
+    txt = txt .. [[### Special variables
 
 Some special variables are set automatically before each evaluation:
 
@@ -68,7 +70,11 @@ function simCmd.help()
     else
         simUI = require 'simUI'
         if not ui then
-            ui = simUI.create('<ui title="Commander Plugin" closeable="true" on-close="simCmd.helpClose" modal="true" size="440,520"><text-browser text="'..string.gsub(simCmd.helpText(),'"','&quot;')..'" type="markdown" /></ui>')
+            ui = simUI.create(
+                     '<ui title="Commander Plugin" closeable="true" on-close="simCmd.helpClose" modal="true" size="440,520"><text-browser text="' ..
+                         string.gsub(simCmd.helpText(), '"', '&quot;') ..
+                         '" type="markdown" /></ui>'
+                 )
         end
     end
 end
@@ -79,7 +85,6 @@ function simCmd.helpClose()
         ui = nil
     end
 end
-
-;(require'simCmd-typecheck')(simCmd)
+(require 'simCmd-typecheck')(simCmd)
 
 return simCmd

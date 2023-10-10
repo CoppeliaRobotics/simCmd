@@ -1,6 +1,6 @@
-sim=require'sim'
+sim = require 'sim'
 
-options={}
+options = {}
 
 -- LuaFormatter off
 menus = {
@@ -159,49 +159,48 @@ menus = {
 -- LuaFormatter on
 
 function menuItemState(menu)
-    local state=0
-    if menu.enabled then state=state+1 end
-    if menu.checked then state=state+2 end
-    if menu.checkable then state=state+4 end
+    local state = 0
+    if menu.enabled then state = state + 1 end
+    if menu.checked then state = state + 2 end
+    if menu.checkable then state = state + 4 end
     return state
 end
 
 function updateMenuItems()
-    for i,menu in ipairs(menus) do
-        if menu.handle then
-            sim.moduleEntry(menu.handle,nil,menuItemState(menu))
-        end
+    for i, menu in ipairs(menus) do
+        if menu.handle then sim.moduleEntry(menu.handle, nil, menuItemState(menu)) end
     end
 end
 
 function sysCall_info()
-    return {autoStart=sim.getNamedBoolParam('simCmd.autoStart')~=false,menu='Developer tools\nCommander\nCommander'}
+    return {
+        autoStart = sim.getNamedBoolParam('simCmd.autoStart') ~= false,
+        menu = 'Developer tools\nCommander\nCommander',
+    }
 end
 
 function sysCall_init()
-    simCmd=require'simCmd'
+    simCmd = require 'simCmd'
     simCmd.setVisible(true)
-    for i,menu in ipairs(menus) do
-        menu.handle=sim.moduleEntry(-1,'Developer tools\nCommander\n'..menu.label,menuItemState(menu))
+    for i, menu in ipairs(menus) do
+        menu.handle = sim.moduleEntry(
+                          -1, 'Developer tools\nCommander\n' .. menu.label, menuItemState(menu)
+                      )
     end
 end
 
 function sysCall_moduleEntry(inData)
-    for i,menu in ipairs(menus) do
-        if menu.handle==inData.handle then
-            if menu.checkable then
-                menu.checked=not menu.checked
-            end
-            if menu.callback then
-                menu.callback(menu)
-            end
+    for i, menu in ipairs(menus) do
+        if menu.handle == inData.handle then
+            if menu.checkable then menu.checked = not menu.checked end
+            if menu.callback then menu.callback(menu) end
         end
     end
     updateMenuItems()
 end
 
 function sysCall_addOnScriptSuspend()
-    return {cmd='cleanup'}
+    return {cmd = 'cleanup'}
 end
 
 function sysCall_cleanup()
