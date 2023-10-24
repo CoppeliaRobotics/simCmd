@@ -164,7 +164,8 @@ void QCommanderWidget::onAskCompletion(const QString &cmd, int cursorPos)
     int scriptHandle;
     QString lang;
     getSelectedScriptInfo(scriptType, scriptHandle, lang);
-    emit askCompletion(scriptHandle, lang, cmd, cursorPos, nullptr);
+    if(scriptHandle != -1)
+        emit askCompletion(scriptHandle, lang, cmd, cursorPos, nullptr);
 }
 
 void QCommanderWidget::onAskCallTip(QString input, int pos)
@@ -173,7 +174,8 @@ void QCommanderWidget::onAskCallTip(QString input, int pos)
     int scriptHandle;
     QString lang;
     getSelectedScriptInfo(scriptType, scriptHandle, lang);
-    emit askCallTip(scriptHandle, lang, input, pos);
+    if(scriptHandle != -1)
+        emit askCallTip(scriptHandle, lang, input, pos);
 }
 
 void QCommanderWidget::onExecute(const QString &cmd)
@@ -195,7 +197,10 @@ void QCommanderWidget::onExecute(const QString &cmd)
     }
     else
     {
-        emit execCode(scriptHandle, lang, cmd);
+        if(scriptHandle != -1)
+            emit execCode(scriptHandle, lang, cmd);
+        else
+            emit addLog(sim_verbosity_errors, "No script is selected");
     }
 
     editor->clear();
