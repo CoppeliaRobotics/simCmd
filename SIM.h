@@ -41,7 +41,7 @@ public slots:
 
 signals:
     void setVisible(bool visible);
-    void scriptListChanged(int sandboxScript, int mainScript, QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning, bool havePython);
+    void scriptListChanged(int sandboxScript, int mainScript, QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning, bool isRunningJustChanged, bool havePython);
     void setCompletion(QStringList s);
     void setCallTip(QString s);
     void historyChanged(QStringList history);
@@ -49,7 +49,7 @@ signals:
     void setPreferredSandboxLang(QString lang);
     void setAutoAcceptCommonCompletionPrefix(bool b);
     void setShowMatchingHistory(bool b);
-    void setSelectedScript(int scriptHandle, QString lang, bool silent);
+    void setSelectedScript(int scriptHandle, QString lang, bool silent, bool fallbackToSandbox);
 
 private:
     QMap<int, QString> execWrapper;

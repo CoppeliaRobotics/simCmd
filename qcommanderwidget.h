@@ -86,13 +86,13 @@ private slots:
 public slots:
     void onSetCompletion(const QStringList &comp);
     void onSetCallTip(const QString &tip);
-    void onScriptListChanged(int sandboxScript, int mainScript, QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning, bool havePython);
+    void onScriptListChanged(int sandboxScript, int mainScript, QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning, bool isRunningJustChanged, bool havePython);
     void setHistory(QStringList history);
     void setResizeStatusbarWhenFocused(bool b);
     void setPreferredSandboxLang(const QString &lang);
     void setAutoAcceptCommonCompletionPrefix(bool b);
     void setShowMatchingHistory(bool b);
-    void setSelectedScript(int scriptHandle, QString lang, bool silent);
+    void setSelectedScript(int scriptHandle, QString lang, bool silent, bool fallbackToSandbox);
 
 signals:
     void askCompletion(int scriptHandle, QString langSuffix, QString input, int pos, QStringList *clout);

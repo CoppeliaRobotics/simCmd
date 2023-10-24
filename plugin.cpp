@@ -131,6 +131,7 @@ public:
             if(lang == sim_lang_python) ret += " (Python)";
             return ret;
         };
+        static bool previouslyRunning {false};
         bool isRunning = sim::getSimulationState() == sim_simulation_advancing_running;
         int sandboxScript = sim::getScriptHandleEx(sim_scripttype_sandboxscript, -1);
         int mainScript = sim::getScriptHandleEx(sim_scripttype_mainscript, -1);
@@ -150,7 +151,8 @@ public:
             if(scriptHandle != -1)
                 customizationScripts[scriptHandle] = getScriptLabel(sim_scripttype_customizationscript, scriptHandle, name);
         }
-        SIM::getInstance()->scriptListChanged(sandboxScript, mainScript, childScripts, customizationScripts, isRunning, !sim::getNamedBoolParam("pythonSandboxInitFailed").value_or(false));
+        SIM::getInstance()->scriptListChanged(sandboxScript, mainScript, childScripts, customizationScripts, isRunning, isRunning ^ previouslyRunning, !sim::getNamedBoolParam("pythonSandboxInitFailed").value_or(false));
+        previouslyRunning = isRunning;
     }
 
     void updateWidgetOptions()
@@ -235,7 +237,7 @@ public:
         if(sim::getBoolParam(sim_boolparam_headless))
             readline->setSelectedScript(in->scriptHandle, lang);
         else
-            SIM::getInstance()->setSelectedScript(in->scriptHandle, lang, false);
+            SIM::getInstance()->setSelectedScript(in->scriptHandle, lang, false, false);
     }
 
 private:
