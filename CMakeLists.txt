@@ -20,9 +20,7 @@ if(NOT COPPELIASIM_INCLUDE_DIR)
         set(COPPELIASIM_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../include)
     endif()
 endif()
-list(APPEND CMAKE_MODULE_PATH
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules
-    ${COPPELIASIM_INCLUDE_DIR}/cmake)
+list(APPEND CMAKE_MODULE_PATH ${COPPELIASIM_INCLUDE_DIR}/cmake)
 find_package(CoppeliaSim 4.5.1.7 REQUIRED)
 
 include(ExternalProject)
@@ -44,19 +42,18 @@ else()
 endif()
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/generated)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external)
 
-coppeliasim_generate_stubs(${CMAKE_CURRENT_BINARY_DIR}/generated XML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/callbacks.xml LUA_FILE ${CMAKE_CURRENT_SOURCE_DIR}/simCmd.lua)
+coppeliasim_generate_stubs(${CMAKE_CURRENT_BINARY_DIR}/generated XML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/sourceCode/callbacks.xml LUA_FILE ${CMAKE_CURRENT_SOURCE_DIR}/lua/simCmd.lua)
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/sourceCode/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 set(SOURCES
-    SIM.cpp
-    UI.cpp
-    plugin.cpp
-    qcommanderwidget.cpp
-    qcommandedit.cpp
-    ConsoleREPL.cpp
+    sourceCode/SIM.cpp
+    sourceCode/UI.cpp
+    sourceCode/plugin.cpp
+    sourceCode/qcommanderwidget.cpp
+    sourceCode/qcommandedit.cpp
+    sourceCode/ConsoleREPL.cpp
 )
 
 set(LIBRARIES
@@ -77,4 +74,4 @@ if(CUSTOM_TOOLTIP_WINDOW)
 endif()
 target_compile_definitions(simCmd PRIVATE REPLXX_STATIC)
 target_link_libraries(simCmd PRIVATE ${LIBRARIES})
-coppeliasim_add_addon("simAddOnCommander.lua")
+coppeliasim_add_addon("addOns/simAddOnCommander.lua")
