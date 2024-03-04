@@ -8,7 +8,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 
 set(Qt Qt5 CACHE STRING "Qt version to use (e.g. Qt5)")
-set_property(CACHE Qt PROPERTY STRINGS Qt5 Qt6)  #
+set_property(CACHE Qt PROPERTY STRINGS Qt5 Qt6)
 
 find_package(Boost REQUIRED)
 find_package(${Qt} COMPONENTS Core Gui Widgets PrintSupport REQUIRED)

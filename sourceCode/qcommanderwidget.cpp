@@ -109,7 +109,10 @@ QCommanderWidget::QCommanderWidget(QWidget *parent)
 
     QGridLayout *grid = new QGridLayout(this);
     grid->setSpacing(0);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     grid->setMargin(0);
+#endif
+    grid->setContentsMargins(0, 0, 0, 0);
     setLayout(grid);
 
 #ifdef CUSTOM_TOOLTIP_WINDOW

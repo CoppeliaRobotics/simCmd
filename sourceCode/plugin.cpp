@@ -70,8 +70,10 @@ public:
         splitter->replaceWidget(1,splitterChild);
         layout = new QVBoxLayout();
         layout->setSpacing(0);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         layout->setMargin(0);
-        layout->setContentsMargins(0,0,0,0);
+#endif
+        layout->setContentsMargins(0, 0, 0, 0);
         splitterChild->setLayout(layout);
         commanderWidget = new QCommanderWidget();
         layout->addWidget(statusBar);

@@ -16,7 +16,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <simStubsGen/cpp/common.h>
 
 // SIM is a singleton
@@ -75,7 +75,7 @@ QStringList loadHistoryData()
     {
         std::string pdata = sim::persistentDataRead("Commander.history");
         QString s = QString::fromStdString(pdata);
-        hist = s.split(QRegExp("(\\r\\n)|(\\n\\r)|\\r|\\n"),
+        hist = s.split(QRegularExpression("(\\r\\n)|(\\n\\r)|\\r|\\n"),
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
             QString::SkipEmptyParts
 #else
