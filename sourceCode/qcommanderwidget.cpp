@@ -190,12 +190,12 @@ void QCommanderWidget::onExecute(const QString &cmd)
 
     if(cmd.length() > 1 && QString("@lua").startsWith(cmd))
     {
-        if(scriptType == sim_scripttype_sandboxscript)
+        if(scriptType == sim_scripttype_sandbox)
             setSelectedScript(sandboxScript, "Lua", false, false);
     }
     else if(cmd.length() > 1 && QString("@python").startsWith(cmd))
     {
-        if(scriptType == sim_scripttype_sandboxscript)
+        if(scriptType == sim_scripttype_sandbox)
             setSelectedScript(sandboxScript, "Python", false, false);
     }
     else
@@ -337,8 +337,8 @@ void QCommanderWidget::onScriptListChanged(int sandboxScript_, int mainScript, Q
         {
             if((i == 0) ^ (lang == preferredSandboxLang)) continue;
             QVariantList data;
-            data << sim_scripttype_sandboxscript << sandboxScript << QString() << lang;
-            scriptCombo->addItem(QString("Sandbox script (%1)").arg(lang), data);
+            data << sim_scripttype_sandbox << sandboxScript << QString() << lang;
+            scriptCombo->addItem(QString("Sandbox (%1)").arg(lang), data);
             if(lang == "Python" && !havePython)
             {
                 QStandardItemModel *model = qobject_cast<QStandardItemModel*>(scriptCombo->model());
@@ -349,7 +349,7 @@ void QCommanderWidget::onScriptListChanged(int sandboxScript_, int mainScript, Q
     if(simRunning)
     {
         QVariantList data;
-        data << sim_scripttype_mainscript << mainScript << QString() << QString();
+        data << sim_scripttype_main << mainScript << QString() << QString();
         scriptCombo->addItem("Main script", data);
     }
     if(simRunning)
@@ -357,7 +357,7 @@ void QCommanderWidget::onScriptListChanged(int sandboxScript_, int mainScript, Q
         for(const auto &e : childScripts.toStdMap())
         {
             QVariantList data;
-            data << sim_scripttype_childscript << e.first << e.second << QString();
+            data << sim_scripttype_simulation << e.first << e.second << QString();
             scriptCombo->addItem(e.second, data);
         }
     }
@@ -365,7 +365,7 @@ void QCommanderWidget::onScriptListChanged(int sandboxScript_, int mainScript, Q
         for(const auto &e : customizationScripts.toStdMap())
         {
             QVariantList data;
-            data << sim_scripttype_customizationscript << e.first << e.second << QString();
+            data << sim_scripttype_customization << e.first << e.second << QString();
             scriptCombo->addItem(e.second, data);
         }
     }

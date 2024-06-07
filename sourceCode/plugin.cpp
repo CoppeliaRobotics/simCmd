@@ -121,9 +121,9 @@ public:
     {
         auto getScriptLabel = [](int type, int scriptHandle, const QString &name) -> QString {
             QString ret = "";
-            if(type == sim_scripttype_childscript)
+            if(type == sim_scripttype_simulation)
                 ret += "Child script of ";
-            if(type == sim_scripttype_customizationscript)
+            if(type == sim_scripttype_customization)
                 ret += "Customization script of ";
             ret += "'";
             ret += name;
@@ -135,8 +135,8 @@ public:
         };
         static bool previouslyRunning {false};
         bool isRunning = sim::getSimulationState() == sim_simulation_advancing_running;
-        int sandboxScript = sim::getScriptHandleEx(sim_scripttype_sandboxscript, -1);
-        int mainScript = sim::getScriptHandleEx(sim_scripttype_mainscript, -1);
+        int sandboxScript = sim::getScriptHandleEx(sim_scripttype_sandbox, -1);
+        int mainScript = sim::getScriptHandleEx(sim_scripttype_main, -1);
         QMap<int, QString> childScripts;
         QMap<int, QString> customizationScripts;
         for(int objectHandle : sim::getObjects(sim_handle_all))
@@ -145,13 +145,13 @@ public:
             int scriptHandle;
             if(isRunning)
             {
-                scriptHandle = sim::getScriptHandleEx(sim_scripttype_childscript, objectHandle);
+                scriptHandle = sim::getScriptHandleEx(sim_scripttype_simulation, objectHandle);
                 if(scriptHandle != -1)
-                    childScripts[scriptHandle] = getScriptLabel(sim_scripttype_childscript, scriptHandle, name);
+                    childScripts[scriptHandle] = getScriptLabel(sim_scripttype_simulation, scriptHandle, name);
             }
-            scriptHandle = sim::getScriptHandleEx(sim_scripttype_customizationscript, objectHandle);
+            scriptHandle = sim::getScriptHandleEx(sim_scripttype_customization, objectHandle);
             if(scriptHandle != -1)
-                customizationScripts[scriptHandle] = getScriptLabel(sim_scripttype_customizationscript, scriptHandle, name);
+                customizationScripts[scriptHandle] = getScriptLabel(sim_scripttype_customization, scriptHandle, name);
         }
         SIM::getInstance()->scriptListChanged(sandboxScript, mainScript, childScripts, customizationScripts, isRunning, isRunning ^ previouslyRunning, !sim::getNamedBoolParam("pythonSandboxInitFailed").value_or(false));
         previouslyRunning = isRunning;
