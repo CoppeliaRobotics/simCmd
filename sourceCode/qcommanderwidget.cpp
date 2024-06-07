@@ -338,7 +338,7 @@ void QCommanderWidget::onScriptListChanged(int sandboxScript_, int mainScript, Q
             if((i == 0) ^ (lang == preferredSandboxLang)) continue;
             QVariantList data;
             data << sim_scripttype_sandbox << sandboxScript << QString() << lang;
-            scriptCombo->addItem(QString("Sandbox (%1)").arg(lang), data);
+            scriptCombo->addItem(QString("Sandbox (%1)").arg(lang.toLower()), data);
             if(lang == "Python" && !havePython)
             {
                 QStandardItemModel *model = qobject_cast<QStandardItemModel*>(scriptCombo->model());

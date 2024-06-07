@@ -120,18 +120,11 @@ public:
     void updateScriptsList()
     {
         auto getScriptLabel = [](int type, int scriptHandle, const QString &name) -> QString {
-            QString ret = "";
-            if(type == sim_scripttype_simulation)
-                ret += "Child script of ";
-            if(type == sim_scripttype_customization)
-                ret += "Customization script of ";
-            ret += "'";
-            ret += name;
-            ret += "'";
-            int lang = sim::getScriptInt32Param(scriptHandle, sim_scriptintparam_lang);
-            if(lang == sim_lang_lua) ret += " (Lua)";
-            if(lang == sim_lang_python) ret += " (Python)";
-            return ret;
+            QString typePrefix = "";
+            if(type == sim_scripttype_simulation) typePrefix = "Simulation script ";
+            if(type == sim_scripttype_customization) typePrefix = "Customization script ";
+            std::string lang = sim::getScriptStringParam(scriptHandle, sim_scriptstringparam_lang);
+            return QString("%1'%2' (%3)").arg(typePrefix, name, QString::fromStdString(lang));
         };
         static bool previouslyRunning {false};
         bool isRunning = sim::getSimulationState() == sim_simulation_advancing_running;
