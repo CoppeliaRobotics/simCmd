@@ -73,8 +73,9 @@ QStringList loadHistoryData()
     QStringList hist;
     try
     {
-        std::string pdata = sim::persistentDataRead("Commander.history");
-        QString s = QString::fromStdString(pdata);
+        auto pdata = sim::readCustomDataBlock(sim_handle_appstorage, "Commander.history");
+        if(!pdata) return hist;
+        QString s = QString::fromStdString(*pdata);
         hist = s.split(QRegularExpression("(\\r\\n)|(\\n\\r)|\\r|\\n"),
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
             QString::SkipEmptyParts
@@ -85,7 +86,7 @@ QStringList loadHistoryData()
     }
     catch(sim::api_error &ex)
     {
-        sim::addLog(sim_verbosity_debug, "failed to read history persistent block");
+        sim::addLog(sim_verbosity_debug, "failed to read history data block");
     }
     return hist;
 }
@@ -95,11 +96,11 @@ void saveHistoryData(QStringList hist)
     QString histStr = hist.join("\n");
     try
     {
-        sim::persistentDataWrite("Commander.history", histStr.toStdString(), 1);
+        sim::writeCustomDataBlock(sim_handle_appstorage, "Commander.history", histStr.toStdString());
     }
     catch(sim::api_error &ex)
     {
-        sim::addLog(sim_verbosity_debug, "failed to write history persistent block");
+        sim::addLog(sim_verbosity_debug, "failed to write history data block");
     }
 }
 
