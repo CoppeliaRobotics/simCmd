@@ -146,7 +146,10 @@ public:
             if(scriptHandle != -1)
                 customizationScripts[scriptHandle] = getScriptLabel(sim_scripttype_customization, scriptHandle, name);
         }
-        SIM::getInstance()->scriptListChanged(sandboxScript, mainScript, childScripts, customizationScripts, isRunning, isRunning ^ previouslyRunning, !sim::getNamedBoolParam("pythonSandboxInitFailed").value_or(false));
+        bool havePython = !sim::getNamedBoolParam("pythonSandboxInitFailed").value_or(false);
+        if(sim::getStringParam(sim_stringparam_sandboxlang) == "bareLua")
+            havePython = false;
+        SIM::getInstance()->scriptListChanged(sandboxScript, mainScript, childScripts, customizationScripts, isRunning, isRunning ^ previouslyRunning, havePython);
         previouslyRunning = isRunning;
     }
 

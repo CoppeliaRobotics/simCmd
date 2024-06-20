@@ -386,7 +386,7 @@ void QCommanderWidget::setResizeStatusbarWhenFocused(bool b)
 
 void QCommanderWidget::setPreferredSandboxLang(const QString &lang)
 {
-    preferredSandboxLang = lang.left(1).toUpper() + lang.mid(1).toLower();
+    preferredSandboxLang = lang == "bareLua" ? "Lua" : lang.left(1).toUpper() + lang.mid(1).toLower();
 }
 
 void QCommanderWidget::setAutoAcceptCommonCompletionPrefix(bool b)

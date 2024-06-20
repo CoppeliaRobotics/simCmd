@@ -10,6 +10,11 @@ Readline::Readline(QObject *parent) : QThread(parent)
     scriptHandle = -1;
     sandboxScript = sim::getScriptHandleEx(sim_scripttype_sandbox, -1);
     preferredSandboxLang = QString::fromStdString(sim::getStringParam(sim_stringparam_sandboxlang));
+    if(preferredSandboxLang == "bareLua")
+    {
+        preferredSandboxLang = "Lua";
+        havePython = false;
+    }
     if(preferredSandboxLang == "")
     {
         preferredSandboxLang = "Lua";
