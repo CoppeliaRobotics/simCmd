@@ -132,18 +132,13 @@ public:
         int mainScript = sim::getScriptHandleEx(sim_scripttype_main, -1);
         QMap<int, QString> childScripts;
         QMap<int, QString> customizationScripts;
-        for(int objectHandle : sim::getObjects(sim_handle_all))
+        for(int scriptHandle : sim::getObjects(sim_sceneobject_script))
         {
-            QString name = QString::fromStdString(sim::getObjectAlias(objectHandle, 5));
-            int scriptHandle;
-            if(isRunning)
-            {
-                scriptHandle = sim::getScriptHandleEx(sim_scripttype_simulation, objectHandle);
-                if(scriptHandle != -1)
-                    childScripts[scriptHandle] = getScriptLabel(sim_scripttype_simulation, scriptHandle, name);
-            }
-            scriptHandle = sim::getScriptHandleEx(sim_scripttype_customization, objectHandle);
-            if(scriptHandle != -1)
+            QString name = QString::fromStdString(sim::getObjectAlias(scriptHandle, 5));
+            int scriptType = sim::getIntProperty(scriptHandle, "scriptType");
+            if(scriptType == sim_scripttype_simulation && isRunning)
+                childScripts[scriptHandle] = getScriptLabel(sim_scripttype_simulation, scriptHandle, name);
+            else if(scriptType == sim_scripttype_customization)
                 customizationScripts[scriptHandle] = getScriptLabel(sim_scripttype_customization, scriptHandle, name);
         }
         bool havePython = !sim::getNamedBoolParam("pythonSandboxInitFailed").value_or(false);
