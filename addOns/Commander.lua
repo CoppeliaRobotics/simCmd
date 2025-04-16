@@ -174,7 +174,6 @@ end
 
 function sysCall_info()
     return {
-        autoStart = sim.getNamedBoolParam('simCmd.autoStart') ~= false,
         menu = 'Developer tools\nCommander\nCommander',
     }
 end
@@ -183,9 +182,7 @@ function sysCall_init()
     simCmd = require 'simCmd'
     simCmd.setVisible(true)
     for i, menu in ipairs(menus) do
-        menu.handle = sim.moduleEntry(
-                          -1, 'Developer tools\nCommander\n' .. menu.label, menuItemState(menu)
-                      )
+        menu.handle = sim.moduleEntry(-1, 'Developer tools\nCommander\n' .. menu.label, menuItemState(menu))
     end
 end
 
@@ -207,3 +204,5 @@ function sysCall_cleanup()
     simCmd.setVisible(false)
     unloadPlugin(simCmd)
 end
+
+require('addOns.autoStart').setup{ns = 'simCmd'}
