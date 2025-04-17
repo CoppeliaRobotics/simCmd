@@ -205,4 +205,4 @@ function sysCall_cleanup()
     unloadPlugin(simCmd)
 end
 
-require('addOns.autoStart').setup{ns = 'simCmd'}
+require('addOns.autoStart').setup{ns = 'simCmd', default = true}
