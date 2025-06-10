@@ -17,6 +17,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <QRegularExpression>
+#include <QCborArray>
 #include <simStubsGen/cpp/common.h>
 
 // SIM is a singleton
@@ -73,34 +74,50 @@ QStringList loadHistoryData()
     QStringList hist;
     try
     {
-        auto pdata = sim::readCustomDataBlock(sim_handle_appstorage, "Commander.history");
+        auto pdata = sim::getBufferProperty(sim_handle_app, "customData.simCmd.history", {});
         if(!pdata) return hist;
-        QString s = QString::fromStdString(*pdata);
-        hist = s.split(QRegularExpression("(\\r\\n)|(\\n\\r)|\\r|\\n"),
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-            QString::SkipEmptyParts
-#else
-            Qt::SkipEmptyParts
-#endif
-        );
+        auto pdataBA = QByteArray::fromStdString(*pdata);
+        QCborParserError parserError;
+        QCborValue value = QCborValue::fromCbor(pdataBA, &parserError);
+        if(parserError.error != QCborError::NoError)
+        {
+            sim::addLog(sim_verbosity_warnings, "customData.simCmd.history contains invalid CBOR data: " + parserError.errorString().toStdString());
+            return hist;
+        }
+        if(!value.isArray())
+        {
+            sim::addLog(sim_verbosity_warnings, "customData.simCmd.history is not a CBOR array (type = " + std::to_string(value.type()) + ")");
+            return hist;
+        }
+        QCborArray array = value.toArray();
+        for(const QCborValue &item : array)
+        {
+            if(item.isString())
+                hist.append(item.toString());
+            else
+                sim::addLog(sim_verbosity_warnings, "customData.simCmd.history item is not a CBOR string");
+        }
     }
     catch(sim::api_error &ex)
     {
-        sim::addLog(sim_verbosity_debug, "failed to read history data block");
+        sim::addLog(sim_verbosity_debug, "failed to read history");
     }
     return hist;
 }
 
 void saveHistoryData(QStringList hist)
 {
-    QString histStr = hist.join("\n");
+    QCborArray array;
+    for(const QString &histItem : hist)
+        array.append(histItem);
+    QByteArray histData = array.toCborValue().toCbor();
     try
     {
-        sim::writeCustomDataBlock(sim_handle_appstorage, "Commander.history", histStr.toStdString());
+        sim::setBufferProperty(sim_handle_app, "customData.simCmd.history", histData.toStdString());
     }
     catch(sim::api_error &ex)
     {
-        sim::addLog(sim_verbosity_debug, "failed to write history data block");
+        sim::addLog(sim_verbosity_debug, "failed to write history");
     }
 }
 
