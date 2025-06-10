@@ -34,7 +34,7 @@ menus = {
         checkable = true,
         checked = true,
         callback = function(self)
-            sim.setNamedBoolParam('simCmd.printAllReturnedValues', self.checked)
+            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.printAllReturnedValues', self.checked)
         end,
     },
     {
@@ -43,7 +43,7 @@ menus = {
         checkable = true,
         checked = true,
         callback = function(self)
-            sim.setNamedBoolParam('simCmd.warnAboutMultipleReturnedValues', self.checked)
+            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.warnAboutMultipleReturnedValues', self.checked)
         end,
     },
     {
@@ -52,7 +52,7 @@ menus = {
         checkable = true,
         checked = true,
         callback = function(self)
-            sim.setNamedBoolParam('simCmd.stringEscapeSpecials', self.checked)
+            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.stringEscapeSpecials', self.checked)
         end,
     },
     {
@@ -61,7 +61,7 @@ menus = {
         checkable = true,
         checked = true,
         callback = function(self)
-            sim.setNamedBoolParam('simCmd.mapSortKeysByName', self.checked)
+            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.mapSortKeysByName', self.checked)
         end,
     },
     {
@@ -70,7 +70,7 @@ menus = {
         checkable = true,
         checked = true,
         callback = function(self)
-            sim.setNamedBoolParam('simCmd.mapSortKeysByType', self.checked)
+            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.mapSortKeysByType', self.checked)
         end,
     },
     {
@@ -79,7 +79,7 @@ menus = {
         checkable = true,
         checked = true,
         callback = function(self)
-            sim.setNamedBoolParam('simCmd.mapShadowLongStrings', self.checked)
+            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.mapShadowLongStrings', self.checked)
         end,
     },
     {
@@ -88,7 +88,7 @@ menus = {
         checkable = true,
         checked = true,
         callback = function(self)
-            sim.setNamedBoolParam('simCmd.mapShadowBufferStrings', self.checked)
+            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.mapShadowBufferStrings', self.checked)
         end,
     },
     {
@@ -97,7 +97,7 @@ menus = {
         checkable = true,
         checked = true,
         callback = function(self)
-            sim.setNamedBoolParam('simCmd.mapShadowSpecialStrings', self.checked)
+            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.mapShadowSpecialStrings', self.checked)
         end,
     },
     ]]--
@@ -107,7 +107,7 @@ menus = {
         checkable = true,
         checked = true,
         callback = function(self)
-            sim.setNamedBoolParam('simCmd.historySkipRepeated', self.checked)
+            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.historySkipRepeated', self.checked)
         end,
     },
     {
@@ -116,7 +116,7 @@ menus = {
         checkable = true,
         checked = true,
         callback = function(self)
-            sim.setNamedBoolParam('simCmd.historyRemoveDups', self.checked)
+            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.historyRemoveDups', self.checked)
         end,
     },
     {
@@ -125,7 +125,7 @@ menus = {
         checkable = true,
         checked = false,
         callback = function(self)
-            sim.setNamedBoolParam('simCmd.showMatchingHistory', self.checked)
+            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.showMatchingHistory', self.checked)
         end,
     },
     {
@@ -134,7 +134,7 @@ menus = {
         checkable = true,
         checked = true,
         callback = function(self)
-            sim.setNamedBoolParam('simCmd.setConvenienceVars', self.checked)
+            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.setConvenienceVars', self.checked)
         end,
     },
     {
@@ -143,7 +143,7 @@ menus = {
         checkable = true,
         checked = true,
         callback = function(self)
-            sim.setNamedBoolParam('simCmd.autoAcceptCommonCompletionPrefix', self.checked)
+            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.autoAcceptCommonCompletionPrefix', self.checked)
         end,
     },
     {
@@ -152,7 +152,7 @@ menus = {
         checkable = true,
         checked = false,
         callback = function(self)
-            sim.setNamedBoolParam('simCmd.resizeStatusbarWhenFocused', self.checked)
+            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.resizeStatusbarWhenFocused', self.checked)
         end,
     },
 }

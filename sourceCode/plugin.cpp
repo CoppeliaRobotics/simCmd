@@ -31,7 +31,7 @@ public:
 
         SIM::getInstance(); // construct SIM here (SIM thread)
 
-        if(sim::getBoolParam(sim_boolparam_headless))
+        if(sim::getIntProperty(sim_handle_app, "headlessMode"))
         {
             auto sim = SIM::getInstance();
             readline = new Readline(sim);
@@ -123,7 +123,7 @@ public:
             QString typePrefix = "";
             if(type == sim_scripttype_simulation) typePrefix = "Simulation script ";
             if(type == sim_scripttype_customization) typePrefix = "Customization script ";
-            std::string lang = sim::getScriptStringParam(scriptHandle, sim_scriptstringparam_lang);
+            std::string lang = sim::getStringProperty(scriptHandle, "language");
             return QString("%1'%2' (%3)").arg(typePrefix, name, QString::fromStdString(lang));
         };
         static bool previouslyRunning {false};
@@ -141,8 +141,8 @@ public:
             else if(scriptType == sim_scripttype_customization)
                 customizationScripts[scriptHandle] = getScriptLabel(sim_scripttype_customization, scriptHandle, name);
         }
-        bool havePython = !sim::getNamedBoolParam("pythonSandboxInitFailed").value_or(false);
-        if(sim::getStringParam(sim_stringparam_sandboxlang) == "bareLua")
+        bool havePython = !sim::getBoolProperty(sim_handle_app, "signal.pythonSandboxInitFailed");
+        if(sim::getStringProperty(sim_handle_app, "sandboxLang") == "bareLua")
             havePython = false;
         SIM::getInstance()->scriptListChanged(sandboxScript, mainScript, childScripts, customizationScripts, isRunning, isRunning ^ previouslyRunning, havePython);
         previouslyRunning = isRunning;
@@ -152,22 +152,22 @@ public:
     {
         SIM *sim = SIM::getInstance();
         sim->setResizeStatusbarWhenFocused(
-            sim::getNamedBoolParam("simCmd.resizeStatusbarWhenFocused").value_or(false)
+            *sim::getBoolProperty(sim_handle_app, "customData.simCmd.resizeStatusbarWhenFocused", false)
         );
         sim->setPreferredSandboxLang(
-            QString::fromStdString(sim::getStringParam(sim_stringparam_sandboxlang))
+            QString::fromStdString(sim::getStringProperty(sim_handle_app, "sandboxLang"))
         );
         sim->setAutoAcceptCommonCompletionPrefix(
-            sim::getNamedBoolParam("simCmd.autoAcceptCommonCompletionPrefix").value_or(true)
+            *sim::getBoolProperty(sim_handle_app, "customData.simCmd.autoAcceptCommonCompletionPrefix", true)
         );
         sim->setShowMatchingHistory(
-            sim::getNamedBoolParam("simCmd.showMatchingHistory").value_or(false)
+            *sim::getBoolProperty(sim_handle_app, "customData.simCmd.showMatchingHistory", false)
         );
     }
 
     void onInstancePass(const sim::InstancePassFlags &flags) override
     {
-        if(sim::getBoolParam(sim_boolparam_headless))
+        if(sim::getIntProperty(sim_handle_app, "headlessMode"))
         {
             // instance pass for headless here
             if(firstInstancePass)
@@ -227,7 +227,7 @@ public:
     void setSelectedScript(setSelectedScript_in *in, setSelectedScript_out *out)
     {
         QString lang = QString::fromStdString(in->lang);
-        if(sim::getBoolParam(sim_boolparam_headless))
+        if(sim::getIntProperty(sim_handle_app, "headlessMode"))
             readline->setSelectedScript(in->scriptHandle, lang);
         else
             SIM::getInstance()->setSelectedScript(in->scriptHandle, lang, false, false);

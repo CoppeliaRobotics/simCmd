@@ -144,9 +144,9 @@ void SIM::appendHistory(QString cmd)
 {
     QStringList hist = loadHistoryData();
 
-    bool historySkipRepeated = sim::getNamedBoolParam("simCmd.historySkipRepeated").value_or(true);
-    bool historyRemoveDups = sim::getNamedBoolParam("simCmd.historyRemoveDups").value_or(false);
-    int historySize = sim::getNamedInt32Param("simCmd.historySize").value_or(1000);
+    bool historySkipRepeated = *sim::getBoolProperty(sim_handle_app, "customData.simCmd.historySkipRepeated", true);
+    bool historyRemoveDups = *sim::getBoolProperty(sim_handle_app, "customData.simCmd.historyRemoveDups", false);
+    int historySize = *sim::getIntProperty(sim_handle_app, "customData.simCmd.historySize", 1000);
 
     if(!historySkipRepeated || hist.isEmpty() || hist[hist.size() - 1] != cmd)
         hist << cmd;
