@@ -141,7 +141,7 @@ public:
             else if(scriptType == sim_scripttype_customization)
                 customizationScripts[scriptHandle] = getScriptLabel(sim_scripttype_customization, scriptHandle, name);
         }
-        bool havePython = !sim::getBoolProperty(sim_handle_app, "signal.pythonSandboxInitFailed");
+        bool havePython = !*sim::getBoolProperty(sim_handle_app, "signal.pythonSandboxInitFailed", false);
         if(sim::getStringProperty(sim_handle_app, "sandboxLang") == "bareLua")
             havePython = false;
         SIM::getInstance()->scriptListChanged(sandboxScript, mainScript, childScripts, customizationScripts, isRunning, isRunning ^ previouslyRunning, havePython);
