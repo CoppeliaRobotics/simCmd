@@ -1,4 +1,6 @@
 local simCmd = loadPlugin 'simCmd';
+local sim = require 'sim-1'
+local simUI
 
 function simCmd.helpText()
     local txt = [[## Commander plugin
@@ -85,6 +87,7 @@ function simCmd.helpClose()
         ui = nil
     end
 end
+
 (require 'simCmd-typecheck')(simCmd)
 
 return simCmd
