@@ -181,7 +181,7 @@ void SIM::onExecCode(int scriptHandle, QString lang, QString code)
 
     appendHistory(code);
 
-    if(!sim::getBoolParam(sim_boolparam_headless))
+    if(!sim::getIntProperty(sim_handle_app, "headlessMode"))
         sim::addLog(sim_verbosity_msgs|sim_verbosity_undecorated, "> %s", code.toStdString());
 
     try
