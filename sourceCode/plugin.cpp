@@ -8,7 +8,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include "SIM.h"
 #include "UI.h"
-#include <simPlusPlus/Plugin.h>
+#include <simPlusPlus-2/Plugin.h>
 #include "plugin.h"
 #include "stubs.h"
 #include "config.h"
