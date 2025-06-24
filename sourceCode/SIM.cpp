@@ -1,7 +1,6 @@
 #include "SIM.h"
 #include "UI.h"
 #include "stubs.h"
-#include <simPlusPlus/Lib.h>
 #include <simStack/stackObject.h>
 #include <simStack/stackNull.h>
 #include <simStack/stackBool.h>

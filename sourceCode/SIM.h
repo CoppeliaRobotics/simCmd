@@ -2,11 +2,10 @@
 #define UIFUNCTIONS_H_INCLUDED
 
 #include "config.h"
-
 #include <QObject>
 #include <QString>
 #include <QMap>
-
+#include <simPlusPlus-2/Lib.h>
 #include "stubs.h"
 
 class SIM : public QObject

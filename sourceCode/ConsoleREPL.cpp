@@ -1,7 +1,7 @@
 #include "ConsoleREPL.h"
 #include <iostream>
 
-#include <simPlusPlus/Lib.h>
+#include <simPlusPlus-2/Lib.h>
 
 
 Readline::Readline(QObject *parent) : QThread(parent)

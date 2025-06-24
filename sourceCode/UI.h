@@ -2,15 +2,13 @@
 #define UIPROXY_H_INCLUDED
 
 #include "config.h"
-
 #include <map>
-
 #include <QObject>
 #include <QString>
 #include <QWidget>
 #include <QPlainTextEdit>
 #include <QSplitter>
-
+#include <simPlusPlus-2/Lib.h>
 #include "stubs.h"
 
 class UI : public QObject
