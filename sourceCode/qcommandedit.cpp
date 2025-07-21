@@ -398,8 +398,6 @@ void QCommandEdit::moveCursorToEnd()
 
 void QCommandEdit::onReturnPressed()
 {
-    if(text().isEmpty()) return;
-
     if(hasSelectedText())
     {
         acceptCompletion();

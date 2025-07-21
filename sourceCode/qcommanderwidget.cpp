@@ -103,9 +103,9 @@ QCommanderWidget::QCommanderWidget(QWidget *parent)
     : QWidget(parent)
 {
     statusbarSize = UI::getInstance()->getStatusbarSize();
-    const int k = 100;
-    statusbarSizeFocused.push_back(statusbarSize[0] - k);
-    statusbarSizeFocused.push_back(statusbarSize[1] + k);
+    const int k = (statusbarSize[0] + statusbarSize[1]) / 2;
+    statusbarSizeFocused.push_back(k);
+    statusbarSizeFocused.push_back(k);
 
     QGridLayout *grid = new QGridLayout(this);
     grid->setSpacing(0);
@@ -139,7 +139,7 @@ QCommanderWidget::QCommanderWidget(QWidget *parent)
     connect(editor, &QCommanderEdit::textChanged, this, &QCommanderWidget::onEditorChanged);
     connect(editor, &QCommanderEdit::cursorPositionChanged, this, &QCommanderWidget::onEditorCursorChanged);
     connect(editor, &QCommanderEdit::clearConsole, this, &QCommanderWidget::onClearConsole);
-    connect(QApplication::instance(), SIGNAL(focusChanged(QWidget*,QWidget*)), this, SLOT(onGlobalFocusChanged(QWidget*,QWidget*)));
+    connect(SIM::getInstance(), &SIM::toggleStatusbarHeight, this, &QCommanderWidget::toggleStatusbarHeight);
 }
 
 QCommanderWidget::~QCommanderWidget()
@@ -235,62 +235,29 @@ void QCommanderWidget::onClearConsole()
     sim::addLog({}, 0, {});
 }
 
-void QCommanderWidget::onFocusIn()
+bool QCommanderWidget::statusbarExpanded()
 {
-    if(resizeStatusbarWhenFocused)
-        expandStatusbar();
-}
-
-void QCommanderWidget::onFocusOut()
-{
-    if(resizeStatusbarWhenFocused)
-        contractStatusbar();
+    auto s = UI::getInstance()->getStatusbarSize();
+    int thr = 3 * (s[0] + s[1]) / 4;
+    return s[0] < thr;
 }
 
 void QCommanderWidget::expandStatusbar()
 {
-    if(!statusbarExpanded)
-    {
-        statusbarSize = UI::getInstance()->getStatusbarSize();
-        UI::getInstance()->setStatusbarSize(statusbarSizeFocused);
-        statusbarExpanded = true;
-    }
+    UI::getInstance()->setStatusbarSize(statusbarSizeFocused);
 }
 
 void QCommanderWidget::contractStatusbar()
 {
-    if(statusbarExpanded)
-    {
-        statusbarSizeFocused = UI::getInstance()->getStatusbarSize();
-        UI::getInstance()->setStatusbarSize(statusbarSize);
-        statusbarExpanded = false;
-    }
+    UI::getInstance()->setStatusbarSize(statusbarSize);
 }
 
-void QCommanderWidget::onGlobalFocusChanged(QWidget *old, QWidget *now)
+void QCommanderWidget::toggleStatusbarHeight()
 {
-    /* treat the statusbar focus as our own focus
-     * why:
-     * when resizeStatusbarWhenFocused is active, and we want to copy
-     * text from the statusbar, we don't want to resize the statusbar as if
-     * the widget has lost focus. */
-
-    sim::addLog(sim_verbosity_debug, "focusChanged: old=%s, new=%s", old ? old->metaObject()->className() : "null", now ? now->metaObject()->className() : "null");
-
-    QPlainTextEdit *statusBar = UI::getInstance()->getStatusBar();
-
-    if(old == editor && now == statusBar)
-    {
-        // do nothing
-    }
-    else if(now == editor)
-    {
-        onFocusIn();
-    }
-    else if(old == editor || old == statusBar)
-    {
-        onFocusOut();
-    }
+    if(statusbarExpanded())
+        contractStatusbar();
+    else
+        expandStatusbar();
 }
 
 void QCommanderWidget::onSetCompletion(const QStringList &comp)
@@ -377,11 +344,6 @@ void QCommanderWidget::onScriptListChanged(int sandboxScript_, int mainScript, Q
 void QCommanderWidget::setHistory(QStringList hist)
 {
     editor->setHistory(hist);
-}
-
-void QCommanderWidget::setResizeStatusbarWhenFocused(bool b)
-{
-    resizeStatusbarWhenFocused = b;
 }
 
 void QCommanderWidget::setPreferredSandboxLang(const QString &lang)

@@ -67,6 +67,7 @@ protected:
 
 public:
     void getSelectedScriptInfo(int &type, int &handle, QString &lang);
+    bool statusbarExpanded();
 
 private slots:
     void onAskCompletion(const QString &cmd, int cursorPos);
@@ -77,18 +78,15 @@ private slots:
     void onEditorChanged(QString text);
     void onEditorCursorChanged(int oldPos, int newPos);
     void onClearConsole();
-    void onFocusIn();
-    void onFocusOut();
     void expandStatusbar();
     void contractStatusbar();
-    void onGlobalFocusChanged(QWidget *old, QWidget *now);
+    void toggleStatusbarHeight();
 
 public slots:
     void onSetCompletion(const QStringList &comp);
     void onSetCallTip(const QString &tip);
     void onScriptListChanged(int sandboxScript, int mainScript, QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning, bool isRunningJustChanged, bool havePython);
     void setHistory(QStringList history);
-    void setResizeStatusbarWhenFocused(bool b);
     void setPreferredSandboxLang(const QString &lang);
     void setAutoAcceptCommonCompletionPrefix(bool b);
     void setShowMatchingHistory(bool b);
@@ -101,14 +99,12 @@ signals:
     void addLog(int verbosity, QString message);
 
 private:
-    bool resizeStatusbarWhenFocused = false;
     QString preferredSandboxLang;
     int sandboxScript = -1;
     bool havePython = false;
 
     QList<int> statusbarSize;
     QList<int> statusbarSizeFocused;
-    bool statusbarExpanded = false;
 
     friend class QGlobalEventFilter;
 };

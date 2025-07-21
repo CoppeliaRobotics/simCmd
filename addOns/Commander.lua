@@ -147,15 +147,6 @@ menus = {
             sim.setBoolProperty(sim.handle_app, 'customData.simCmd.autoAcceptCommonCompletionPrefix', self.checked)
         end,
     },
-    {
-        label = 'Resize statusbar when focused',
-        enabled = true,
-        checkable = true,
-        checked = false,
-        callback = function(self)
-            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.resizeStatusbarWhenFocused', self.checked)
-        end,
-    },
 }
 -- LuaFormatter on
 

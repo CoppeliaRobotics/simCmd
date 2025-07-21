@@ -151,9 +151,6 @@ public:
     void updateWidgetOptions()
     {
         SIM *sim = SIM::getInstance();
-        sim->setResizeStatusbarWhenFocused(
-            *sim::getBoolProperty(sim_handle_app, "customData.simCmd.resizeStatusbarWhenFocused", false)
-        );
         sim->setPreferredSandboxLang(
             QString::fromStdString(sim::getStringProperty(sim_handle_app, "sandboxLang"))
         );
@@ -196,7 +193,6 @@ public:
             QObject::connect(sim, &SIM::setCompletion, commanderWidget, &QCommanderWidget::onSetCompletion);
             QObject::connect(sim, &SIM::setCallTip, commanderWidget, &QCommanderWidget::onSetCallTip);
             QObject::connect(sim, &SIM::historyChanged, commanderWidget, &QCommanderWidget::setHistory);
-            QObject::connect(sim, &SIM::setResizeStatusbarWhenFocused, commanderWidget, &QCommanderWidget::setResizeStatusbarWhenFocused);
             QObject::connect(sim, &SIM::setPreferredSandboxLang, commanderWidget, &QCommanderWidget::setPreferredSandboxLang);
             QObject::connect(sim, &SIM::setAutoAcceptCommonCompletionPrefix, commanderWidget, &QCommanderWidget::setAutoAcceptCommonCompletionPrefix);
             QObject::connect(sim, &SIM::setShowMatchingHistory, commanderWidget, &QCommanderWidget::setShowMatchingHistory);
@@ -231,6 +227,11 @@ public:
             readline->setSelectedScript(in->scriptHandle, lang);
         else
             SIM::getInstance()->setSelectedScript(in->scriptHandle, lang, false, false);
+    }
+
+    void toggleStatusbarHeight(toggleStatusbarHeight_in *in, toggleStatusbarHeight_out *out)
+    {
+        SIM::getInstance()->toggleStatusbarHeight();
     }
 
 private:

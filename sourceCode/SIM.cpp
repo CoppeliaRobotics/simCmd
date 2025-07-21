@@ -178,6 +178,12 @@ void SIM::onExecCode(int scriptHandle, QString lang, QString code)
 {
     ASSERT_THREAD(!UI);
 
+    if(code == "")
+    {
+        SIM::getInstance()->toggleStatusbarHeight();
+        return;
+    }
+
     appendHistory(code);
 
     if(!sim::getIntProperty(sim_handle_app, "headlessMode"))

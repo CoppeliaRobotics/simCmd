@@ -33,4 +33,11 @@
         <return>
         </return>
     </command>
+    <command name="toggleStatusbarHeight">
+        <description>Change the statusbar height from expanded to contracted and vice-versa.</description>
+        <params>
+        </params>
+        <return>
+        </return>
+    </command>
 </plugin>

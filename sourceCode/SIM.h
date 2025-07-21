@@ -44,11 +44,11 @@ signals:
     void setCompletion(QStringList s);
     void setCallTip(QString s);
     void historyChanged(QStringList history);
-    void setResizeStatusbarWhenFocused(bool b);
     void setPreferredSandboxLang(QString lang);
     void setAutoAcceptCommonCompletionPrefix(bool b);
     void setShowMatchingHistory(bool b);
     void setSelectedScript(int scriptHandle, QString lang, bool silent, bool fallbackToSandbox);
+    void toggleStatusbarHeight();
 
 private:
     QMap<int, QString> execWrapper;
