@@ -234,6 +234,14 @@ public:
         SIM::getInstance()->toggleStatusbarHeight();
     }
 
+    void exec(exec_in *in, exec_out *out)
+    {
+        int sandboxScript = sim::getScriptHandleEx(sim_scripttype_sandbox, -1);
+        QString lang = QString::fromStdString(in->lang);
+        QString code = QString::fromStdString(in->code);
+        SIM::getInstance()->onExecCode(sandboxScript, lang, code);
+    }
+
 private:
     Readline *readline{nullptr};
     bool firstInstancePass = true;
