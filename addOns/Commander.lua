@@ -147,6 +147,15 @@ menus = {
             sim.setBoolProperty(sim.handle_app, 'customData.simCmd.autoAcceptCommonCompletionPrefix', self.checked)
         end,
     },
+    {
+        label = 'Show full stack traceback',
+        enabled = true,
+        checkable = true,
+        checked = false,
+        callback = function(self)
+            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.showFullStackTrace', self.checked)
+        end,
+    },
 }
 -- LuaFormatter on
 
