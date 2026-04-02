@@ -12,7 +12,7 @@ menus = {
     {
         label = 'Clear command history',
         enabled = true,
-        callback = function(self)
+        menuCallback = function(self)
             simCmd.clearHistory()
         end,
     },
@@ -34,72 +34,56 @@ menus = {
         enabled = true,
         checkable = true,
         checked = true,
-        callback = function(self)
-            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.printAllReturnedValues', self.checked)
-        end,
+        propertyName = 'customData.simCmd.printAllReturnedValues',
     },
     {
         label = 'Warn about multiple returned values',
         enabled = true,
         checkable = true,
         checked = true,
-        callback = function(self)
-            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.warnAboutMultipleReturnedValues', self.checked)
-        end,
+        propertyName = 'customData.simCmd.warnAboutMultipleReturnedValues',
     },
     {
         label = 'String rendering: escape special characters',
         enabled = true,
         checkable = true,
         checked = true,
-        callback = function(self)
-            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.stringEscapeSpecials', self.checked)
-        end,
+        propertyName = 'customData.simCmd.stringEscapeSpecials',
     },
     {
         label = 'Map/array rendering: sort keys by name',
         enabled = true,
         checkable = true,
         checked = true,
-        callback = function(self)
-            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.mapSortKeysByName', self.checked)
-        end,
+        propertyName = 'customData.simCmd.mapSortKeysByName',
     },
     {
         label = 'Map/array rendering: sort keys by type',
         enabled = true,
         checkable = true,
         checked = true,
-        callback = function(self)
-            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.mapSortKeysByType', self.checked)
-        end,
+        propertyName = 'customData.simCmd.mapSortKeysByType',
     },
     {
         label = 'Map/array rendering: shadow long strings',
         enabled = true,
         checkable = true,
         checked = true,
-        callback = function(self)
-            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.mapShadowLongStrings', self.checked)
-        end,
+        propertyName = 'customData.simCmd.mapShadowLongStrings',
     },
     {
         label = 'Map/array rendering: shadow buffer strings',
         enabled = true,
         checkable = true,
         checked = true,
-        callback = function(self)
-            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.mapShadowBufferStrings', self.checked)
-        end,
+        propertyName = 'customData.simCmd.mapShadowBufferStrings',
     },
     {
         label = 'Map/array rendering: shadow strings with special characters',
         enabled = true,
         checkable = true,
         checked = true,
-        callback = function(self)
-            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.mapShadowSpecialStrings', self.checked)
-        end,
+        propertyName = 'customData.simCmd.mapShadowSpecialStrings',
     },
     ]]--
     {
@@ -107,57 +91,48 @@ menus = {
         enabled = true,
         checkable = true,
         checked = true,
-        callback = function(self)
-            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.historySkipRepeated', self.checked)
-        end,
+        propertyName = 'customData.simCmd.historySkipRepeated',
     },
     {
         label = 'History: remove duplicates',
         enabled = true,
         checkable = true,
         checked = true,
-        callback = function(self)
-            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.historyRemoveDups', self.checked)
-        end,
+        propertyName = 'customData.simCmd.historyRemoveDups',
     },
     {
         label = 'History: show matching entries (select with UP)',
         enabled = true,
         checkable = true,
         checked = false,
-        callback = function(self)
-            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.showMatchingHistory', self.checked)
-        end,
+        propertyName = 'customData.simCmd.showMatchingHistory',
     },
     {
         label = 'Set convenience vars',
         enabled = true,
         checkable = true,
         checked = true,
-        callback = function(self)
-            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.setConvenienceVars', self.checked)
-        end,
+        propertyName = 'customData.simCmd.setConvenienceVars',
     },
     {
         label = 'Auto-accept common completion prefix',
         enabled = true,
         checkable = true,
         checked = true,
-        callback = function(self)
-            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.autoAcceptCommonCompletionPrefix', self.checked)
-        end,
+        propertyName = 'customData.simCmd.autoAcceptCommonCompletionPrefix',
     },
     {
         label = 'Show full stack traceback',
         enabled = true,
         checkable = true,
-        checked = false,
-        callback = function(self)
-            sim.setBoolProperty(sim.handle_app, 'customData.simCmd.showFullStackTrace', self.checked)
-        end,
+        checked = true,
+        propertyName = 'customData.simCmd.showFullStackTrace',
     },
 }
 -- LuaFormatter on
+
+menuByPropertyName = {}
+menuByHandle = {}
 
 function menuItemState(menu)
     local state = 0
@@ -165,12 +140,6 @@ function menuItemState(menu)
     if menu.checked then state = state + 2 end
     if menu.checkable then state = state + 4 end
     return state
-end
-
-function updateMenuItems()
-    for i, menu in ipairs(menus) do
-        if menu.handle then sim.moduleEntry(menu.handle, nil, menuItemState(menu)) end
-    end
 end
 
 function sysCall_info()
@@ -182,19 +151,50 @@ end
 function sysCall_init()
     simCmd = require 'simCmd'
     simCmd.setVisible(true)
+
+    local filterPropertyNames = {}
+
     for i, menu in ipairs(menus) do
         menu.handle = sim.moduleEntry(-1, 'Developer tools\nCommander\n' .. menu.label, menuItemState(menu))
+        menuByHandle[menu.handle] = menu
+        if menu.propertyName then
+            menuByPropertyName[menu.propertyName] = menu
+            table.insert(filterPropertyNames, menu.propertyName)
+        end
     end
+
+    sim.setEventFilters{[sim.handle_app] = filterPropertyNames}
 end
 
 function sysCall_moduleEntry(inData)
-    for i, menu in ipairs(menus) do
-        if menu.handle == inData.handle then
-            if menu.checkable then menu.checked = not menu.checked end
-            if menu.callback then menu.callback(menu) end
+    local menu = menuByHandle[inData.handle]
+    if not menu then return end
+    if menu.checkable then
+        menu.checked = not menu.checked
+        if menu.propertyName then
+            sim.setBoolProperty(sim.handle_app, menu.propertyName, menu.checked)
         end
     end
-    updateMenuItems()
+    if menu.menuCallback then
+        menu.menuCallback(menu)
+    end
+    sim.moduleEntry(menu.handle, nil, menuItemState(menu))
+end
+
+function sysCall_event(eventData)
+    local cbor = require 'simCBOR'
+    events = cbor.decode(eventData)
+    for _, e in ipairs(events) do
+        if e.handle == sim.handle_app and e.event == 'objectChanged' then
+            for k, v in pairs(e.data) do
+                local menu = menuByPropertyName[k]
+                if menu and type(v) == 'boolean' then
+                    menu.checked = v
+                    sim.moduleEntry(menu.handle, nil, menuItemState(menu))
+                end
+            end
+        end
+    end
 end
 
 function sysCall_addOnScriptSuspend()
