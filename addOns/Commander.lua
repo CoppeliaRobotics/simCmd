@@ -188,7 +188,7 @@ function sysCall_event(eventData)
         if e.handle == sim.handle_app and e.event == 'objectChanged' then
             for k, v in pairs(e.data) do
                 local menu = menuByPropertyName[k]
-                if menu and type(v) == 'boolean' then
+                if menu and menu.checkable and type(v) == 'boolean' then
                     menu.checked = v
                     sim.moduleEntry(menu.handle, nil, menuItemState(menu))
                 end
