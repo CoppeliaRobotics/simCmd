@@ -102,7 +102,6 @@ public:
     {
         if(info.event == "objectChanged" && allScripts.contains(info.handle) && data.contains("state"))
         {
-            sim::addLog(sim_verbosity_warnings, "script %d changed state to %d", info.handle, data["state"].as<int>());
             updateScriptsList();
         }
     }
