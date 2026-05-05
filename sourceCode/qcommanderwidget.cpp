@@ -123,7 +123,8 @@ QCommanderWidget::QCommanderWidget(QWidget *parent)
     editor->setPlaceholderText("Input code here, or type \"help()\" (use TAB for auto-completion)");
     editor->setFont(QFont("Courier", 12));
     scriptCombo = new QComboBox(this);
-    scriptCombo->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+    scriptCombo->setMinimumContentsLength(20);
+    scriptCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
 
 #ifdef CUSTOM_TOOLTIP_WINDOW
     grid->addWidget(calltipLabel, 0, 0);
@@ -282,7 +283,7 @@ void QCommanderWidget::onSetCallTip(const QString &tip)
 #endif // CUSTOM_TOOLTIP_WINDOW
 }
 
-void QCommanderWidget::onScriptListChanged(int sandboxScript_, int mainScript, QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning, bool isRunningJustChanged, bool havePython_)
+void QCommanderWidget::onScriptListChanged(int sandboxScript_, int mainScript, QMap<int,QString> simulationScripts, QMap<int,QString> customizationScripts, QMap<int,QString> addons, bool simRunning, bool isRunningJustChanged, bool havePython_)
 {
     havePython = havePython_;
     sandboxScript = sandboxScript_;
@@ -297,6 +298,7 @@ void QCommanderWidget::onScriptListChanged(int sandboxScript_, int mainScript, Q
     while(scriptCombo->count()) scriptCombo->removeItem(0);
 
     // populate combo box:
+    bool sep = false;
     QStringList sandboxLangs{"Lua", "Python"};
     for(int i = 0; i < 2; i++)
     {
@@ -317,14 +319,16 @@ void QCommanderWidget::onScriptListChanged(int sandboxScript_, int mainScript, Q
     {
         QVariantList data;
         data << sim_scripttype_main << mainScript << QString() << QString();
+        if(!sep) { sep = true; scriptCombo->insertSeparator(scriptCombo->count()); }
         scriptCombo->addItem("Main script", data);
     }
     if(simRunning)
     {
-        for(const auto &e : childScripts.toStdMap())
+        for(const auto &e : simulationScripts.toStdMap())
         {
             QVariantList data;
             data << sim_scripttype_simulation << e.first << e.second << QString();
+            if(!sep) { sep = true; scriptCombo->insertSeparator(scriptCombo->count()); }
             scriptCombo->addItem(e.second, data);
         }
     }
@@ -333,6 +337,24 @@ void QCommanderWidget::onScriptListChanged(int sandboxScript_, int mainScript, Q
         {
             QVariantList data;
             data << sim_scripttype_customization << e.first << e.second << QString();
+            if(!sep) { sep = true; scriptCombo->insertSeparator(scriptCombo->count()); }
+            scriptCombo->addItem(e.second, data);
+        }
+    }
+    {
+        QList<QPair<int, QString>> sortedAddons;
+        for(auto it = addons.begin(); it != addons.end(); ++it)
+            sortedAddons.append(qMakePair(it.key(), it.value()));
+        std::sort(sortedAddons.begin(), sortedAddons.end(), [](const QPair<int, QString>& a, const QPair<int, QString>& b) {
+            return a.second < b.second;
+        });
+
+        sep = false;
+        for(const auto &e : sortedAddons)
+        {
+            QVariantList data;
+            data << sim_scripttype_addon << e.first << e.second << QString();
+            if(!sep) { sep = true; scriptCombo->insertSeparator(scriptCombo->count()); }
             scriptCombo->addItem(e.second, data);
         }
     }

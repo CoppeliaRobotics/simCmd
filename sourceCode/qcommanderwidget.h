@@ -85,7 +85,7 @@ private slots:
 public slots:
     void onSetCompletion(const QStringList &comp);
     void onSetCallTip(const QString &tip);
-    void onScriptListChanged(int sandboxScript, int mainScript, QMap<int,QString> childScripts, QMap<int,QString> customizationScripts, bool simRunning, bool isRunningJustChanged, bool havePython);
+    void onScriptListChanged(int sandboxScript, int mainScript, QMap<int,QString> simulationScripts, QMap<int,QString> customizationScripts, QMap<int,QString> addons, bool simRunning, bool isRunningJustChanged, bool havePython);
     void setHistory(QStringList history);
     void setPreferredSandboxLang(const QString &lang);
     void setAutoAcceptCommonCompletionPrefix(bool b);
@@ -110,4 +110,3 @@ private:
 };
 
 #endif // QCOMMANDERWIDGET_H_INCLUDED
-
