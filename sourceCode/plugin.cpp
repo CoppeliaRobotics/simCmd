@@ -135,7 +135,7 @@ public:
         for(int scriptHandle : sim::getObjects(sim_sceneobject_script))
         {
             QString name = QString::fromStdString(sim::getObjectAlias(scriptHandle, 5));
-            int scriptType = sim::getIntProperty(scriptHandle, "scriptType");
+            int scriptType = sim::getIntProperty(scriptHandle, "type");
             if(scriptType == sim_scripttype_simulation && isRunning)
                 childScripts[scriptHandle] = getScriptLabel(sim_scripttype_simulation, scriptHandle, name);
             else if(scriptType == sim_scripttype_customization)
