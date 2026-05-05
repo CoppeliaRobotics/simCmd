@@ -6,17 +6,20 @@
 #include <boost/format.hpp>
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include "SIM.h"
-#include "UI.h"
-#include <simPlusPlus-2/Plugin.h>
-#include "plugin.h"
-#include "stubs.h"
-#include "config.h"
+#include <jsoncons/json.hpp>
 #include <QPlainTextEdit>
 #include <QVBoxLayout>
 #include <QSplitter>
+#include <simPlusPlus-2/Plugin.h>
+#include "SIM.h"
+#include "UI.h"
+#include "plugin.h"
+#include "stubs.h"
+#include "config.h"
 #include "qcommanderwidget.h"
 #include "ConsoleREPL.h"
+
+using json = jsoncons::json;
 
 class Plugin : public sim::Plugin
 {
@@ -95,6 +98,20 @@ public:
         UI_THREAD = NULL;
     }
 
+    void onEvent(const sim::EventInfo &info, const json &data) override
+    {
+        if(info.event == "objectChanged" && allScripts.contains(info.handle) && data.contains("state"))
+        {
+            sim::addLog(sim_verbosity_warnings, "script %d changed state to %d", info.handle, data["state"].as<int>());
+            updateScriptsList();
+        }
+    }
+
+    void onScriptStateAboutToBeDestroyed(int scriptHandle, long long scriptUid) override
+    {
+        updateScriptsList();
+    }
+
     void updateUI()
     {
         if(!commanderWidget) return;
@@ -117,8 +134,14 @@ public:
         }
     }
 
-    void updateScriptsList()
+    void updateScriptsList(bool immediate = false)
     {
+        if(!immediate)
+        {
+            updateScriptListPending = true;
+            return;
+        }
+
         auto getScriptLabel = [](int type, const QString &name, const QString &lang) -> QString {
             QString typePrefix = "";
             if(type == sim_scripttype_simulation) typePrefix = "Simulation script ";
@@ -128,23 +151,31 @@ public:
         static bool previouslyRunning {false};
         bool isRunning = sim::getSimulationState() == sim_simulation_advancing_running;
         int sandboxScript = sim::getScriptHandleEx(sim_scripttype_sandbox, -1);
+        allScripts.insert(sandboxScript, true);
         int mainScript = sim::getScriptHandleEx(sim_scripttype_main, -1);
+        allScripts.insert(mainScript, true);
         QMap<int, QString> simulationScripts;
         QMap<int, QString> customizationScripts;
         for(int scriptHandle : sim::getObjects(sim_sceneobject_script))
         {
             QString name = QString::fromStdString(sim::getObjectAlias(scriptHandle, 5));
             int detachedScriptHandle = sim::getHandleProperty(scriptHandle, "detachedScript");
-            int scriptType = sim::getIntProperty(detachedScriptHandle, "type");
+            allScripts.insert(detachedScriptHandle, true);
+            int state = sim::getIntProperty(detachedScriptHandle, "state");
+            if(state != sim_scriptstate_initialized) continue;
+            int type = sim::getIntProperty(detachedScriptHandle, "type");
             QString lang = QString::fromStdString(sim::getStringProperty(detachedScriptHandle, "language"));
-            if(scriptType == sim_scripttype_simulation && isRunning)
+            if(type == sim_scripttype_simulation && isRunning)
                 simulationScripts[scriptHandle] = getScriptLabel(sim_scripttype_simulation, name, lang);
-            else if(scriptType == sim_scripttype_customization)
+            else if(type == sim_scripttype_customization)
                 customizationScripts[scriptHandle] = getScriptLabel(sim_scripttype_customization, name, lang);
         }
         QMap<int, QString> addons;
         for(int addonHandle : sim::getHandleArrayProperty(sim_handle_app, "addOns"))
         {
+            allScripts.insert(addonHandle, true);
+            int state = sim::getIntProperty(addonHandle, "state");
+            if(state != sim_scriptstate_initialized) continue;
             QString name = QString::fromStdString(sim::getStringProperty(addonHandle, "addOnMenuPath"));
             QString lang = QString::fromStdString(sim::getStringProperty(addonHandle, "language"));
             addons[addonHandle] = QStringLiteral("Add-on: %1 (%2)").arg(name, lang);
@@ -210,9 +241,10 @@ public:
 
         updateWidgetOptions();
 
-        if(firstInstancePass || flags.objectsErased || flags.objectsCreated || flags.modelLoaded || flags.sceneLoaded || flags.undoCalled || flags.redoCalled || flags.sceneSwitched || flags.scriptCreated || flags.scriptErased || flags.simulationStarted || flags.simulationEnded)
+        if(updateScriptListPending || firstInstancePass || flags.objectsErased || flags.objectsCreated || flags.modelLoaded || flags.sceneLoaded || flags.undoCalled || flags.redoCalled || flags.sceneSwitched || flags.scriptCreated || flags.scriptErased || flags.simulationStarted || flags.simulationEnded)
         {
-            updateScriptsList();
+            updateScriptsList(true);
+            updateScriptListPending = false;
         }
 
         firstInstancePass = false;
@@ -258,6 +290,8 @@ private:
     QWidget *splitterChild = 0L;
     QVBoxLayout *layout = 0L;
     QCommanderWidget *commanderWidget = 0L;
+    QMap<int, bool> allScripts;
+    bool updateScriptListPending = false;
 };
 
 SIM_UI_PLUGIN(Plugin)

@@ -41,6 +41,19 @@ else()
     set(REPLXX_LIBRARY ${REPLXX_BUILD_DIR}/libreplxx.a)
 endif()
 
+include(FetchContent)
+FetchContent_Declare(jsoncons
+    GIT_REPOSITORY https://github.com/danielaparker/jsoncons
+    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/jsoncons
+)
+FetchContent_GetProperties(jsoncons)
+if(NOT jsoncons_POPULATED)
+    FetchContent_Populate(jsoncons)
+    #add_subdirectory(${jsoncons_SOURCE_DIR} ${jsoncons_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/jsoncons/include)
+add_compile_definitions(HAVE_JSONCONS)
+
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/generated)
 
 coppeliasim_generate_stubs(${CMAKE_CURRENT_BINARY_DIR}/generated XML_FILE ${CMAKE_CURRENT_SOURCE_DIR}/sourceCode/callbacks.xml LUA_FILE ${CMAKE_CURRENT_SOURCE_DIR}/lua/simCmd.lua)
