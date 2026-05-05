@@ -119,11 +119,10 @@ public:
 
     void updateScriptsList()
     {
-        auto getScriptLabel = [](int type, int scriptHandle, const QString &name) -> QString {
+        auto getScriptLabel = [](int type, const QString &name, const std::string &lang) -> QString {
             QString typePrefix = "";
             if(type == sim_scripttype_simulation) typePrefix = "Simulation script ";
             if(type == sim_scripttype_customization) typePrefix = "Customization script ";
-            std::string lang = sim::getStringProperty(scriptHandle, "language");
             return QString("%1'%2' (%3)").arg(typePrefix, name, QString::fromStdString(lang));
         };
         static bool previouslyRunning {false};
@@ -135,11 +134,13 @@ public:
         for(int scriptHandle : sim::getObjects(sim_sceneobject_script))
         {
             QString name = QString::fromStdString(sim::getObjectAlias(scriptHandle, 5));
-            int scriptType = sim::getIntProperty(scriptHandle, "type");
+            int detachedScriptHandle = sim::getHandleProperty(scriptHandle, "detachedScript");
+            int scriptType = sim::getIntProperty(detachedScriptHandle, "type");
+            std::string lang = sim::getStringProperty(detachedScriptHandle, "language");
             if(scriptType == sim_scripttype_simulation && isRunning)
-                childScripts[scriptHandle] = getScriptLabel(sim_scripttype_simulation, scriptHandle, name);
+                childScripts[scriptHandle] = getScriptLabel(sim_scripttype_simulation, name, lang);
             else if(scriptType == sim_scripttype_customization)
-                customizationScripts[scriptHandle] = getScriptLabel(sim_scripttype_customization, scriptHandle, name);
+                customizationScripts[scriptHandle] = getScriptLabel(sim_scripttype_customization, name, lang);
         }
         bool havePython = !*sim::getBoolProperty(sim_handle_app, "signal.pythonSandboxInitFailed", false);
         if(sim::getStringProperty(sim_handle_app, "sandboxLang") == "bareLua")
