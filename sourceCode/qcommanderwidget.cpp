@@ -409,6 +409,7 @@ void QCommanderWidget::setSelectedScript(int newScriptHandle, QString newLang, b
     for(int i = 0; i < scriptCombo->count(); i++)
     {
         QVariantList data = scriptCombo->itemData(i).toList();
+        if(data.isEmpty()) continue;
         int scriptHandle = data[1].toInt();
         QString lang = data[3].toString();
         if(scriptHandle == newScriptHandle && lang == newLang)
