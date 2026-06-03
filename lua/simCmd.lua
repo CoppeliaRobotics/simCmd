@@ -55,13 +55,6 @@ Some special variables are set automatically before each evaluation:
 - **H**: (function) alias for sim.getObject, e.g. H'/foo' as a shortcut for sim.getObject('/foo'); it also accepts TAB-completion.
 - **SEL**: (table) the current object selection, i.e. a list of handles.
 - **SEL1**: (int) the last selected object, i.e. the last element of SEL.
-
-
-### Misc. utility functions
-
-- **apropos**: use this to search in the API symbols (functions and constants), e.g. apropos'inertia'.
-- **printBytes**: print a binary string in hexadecimal bytes, like hexdump.
-
 ]]
     return txt
 end
@@ -73,7 +66,7 @@ function simCmd.help()
         simUI = require 'simUI'
         if not ui then
             ui = simUI.create(
-                     '<ui title="Commander Plugin" closeable="true" on-close="simCmd.helpClose" modal="true" size="440,520"><text-browser text="' ..
+                     '<ui title="Commander Plugin" closeable="true" on-close="onClose" modal="true" size="440,520"><text-browser text="' ..
                          string.gsub(simCmd.helpText(), '"', '&quot;') ..
                          '" type="markdown" /></ui>'
                  )
@@ -81,7 +74,7 @@ function simCmd.help()
     end
 end
 
-function simCmd.helpClose()
+function onClose()
     if ui then
         simUI.destroy(ui)
         ui = nil
