@@ -29,10 +29,6 @@ public:
         if(!registerScriptStuff())
             throw std::runtime_error("failed to register script stuff");
 
-        setExtVersion("Lua REPL (read-eval-print-loop) Plugin");
-        setBuildDate(BUILD_DATE);
-        sim::callMethod(sim_handle_app, "setPluginInfo", PLUGIN_NAME, std::map<std::string, std::variant<std::string, int>>{{"version", sim::pluginInfo->version}});
-
         SIM::getInstance(); // construct SIM here (SIM thread)
 
         if(sim::getIntProperty(sim_handle_app, "headlessMode"))
