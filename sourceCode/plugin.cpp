@@ -159,7 +159,7 @@ public:
             allScripts.insert(detachedScriptHandle, true);
             int state = sim::getIntProperty(detachedScriptHandle, "state");
             if(state != sim_scriptstate_initialized) continue;
-            int type = sim::getIntProperty(detachedScriptHandle, "type");
+            int type = sim::getIntProperty(detachedScriptHandle, "detachedScript.type");
             QString lang = QString::fromStdString(sim::getStringProperty(detachedScriptHandle, "language"));
             if(type == sim_scripttype_simulation && isRunning)
                 simulationScripts[scriptHandle] = getScriptLabel(sim_scripttype_simulation, name, lang);
