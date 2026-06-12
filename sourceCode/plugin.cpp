@@ -138,10 +138,8 @@ public:
             return;
         }
 
-        auto getScriptLabel = [](int type, const QString &name, const QString &lang) -> QString {
-            QString typePrefix = "";
-            if(type == sim_scripttype_simulation) typePrefix = "Simulation script ";
-            if(type == sim_scripttype_customization) typePrefix = "Customization script ";
+        auto getScriptLabel = [](const QString &type, const QString &name, const QString &lang) -> QString {
+            QString typePrefix = type.left(1).toUpper() + type.mid(1) + " script ";
             return QString("%1'%2' (%3)").arg(typePrefix, name, lang);
         };
         static bool previouslyRunning {false};
@@ -159,12 +157,12 @@ public:
             allScripts.insert(detachedScriptHandle, true);
             int state = sim::getIntProperty(detachedScriptHandle, "state");
             if(state != sim_scriptstate_initialized) continue;
-            int type = sim::getIntProperty(detachedScriptHandle, "detachedScript.type");
+            QString type = QString::fromStdString(sim::getStringProperty(detachedScriptHandle, "detachedScript.type"));
             QString lang = QString::fromStdString(sim::getStringProperty(detachedScriptHandle, "language"));
-            if(type == sim_scripttype_simulation && isRunning)
-                simulationScripts[scriptHandle] = getScriptLabel(sim_scripttype_simulation, name, lang);
-            else if(type == sim_scripttype_customization)
-                customizationScripts[scriptHandle] = getScriptLabel(sim_scripttype_customization, name, lang);
+            if(type == "simulation" && isRunning)
+                simulationScripts[scriptHandle] = getScriptLabel(type, name, lang);
+            else if(type == "customization")
+                customizationScripts[scriptHandle] = getScriptLabel(type, name, lang);
         }
         QMap<int, QString> addons;
         for(int addonHandle : sim::getHandleArrayProperty(sim_handle_app, "addOns"))
