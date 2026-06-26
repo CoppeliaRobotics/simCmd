@@ -248,6 +248,7 @@ void SIM::onAskCallTip(int scriptHandle, QString lang, QString input, int pos)
     int stackHandle = sim::createStack();
     writeToStack(input.toStdString(), stackHandle);
     writeToStack(pos, stackHandle);
+    writeToStack(scriptHandle, stackHandle);
     try
     {
         QString func = "_getCalltip";
