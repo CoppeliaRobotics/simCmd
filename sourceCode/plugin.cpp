@@ -153,12 +153,12 @@ public:
         for(int scriptHandle : sim::getObjects(sim_sceneobject_script))
         {
             QString name = QString::fromStdString(sim::getObjectAlias(scriptHandle, 5));
-            int detachedScriptHandle = sim::getHandleProperty(scriptHandle, "detachedScript");
-            allScripts.insert(detachedScriptHandle, true);
-            int state = sim::getIntProperty(detachedScriptHandle, "state");
+            int nakedScriptHandle = sim::getHandleProperty(scriptHandle, "script");
+            allScripts.insert(nakedScriptHandle, true);
+            int state = sim::getIntProperty(nakedScriptHandle, "state");
             if(state != sim_scriptstate_initialized) continue;
-            QString type = QString::fromStdString(sim::getStringProperty(detachedScriptHandle, "detachedScript.type"));
-            QString lang = QString::fromStdString(sim::getStringProperty(detachedScriptHandle, "language"));
+            QString type = QString::fromStdString(sim::getStringProperty(nakedScriptHandle, "script.type"));
+            QString lang = QString::fromStdString(sim::getStringProperty(nakedScriptHandle, "language"));
             if(type == "simulation" && isRunning)
                 simulationScripts[scriptHandle] = getScriptLabel(type, name, lang);
             else if(type == "customization")
