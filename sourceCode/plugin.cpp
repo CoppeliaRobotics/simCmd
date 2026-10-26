@@ -144,9 +144,17 @@ public:
         };
         static bool previouslyRunning {false};
         bool isRunning = sim::getSimulationState() == sim_simulation_advancing_running;
-        int sandboxScript = sim::getScriptHandleEx(sim_scripttype_sandbox, -1);
-        allScripts.insert(sandboxScript, true);
-        int mainScript = sim::getScriptHandleEx(sim_scripttype_main, -1);
+        QMap<int, QString> sandboxScripts;
+        sim::handle_t sandboxScriptLua = sim::getHandleProperty(sim_handle_app, "sandbox");
+        sandboxScripts[sandboxScriptLua] = "Sandbox (Lua)";
+        allScripts.insert(sandboxScriptLua, true);
+        sim::handle_t sandboxScriptPython = sim::getHandleProperty(sim_handle_app, "pySandbox");
+        if(sandboxScriptPython != -1)
+        {
+            sandboxScripts[sandboxScriptPython] = "Sandbox (Python)";
+            allScripts.insert(sandboxScriptPython, true);
+        }
+        sim::handle_t mainScript = sim::getHandleProperty(sim_handle_scene, "mainScript");
         allScripts.insert(mainScript, true);
         QMap<int, QString> simulationScripts;
         QMap<int, QString> customizationScripts;
@@ -174,19 +182,13 @@ public:
             QString lang = QString::fromStdString(sim::getStringProperty(addonHandle, "language"));
             addons[addonHandle] = QStringLiteral("Add-on: %1 (%2)").arg(name, lang);
         }
-        bool havePython = !*sim::getBoolProperty(sim_handle_app, "signal.pythonSandboxInitFailed", false);
-        if(sim::getStringProperty(sim_handle_app, "sandboxLang") == "bareLua")
-            havePython = false;
-        SIM::getInstance()->scriptListChanged(sandboxScript, mainScript, simulationScripts, customizationScripts, addons, isRunning, isRunning ^ previouslyRunning, havePython);
+        SIM::getInstance()->scriptListChanged(sandboxScripts, mainScript, simulationScripts, customizationScripts, addons, isRunning, isRunning ^ previouslyRunning);
         previouslyRunning = isRunning;
     }
 
     void updateWidgetOptions()
     {
         SIM *sim = SIM::getInstance();
-        sim->setPreferredSandboxLang(
-            QString::fromStdString(sim::getStringProperty(sim_handle_app, "sandboxLang"))
-        );
         sim->setAutoAcceptCommonCompletionPrefix(
             *sim::getBoolProperty(sim_handle_app, "customData.simCmd.autoAcceptCommonCompletionPrefix", true)
         );
@@ -226,7 +228,6 @@ public:
             QObject::connect(sim, &SIM::setCompletion, commanderWidget, &QCommanderWidget::onSetCompletion);
             QObject::connect(sim, &SIM::setCallTip, commanderWidget, &QCommanderWidget::onSetCallTip);
             QObject::connect(sim, &SIM::historyChanged, commanderWidget, &QCommanderWidget::setHistory);
-            QObject::connect(sim, &SIM::setPreferredSandboxLang, commanderWidget, &QCommanderWidget::setPreferredSandboxLang);
             QObject::connect(sim, &SIM::setAutoAcceptCommonCompletionPrefix, commanderWidget, &QCommanderWidget::setAutoAcceptCommonCompletionPrefix);
             QObject::connect(sim, &SIM::setShowMatchingHistory, commanderWidget, &QCommanderWidget::setShowMatchingHistory);
             QObject::connect(sim, &SIM::setSelectedScript, commanderWidget, &QCommanderWidget::setSelectedScript);
@@ -256,11 +257,10 @@ public:
 
     void setSelectedScript(setSelectedScript_in *in, setSelectedScript_out *out)
     {
-        QString lang = QString::fromStdString(in->lang);
         if(sim::getIntProperty(sim_handle_app, "headlessMode"))
-            readline->setSelectedScript(in->scriptHandle, lang);
+            readline->setSelectedScript(in->scriptHandle);
         else
-            SIM::getInstance()->setSelectedScript(in->scriptHandle, lang, false, false);
+            SIM::getInstance()->setSelectedScript(in->scriptHandle, false, false);
     }
 
     void toggleStatusbarHeight(toggleStatusbarHeight_in *in, toggleStatusbarHeight_out *out)
@@ -271,9 +271,8 @@ public:
     void exec(exec_in *in, exec_out *out)
     {
         int sandboxScript = sim::getScriptHandleEx(sim_scripttype_sandbox, -1);
-        QString lang = QString::fromStdString(in->lang);
         QString code = QString::fromStdString(in->code);
-        SIM::getInstance()->onExecCode(sandboxScript, lang, code);
+        SIM::getInstance()->onExecCode(sandboxScript, code);
     }
 
 private:

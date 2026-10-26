@@ -34,20 +34,19 @@ private:
 
 public slots:
     void addLog(int verbosity, QString message);
-    void onExecCode(int scriptHandle, QString lang, QString code);
-    void onAskCompletion(int scriptHandle, QString lang, QString input, int pos, QStringList *clout);
-    void onAskCallTip(int scriptHandle, QString lang, QString input, int pos);
+    void onExecCode(int scriptHandle, QString code);
+    void onAskCompletion(int scriptHandle, QString input, int pos, QStringList *clout);
+    void onAskCallTip(int scriptHandle, QString input, int pos);
 
 signals:
     void setVisible(bool visible);
-    void scriptListChanged(int sandboxScript, int mainScript, QMap<int,QString> simulationScripts, QMap<int,QString> customizationScripts, QMap<int,QString> addons, bool simRunning, bool isRunningJustChanged, bool havePython);
+    void scriptListChanged(QMap<int,QString> sandboxScripts, int mainScript, QMap<int,QString> simulationScripts, QMap<int,QString> customizationScripts, QMap<int,QString> addons, bool simRunning, bool isRunningJustChanged);
     void setCompletion(QStringList s);
     void setCallTip(QString s);
     void historyChanged(QStringList history);
-    void setPreferredSandboxLang(QString lang);
     void setAutoAcceptCommonCompletionPrefix(bool b);
     void setShowMatchingHistory(bool b);
-    void setSelectedScript(int scriptHandle, QString lang, bool silent, bool fallbackToSandbox);
+    void setSelectedScript(int scriptHandle, bool silent, bool fallbackToSandbox);
     void toggleStatusbarHeight();
 
 private:

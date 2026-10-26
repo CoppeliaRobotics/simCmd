@@ -26,9 +26,6 @@
             <param name="scriptHandle" type="int">
                 <description>handle of the script</description>
             </param>
-            <param name="lang" type="string" default='""'>
-                <description>language (only applies to sandbox)</description>
-            </param>
         </params>
         <return>
         </return>
@@ -43,9 +40,6 @@
     <command name="exec">
         <description>Input and execute code, as if it was input manually.</description>
         <params>
-            <param name="lang" type="string">
-                <description>sandbox language</description>
-            </param>
             <param name="code" type="string">
                 <description>code</description>
             </param>

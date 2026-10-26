@@ -17,17 +17,13 @@ public:
     Replxx::completions_t hook_completion(const std::string &context, int &contextLen);
 
 public slots:
-    void setSelectedScript(int scriptHandle, QString lang);
+    void setSelectedScript(int scriptHandle);
 
 signals:
-    void execCode(int scriptHandle, QString langSuffix, QString code);
-    void askCompletion(int scriptHandle, QString langSuffix, QString input, int pos, QStringList *cl);
+    void execCode(int scriptHandle, QString code);
+    void askCompletion(int scriptHandle, QString input, int pos, QStringList *cl);
 
 private:
     Replxx rx;
-    int sandboxScript;
-    QString preferredSandboxLang;
     int scriptHandle;
-    QString lang;
-    bool havePython;
 };

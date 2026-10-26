@@ -66,7 +66,7 @@ protected:
     QLabel *calltipLabel;
 
 public:
-    void getSelectedScriptInfo(int &type, int &handle, QString &lang);
+    void getSelectedScriptInfo(int &type, int &handle);
     bool statusbarExpanded();
 
 private slots:
@@ -85,24 +85,19 @@ private slots:
 public slots:
     void onSetCompletion(const QStringList &comp);
     void onSetCallTip(const QString &tip);
-    void onScriptListChanged(int sandboxScript, int mainScript, QMap<int,QString> simulationScripts, QMap<int,QString> customizationScripts, QMap<int,QString> addons, bool simRunning, bool isRunningJustChanged, bool havePython);
+    void onScriptListChanged(QMap<int,QString> sandboxScripts, int mainScript, QMap<int,QString> simulationScripts, QMap<int,QString> customizationScripts, QMap<int,QString> addons, bool simRunning, bool isRunningJustChanged);
     void setHistory(QStringList history);
-    void setPreferredSandboxLang(const QString &lang);
     void setAutoAcceptCommonCompletionPrefix(bool b);
     void setShowMatchingHistory(bool b);
-    void setSelectedScript(int scriptHandle, QString lang, bool silent, bool fallbackToSandbox);
+    void setSelectedScript(int scriptHandle, bool silent, bool fallbackToSandbox);
 
 signals:
-    void askCompletion(int scriptHandle, QString langSuffix, QString input, int pos, QStringList *clout);
-    void askCallTip(int scriptHandle, QString langSuffix, QString input, int pos);
-    void execCode(int scriptHandle, QString langSuffix, QString code);
+    void askCompletion(int scriptHandle, QString input, int pos, QStringList *clout);
+    void askCallTip(int scriptHandle, QString input, int pos);
+    void execCode(int scriptHandle, QString code);
     void addLog(int verbosity, QString message);
 
 private:
-    QString preferredSandboxLang;
-    int sandboxScript = -1;
-    bool havePython = false;
-
     QList<int> statusbarSize;
     QList<int> statusbarSizeFocused;
 
