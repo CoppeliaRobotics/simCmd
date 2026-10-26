@@ -37,10 +37,11 @@ public slots:
     void onExecCode(int scriptHandle, QString code);
     void onAskCompletion(int scriptHandle, QString input, int pos, QStringList *clout);
     void onAskCallTip(int scriptHandle, QString input, int pos);
+    void onCurrentScriptChanged(int scriptHandle);
 
 signals:
     void setVisible(bool visible);
-    void scriptListChanged(QMap<int,QString> sandboxScripts, int mainScript, QMap<int,QString> simulationScripts, QMap<int,QString> customizationScripts, QMap<int,QString> addons, bool simRunning, bool isRunningJustChanged);
+    void scriptListChanged(QMap<int,QString> sandboxScripts, QMap<int,QString> sandboxLang, const QString &preferredSandboxLang, int mainScript, QMap<int,QString> simulationScripts, QMap<int,QString> customizationScripts, QMap<int,QString> addons, bool simRunning, bool isRunningJustChanged);
     void setCompletion(QStringList s);
     void setCallTip(QString s);
     void historyChanged(QStringList history);

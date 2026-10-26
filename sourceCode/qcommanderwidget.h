@@ -85,7 +85,7 @@ private slots:
 public slots:
     void onSetCompletion(const QStringList &comp);
     void onSetCallTip(const QString &tip);
-    void onScriptListChanged(QMap<int,QString> sandboxScripts, int mainScript, QMap<int,QString> simulationScripts, QMap<int,QString> customizationScripts, QMap<int,QString> addons, bool simRunning, bool isRunningJustChanged);
+    void onScriptListChanged(QMap<int,QString> sandboxScripts, QMap<int,QString> sandboxLang, const QString &preferredSandboxLang, int mainScript, QMap<int,QString> simulationScripts, QMap<int,QString> customizationScripts, QMap<int,QString> addons, bool simRunning, bool isRunningJustChanged);
     void setHistory(QStringList history);
     void setAutoAcceptCommonCompletionPrefix(bool b);
     void setShowMatchingHistory(bool b);
@@ -96,8 +96,10 @@ signals:
     void askCallTip(int scriptHandle, QString input, int pos);
     void execCode(int scriptHandle, QString code);
     void addLog(int verbosity, QString message);
+    void currentScriptChanged(int scriptHandle);
 
 private:
+    QMap<int,QString> sandboxScripts;
     QList<int> statusbarSize;
     QList<int> statusbarSizeFocused;
 

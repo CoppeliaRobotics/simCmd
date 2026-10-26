@@ -256,3 +256,13 @@ void SIM::onAskCallTip(int scriptHandle, QString input, int pos)
     catch(sim::exception &ex) {}
     sim::releaseStack(stackHandle);
 }
+
+void SIM::onCurrentScriptChanged(int scriptHandle)
+{
+    auto type = sim::getStringProperty(scriptHandle, "script.type");
+    if(type == "sandbox")
+    {
+        auto lang = sim::getStringProperty(scriptHandle, "language");
+        sim::setStringProperty(sim_handle_app, "customData.simCmd.sandboxLang", lang);
+    }
+}

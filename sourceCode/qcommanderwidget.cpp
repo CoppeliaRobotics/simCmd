@@ -141,6 +141,11 @@ QCommanderWidget::QCommanderWidget(QWidget *parent)
     connect(editor, &QCommanderEdit::cursorPositionChanged, this, &QCommanderWidget::onEditorCursorChanged);
     connect(editor, &QCommanderEdit::clearConsole, this, &QCommanderWidget::onClearConsole);
     connect(SIM::getInstance(), &SIM::toggleStatusbarHeight, this, &QCommanderWidget::toggleStatusbarHeight);
+    connect(scriptCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=] (int) {
+        int type, handle;
+        getSelectedScriptInfo(type, handle);
+        emit currentScriptChanged(handle);
+    });
 }
 
 QCommanderWidget::~QCommanderWidget()
@@ -266,8 +271,10 @@ void QCommanderWidget::onSetCallTip(const QString &tip)
 #endif // CUSTOM_TOOLTIP_WINDOW
 }
 
-void QCommanderWidget::onScriptListChanged(QMap<int,QString> sandboxScripts, int mainScript, QMap<int,QString> simulationScripts, QMap<int,QString> customizationScripts, QMap<int,QString> addons, bool simRunning, bool isRunningJustChanged)
+void QCommanderWidget::onScriptListChanged(QMap<int,QString> sandboxScripts, QMap<int,QString> sandboxLang, const QString &preferredSandboxLang, int mainScript, QMap<int,QString> simulationScripts, QMap<int,QString> customizationScripts, QMap<int,QString> addons, bool simRunning, bool isRunningJustChanged)
 {
+    this->sandboxScripts = sandboxScripts;
+
     // save current selection:
     int oldScriptType;
     int oldScriptHandle;
@@ -282,9 +289,9 @@ void QCommanderWidget::onScriptListChanged(QMap<int,QString> sandboxScripts, int
     {
         for(const auto &e : sandboxScripts.toStdMap())
         {
-            if(oldScriptHandle == -1)
+            if(oldScriptHandle == -1 && sandboxLang[e.first] == preferredSandboxLang)
             {
-                // start with the first sandbox script selected
+                // start with the preferred-lang sandbox script selected
                 oldScriptHandle = e.first;
             }
 
