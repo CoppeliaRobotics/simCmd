@@ -10,7 +10,6 @@
 #include <QLabel>
 #include <QStandardItem>
 #include <QStandardItemModel>
-#include <QDebug>
 
 #ifdef Q_OS_MACOS
 #define Q_REAL_CTRL Qt::MetaModifier
@@ -144,7 +143,6 @@ QCommanderWidget::QCommanderWidget(QWidget *parent)
     connect(SIM::getInstance(), &SIM::toggleStatusbarHeight, this, &QCommanderWidget::toggleStatusbarHeight);
     connect(scriptCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=] (int) {
         sim::handle_t scriptHandle = getSelectedScriptHandle();
-        qDebug() << "emitting currentScriptChanged" << scriptHandle;
         emit currentScriptChanged(scriptHandle);
     });
 }
@@ -271,13 +269,6 @@ void QCommanderWidget::onScriptListChanged(HandleStringMap sandboxScripts, Handl
         // clear cxombo box:
         while(scriptCombo->count()) scriptCombo->removeItem(0);
 
-        qDebug() << "---- onScriptListChanged begin";
-        auto scriptComboAddItem = [=] (const QString &label, sim::handle_t scriptHandle)
-        {
-            qDebug() << "---- ---- scriptCombo->addItem" << scriptHandle << label;
-            scriptCombo->addItem(label, scriptHandle);
-        };
-
         // populate combo box:
         bool sep = false;
         if(true)
@@ -291,13 +282,13 @@ void QCommanderWidget::onScriptListChanged(HandleStringMap sandboxScripts, Handl
                 if(oldScriptHandle == -1 && sandboxLang[scriptHandle] == preferredSandboxLang)
                     oldScriptHandle = scriptHandle;
 
-                scriptComboAddItem(label, scriptHandle);
+                scriptCombo->addItem(label, scriptHandle);
             }
         }
         if(simRunning)
         {
             if(!sep) { sep = true; scriptCombo->insertSeparator(scriptCombo->count()); }
-            scriptComboAddItem("Main script", mainScript);
+            scriptCombo->addItem("Main script", mainScript);
         }
         if(simRunning)
         {
@@ -306,7 +297,7 @@ void QCommanderWidget::onScriptListChanged(HandleStringMap sandboxScripts, Handl
                 sim::handle_t scriptHandle = e.first;
                 QString label = e.second;
                 if(!sep) { sep = true; scriptCombo->insertSeparator(scriptCombo->count()); }
-                scriptComboAddItem(label, scriptHandle);
+                scriptCombo->addItem(label, scriptHandle);
             }
         }
         {
@@ -315,7 +306,7 @@ void QCommanderWidget::onScriptListChanged(HandleStringMap sandboxScripts, Handl
                 sim::handle_t scriptHandle = e.first;
                 QString label = e.second;
                 if(!sep) { sep = true; scriptCombo->insertSeparator(scriptCombo->count()); }
-                scriptComboAddItem(label, scriptHandle);
+                scriptCombo->addItem(label, scriptHandle);
             }
         }
         {
@@ -332,10 +323,9 @@ void QCommanderWidget::onScriptListChanged(HandleStringMap sandboxScripts, Handl
                 sim::handle_t scriptHandle = e.first;
                 QString label = e.second;
                 if(!sep) { sep = true; scriptCombo->insertSeparator(scriptCombo->count()); }
-                scriptComboAddItem(label, scriptHandle);
+                scriptCombo->addItem(label, scriptHandle);
             }
         }
-        qDebug() << "---- onScriptListChanged end";
     }
 
     // restore selection:
