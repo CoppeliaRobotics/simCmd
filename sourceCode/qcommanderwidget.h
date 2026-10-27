@@ -92,6 +92,7 @@ public slots:
     void setAutoAcceptCommonCompletionPrefix(bool b);
     void setShowMatchingHistory(bool b);
     void setSelectedScript(sim::handle_t scriptHandle, bool silent, bool fallbackToSandbox);
+    void selectPreviousOrNextScript(int delta);
 
 signals:
     void askCompletion(sim::handle_t scriptHandle, QString input, int pos, QStringList *clout);

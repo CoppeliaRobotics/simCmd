@@ -29,11 +29,21 @@ bool QGlobalEventFilter::eventFilter(QObject *object, QEvent *event)
     if(event->type() == QEvent::KeyPress)
     {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-        if(keyEvent->key() == Qt::Key_C && keyEvent->modifiers().testFlag(Q_REAL_CTRL) && keyEvent->modifiers().testFlag(Qt::AltModifier))
+        if(keyEvent->modifiers().testFlag(Q_REAL_CTRL) && keyEvent->modifiers().testFlag(Qt::AltModifier))
         {
-            if(widget_->isVisible())
-                widget_->setFocus();
-            return true;
+            switch(keyEvent->key())
+            {
+            case Qt::Key_C:
+                if(widget_->isVisible())
+                    widget_->setFocus();
+                return true;
+            case Qt::Key_Up:
+                commander_->selectPreviousOrNextScript(-1);
+                return true;
+            case Qt::Key_Down:
+                commander_->selectPreviousOrNextScript(1);
+                return true;
+            }
         }
     }
     return QObject::eventFilter(object, event);
@@ -369,4 +379,30 @@ void QCommanderWidget::setSelectedScript(sim::handle_t newScriptHandle, bool sil
 
     if(!found && fallbackToSandbox)
         setSelectedScript(-1, true, false);
+}
+
+void QCommanderWidget::selectPreviousOrNextScript(int delta)
+{
+    const int count = scriptCombo->count();
+    if(count == 0 || delta == 0)
+        return;
+
+    const int dir = (delta > 0) ? 1 : -1;
+
+    int index = scriptCombo->currentIndex();
+    if(index < 0)
+        index = (dir > 0) ? -1 : count;
+
+    const QAbstractItemModel *model = scriptCombo->model();
+    const int column = scriptCombo->modelColumn();
+    const QModelIndex root = scriptCombo->rootModelIndex();
+
+    for(int step = 0; step < count; ++step)
+    {
+        index = (index + dir + count) % count;
+        const QModelIndex mi = model->index(index, column, root);
+        if(model->flags(mi) & Qt::ItemIsSelectable)
+            break;
+    }
+    scriptCombo->setCurrentIndex(index);
 }
