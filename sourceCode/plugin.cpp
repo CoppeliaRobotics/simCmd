@@ -157,7 +157,7 @@ public:
         static bool previouslyRunning {false};
         bool isRunning = sim::getSimulationState() == sim_simulation_advancing_running;
         QMap<int, QString> sandboxScripts, sandboxLang;
-        for(auto n : std::vector<std::string>{"sandbox", "pySandbox"})
+        for(auto n : std::vector<std::string>{"sandboxLua", "sandboxPython"})
         {
             sim::handle_t sandboxScript = sim::getHandleProperty(sim_handle_app, n);
             if(sandboxScript == -1) continue;
