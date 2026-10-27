@@ -10,6 +10,7 @@
 #include <QLabel>
 #include <QStandardItem>
 #include <QStandardItemModel>
+#include <QDebug>
 
 #ifdef Q_OS_MACOS
 #define Q_REAL_CTRL Qt::MetaModifier
@@ -142,9 +143,9 @@ QCommanderWidget::QCommanderWidget(QWidget *parent)
     connect(editor, &QCommanderEdit::clearConsole, this, &QCommanderWidget::onClearConsole);
     connect(SIM::getInstance(), &SIM::toggleStatusbarHeight, this, &QCommanderWidget::toggleStatusbarHeight);
     connect(scriptCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=] (int) {
-        int type, handle;
-        getSelectedScriptInfo(type, handle);
-        emit currentScriptChanged(handle);
+        sim::handle_t scriptHandle = getSelectedScriptHandle();
+        qDebug() << "emitting currentScriptChanged" << scriptHandle;
+        emit currentScriptChanged(scriptHandle);
     });
 }
 
@@ -152,43 +153,29 @@ QCommanderWidget::~QCommanderWidget()
 {
 }
 
-void QCommanderWidget::getSelectedScriptInfo(int &type, int &handle)
+sim::handle_t QCommanderWidget::getSelectedScriptHandle()
 {
-    type = -1;
-    handle = -1;
-
-    if(scriptCombo->currentIndex() >= 0)
-    {
-        QVariantList data = scriptCombo->itemData(scriptCombo->currentIndex()).toList();
-        type = data[0].toInt();
-        handle = data[1].toInt();
-    }
+    int idx = scriptCombo->currentIndex();
+    return idx >= 0 ? scriptCombo->itemData(idx).toLongLong() : -1;
 }
 
 void QCommanderWidget::onAskCompletion(const QString &cmd, int cursorPos)
 {
-    int scriptType;
-    int scriptHandle;
-    getSelectedScriptInfo(scriptType, scriptHandle);
+    sim::handle_t scriptHandle = getSelectedScriptHandle();
     if(scriptHandle != -1)
         emit askCompletion(scriptHandle, cmd, cursorPos, nullptr);
 }
 
 void QCommanderWidget::onAskCallTip(QString input, int pos)
 {
-    int scriptType;
-    int scriptHandle;
-    getSelectedScriptInfo(scriptType, scriptHandle);
+    sim::handle_t scriptHandle = getSelectedScriptHandle();
     if(scriptHandle != -1)
         emit askCallTip(scriptHandle, input, pos);
 }
 
 void QCommanderWidget::onExecute(const QString &cmd)
 {
-    int scriptType;
-    int scriptHandle;
-    QString lang;
-    getSelectedScriptInfo(scriptType, scriptHandle);
+    sim::handle_t scriptHandle = getSelectedScriptHandle();
 
     if(scriptHandle != -1)
         emit execCode(scriptHandle, cmd);
@@ -271,77 +258,84 @@ void QCommanderWidget::onSetCallTip(const QString &tip)
 #endif // CUSTOM_TOOLTIP_WINDOW
 }
 
-void QCommanderWidget::onScriptListChanged(QMap<int,QString> sandboxScripts, QMap<int,QString> sandboxLang, const QString &preferredSandboxLang, int mainScript, QMap<int,QString> simulationScripts, QMap<int,QString> customizationScripts, QMap<int,QString> addons, bool simRunning, bool isRunningJustChanged)
+void QCommanderWidget::onScriptListChanged(HandleStringMap sandboxScripts, HandleStringMap sandboxLang, const QString &preferredSandboxLang, sim::handle_t mainScript, HandleStringMap simulationScripts, HandleStringMap customizationScripts, HandleStringMap addons, bool simRunning, bool isRunningJustChanged)
 {
     this->sandboxScripts = sandboxScripts;
 
     // save current selection:
-    int oldScriptType;
-    int oldScriptHandle;
-    getSelectedScriptInfo(oldScriptType, oldScriptHandle);
+    sim::handle_t oldScriptHandle = getSelectedScriptHandle();
 
-    // clear cxombo box:
-    while(scriptCombo->count()) scriptCombo->removeItem(0);
-
-    // populate combo box:
-    bool sep = false;
-    if(true)
     {
-        for(const auto &e : sandboxScripts.toStdMap())
+        const QSignalBlocker blocker(scriptCombo);
+
+        // clear cxombo box:
+        while(scriptCombo->count()) scriptCombo->removeItem(0);
+
+        qDebug() << "---- onScriptListChanged begin";
+        auto scriptComboAddItem = [=] (const QString &label, sim::handle_t scriptHandle)
         {
-            if(oldScriptHandle == -1 && sandboxLang[e.first] == preferredSandboxLang)
+            qDebug() << "---- ---- scriptCombo->addItem" << scriptHandle << label;
+            scriptCombo->addItem(label, scriptHandle);
+        };
+
+        // populate combo box:
+        bool sep = false;
+        if(true)
+        {
+            for(const auto &e : sandboxScripts.toStdMap())
             {
+                sim::handle_t scriptHandle = e.first;
+                QString label = e.second;
+
                 // start with the preferred-lang sandbox script selected
-                oldScriptHandle = e.first;
+                if(oldScriptHandle == -1 && sandboxLang[scriptHandle] == preferredSandboxLang)
+                    oldScriptHandle = scriptHandle;
+
+                scriptComboAddItem(label, scriptHandle);
             }
+        }
+        if(simRunning)
+        {
+            if(!sep) { sep = true; scriptCombo->insertSeparator(scriptCombo->count()); }
+            scriptComboAddItem("Main script", mainScript);
+        }
+        if(simRunning)
+        {
+            for(const auto &e : simulationScripts.toStdMap())
+            {
+                sim::handle_t scriptHandle = e.first;
+                QString label = e.second;
+                if(!sep) { sep = true; scriptCombo->insertSeparator(scriptCombo->count()); }
+                scriptComboAddItem(label, scriptHandle);
+            }
+        }
+        {
+            for(const auto &e : customizationScripts.toStdMap())
+            {
+                sim::handle_t scriptHandle = e.first;
+                QString label = e.second;
+                if(!sep) { sep = true; scriptCombo->insertSeparator(scriptCombo->count()); }
+                scriptComboAddItem(label, scriptHandle);
+            }
+        }
+        {
+            QList<QPair<sim::handle_t, QString>> sortedAddons;
+            for(auto it = addons.begin(); it != addons.end(); ++it)
+                sortedAddons.append(qMakePair(it.key(), it.value()));
+            std::sort(sortedAddons.begin(), sortedAddons.end(), [](const QPair<sim::handle_t, QString>& a, const QPair<sim::handle_t, QString>& b) {
+                return a.second < b.second;
+            });
 
-            QVariantList data;
-            data << sim_scripttype_sandbox << e.first << e.second;
-            scriptCombo->addItem(e.second, data);
+            sep = false;
+            for(const auto &e : sortedAddons)
+            {
+                sim::handle_t scriptHandle = e.first;
+                QString label = e.second;
+                if(!sep) { sep = true; scriptCombo->insertSeparator(scriptCombo->count()); }
+                scriptComboAddItem(label, scriptHandle);
+            }
         }
-    }
-    if(simRunning)
-    {
-        QVariantList data;
-        data << sim_scripttype_main << mainScript << QString();
-        if(!sep) { sep = true; scriptCombo->insertSeparator(scriptCombo->count()); }
-        scriptCombo->addItem("Main script", data);
-    }
-    if(simRunning)
-    {
-        for(const auto &e : simulationScripts.toStdMap())
-        {
-            QVariantList data;
-            data << sim_scripttype_simulation << e.first << e.second;
-            if(!sep) { sep = true; scriptCombo->insertSeparator(scriptCombo->count()); }
-            scriptCombo->addItem(e.second, data);
-        }
-    }
-    {
-        for(const auto &e : customizationScripts.toStdMap())
-        {
-            QVariantList data;
-            data << sim_scripttype_customization << e.first << e.second;
-            if(!sep) { sep = true; scriptCombo->insertSeparator(scriptCombo->count()); }
-            scriptCombo->addItem(e.second, data);
-        }
-    }
-    {
-        QList<QPair<int, QString>> sortedAddons;
-        for(auto it = addons.begin(); it != addons.end(); ++it)
-            sortedAddons.append(qMakePair(it.key(), it.value()));
-        std::sort(sortedAddons.begin(), sortedAddons.end(), [](const QPair<int, QString>& a, const QPair<int, QString>& b) {
-            return a.second < b.second;
-        });
-
-        sep = false;
-        for(const auto &e : sortedAddons)
-        {
-            QVariantList data;
-            data << sim_scripttype_addon << e.first << e.second;
-            if(!sep) { sep = true; scriptCombo->insertSeparator(scriptCombo->count()); }
-            scriptCombo->addItem(e.second, data);
-        }
+        qDebug() << "---- onScriptListChanged end";
     }
 
     // restore selection:
@@ -363,15 +357,13 @@ void QCommanderWidget::setShowMatchingHistory(bool b)
     editor->setShowMatchingHistory(b);
 }
 
-void QCommanderWidget::setSelectedScript(int newScriptHandle, bool silent, bool fallbackToSandbox)
+void QCommanderWidget::setSelectedScript(sim::handle_t newScriptHandle, bool silent, bool fallbackToSandbox)
 {
     int index = -1;
     bool found = false;
     for(int i = 0; i < scriptCombo->count(); i++)
     {
-        QVariantList data = scriptCombo->itemData(i).toList();
-        if(data.isEmpty()) continue;
-        int scriptHandle = data[1].toInt();
+        sim::handle_t scriptHandle = scriptCombo->itemData(i).toLongLong();
         if(scriptHandle == newScriptHandle)
         {
             index = i;

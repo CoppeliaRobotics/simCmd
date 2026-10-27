@@ -7,6 +7,8 @@
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <jsoncons/json.hpp>
+#include <QString>
+#include <QMetaType>
 #include <QPlainTextEdit>
 #include <QVBoxLayout>
 #include <QSplitter>
@@ -18,6 +20,10 @@
 #include "config.h"
 #include "qcommanderwidget.h"
 #include "ConsoleREPL.h"
+#include "common.h"
+
+Q_DECLARE_METATYPE(sim::handle_t)
+Q_DECLARE_METATYPE(HandleStringMap)
 
 using json = jsoncons::json;
 
@@ -103,7 +109,7 @@ public:
         }
     }
 
-    void onScriptStateAboutToBeDestroyed(int scriptHandle, long long scriptUid) override
+    void onScriptStateAboutToBeDestroyed(sim::handle_t scriptHandle, long long scriptUid) override
     {
         updateScriptsList();
     }
@@ -156,7 +162,7 @@ public:
         };
         static bool previouslyRunning {false};
         bool isRunning = sim::getSimulationState() == sim_simulation_advancing_running;
-        QMap<int, QString> sandboxScripts, sandboxLang;
+        QMap<sim::handle_t, QString> sandboxScripts, sandboxLang;
         for(auto n : std::vector<std::string>{"sandboxLua", "sandboxPython"})
         {
             sim::handle_t sandboxScript = sim::getHandleProperty(sim_handle_app, n);
@@ -167,12 +173,12 @@ public:
         }
         sim::handle_t mainScript = sim::getHandleProperty(sim_handle_scene, "mainScript");
         allScripts.insert(mainScript, true);
-        QMap<int, QString> simulationScripts;
-        QMap<int, QString> customizationScripts;
-        for(int scriptHandle : sim::getObjects(sim_sceneobject_script))
+        QMap<sim::handle_t, QString> simulationScripts;
+        QMap<sim::handle_t, QString> customizationScripts;
+        for(sim::handle_t scriptHandle : sim::getObjects(sim_sceneobject_script))
         {
             QString name = QString::fromStdString(sim::getObjectAlias(scriptHandle, 5));
-            int nakedScriptHandle = sim::getHandleProperty(scriptHandle, "script");
+            sim::handle_t nakedScriptHandle = sim::getHandleProperty(scriptHandle, "script");
             allScripts.insert(nakedScriptHandle, true);
             int state = sim::getIntProperty(nakedScriptHandle, "script.state");
             if(state != sim_scriptstate_initialized) continue;
@@ -182,8 +188,8 @@ public:
             else if(type == "customization")
                 customizationScripts[scriptHandle] = getScriptLabel(scriptHandle, name);
         }
-        QMap<int, QString> addons;
-        for(int addonHandle : sim::getHandleArrayProperty(sim_handle_app, "addOns"))
+        QMap<sim::handle_t, QString> addons;
+        for(sim::handle_t addonHandle : sim::getHandleArrayProperty(sim_handle_app, "addOns"))
         {
             allScripts.insert(addonHandle, true);
             int state = sim::getIntProperty(addonHandle, "state");
@@ -226,7 +232,8 @@ public:
 
         if(firstInstancePass)
         {
-            int id = qRegisterMetaType< QMap<int,QString> >();
+            qRegisterMetaType<sim::handle_t>("sim::handle_t");
+            qRegisterMetaType<HandleStringMap>("HandleStringMap");
 
             SIM *sim = SIM::getInstance();
             QObject::connect(commanderWidget, &QCommanderWidget::execCode, sim, &SIM::onExecCode);
@@ -281,7 +288,7 @@ public:
 
     void exec(exec_in *in, exec_out *out)
     {
-        int sandboxScript = sim::getScriptHandleEx(sim_scripttype_sandbox, -1);
+        sim::handle_t sandboxScript = sim::getScriptHandleEx(sim_scripttype_sandbox, -1);
         QString code = QString::fromStdString(in->code);
         SIM::getInstance()->onExecCode(sandboxScript, code);
     }
@@ -294,7 +301,7 @@ private:
     QWidget *splitterChild = 0L;
     QVBoxLayout *layout = 0L;
     QCommanderWidget *commanderWidget = 0L;
-    QMap<int, bool> allScripts;
+    QMap<sim::handle_t, bool> allScripts;
     bool updateScriptListPending = false;
 };
 

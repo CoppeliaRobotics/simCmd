@@ -7,6 +7,7 @@
 #include <QMap>
 #include <simPlusPlus-2/Lib.h>
 #include "stubs.h"
+#include "common.h"
 
 class SIM : public QObject
 {
@@ -34,24 +35,24 @@ private:
 
 public slots:
     void addLog(int verbosity, QString message);
-    void onExecCode(int scriptHandle, QString code);
-    void onAskCompletion(int scriptHandle, QString input, int pos, QStringList *clout);
-    void onAskCallTip(int scriptHandle, QString input, int pos);
-    void onCurrentScriptChanged(int scriptHandle);
+    void onExecCode(sim::handle_t scriptHandle, QString code);
+    void onAskCompletion(sim::handle_t scriptHandle, QString input, int pos, QStringList *clout);
+    void onAskCallTip(sim::handle_t scriptHandle, QString input, int pos);
+    void onCurrentScriptChanged(sim::handle_t scriptHandle);
 
 signals:
     void setVisible(bool visible);
-    void scriptListChanged(QMap<int,QString> sandboxScripts, QMap<int,QString> sandboxLang, const QString &preferredSandboxLang, int mainScript, QMap<int,QString> simulationScripts, QMap<int,QString> customizationScripts, QMap<int,QString> addons, bool simRunning, bool isRunningJustChanged);
+    void scriptListChanged(HandleStringMap sandboxScripts, HandleStringMap sandboxLang, const QString &preferredSandboxLang, sim::handle_t mainScript, HandleStringMap simulationScripts, HandleStringMap customizationScripts, HandleStringMap addons, bool simRunning, bool isRunningJustChanged);
     void setCompletion(QStringList s);
     void setCallTip(QString s);
     void historyChanged(QStringList history);
     void setAutoAcceptCommonCompletionPrefix(bool b);
     void setShowMatchingHistory(bool b);
-    void setSelectedScript(int scriptHandle, bool silent, bool fallbackToSandbox);
+    void setSelectedScript(sim::handle_t scriptHandle, bool silent, bool fallbackToSandbox);
     void toggleStatusbarHeight();
 
 private:
-    QMap<int, QString> execWrapper;
+    HandleStringMap execWrapper;
 };
 
 #endif // UIFUNCTIONS_H_INCLUDED

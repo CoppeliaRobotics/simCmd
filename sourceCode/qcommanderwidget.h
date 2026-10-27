@@ -10,7 +10,9 @@
 #include <QComboBox>
 #include <QPushButton>
 #include <QLabel>
+#include <simPlusPlus-2/Lib.h>
 #include "qcommandedit.h"
+#include "common.h"
 
 class QCommanderWidget;
 class QCommanderEdit;
@@ -66,7 +68,7 @@ protected:
     QLabel *calltipLabel;
 
 public:
-    void getSelectedScriptInfo(int &type, int &handle);
+    sim::handle_t getSelectedScriptHandle();
     bool statusbarExpanded();
 
 private slots:
@@ -85,21 +87,21 @@ private slots:
 public slots:
     void onSetCompletion(const QStringList &comp);
     void onSetCallTip(const QString &tip);
-    void onScriptListChanged(QMap<int,QString> sandboxScripts, QMap<int,QString> sandboxLang, const QString &preferredSandboxLang, int mainScript, QMap<int,QString> simulationScripts, QMap<int,QString> customizationScripts, QMap<int,QString> addons, bool simRunning, bool isRunningJustChanged);
+    void onScriptListChanged(HandleStringMap sandboxScripts, HandleStringMap sandboxLang, const QString &preferredSandboxLang, sim::handle_t mainScript, HandleStringMap simulationScripts, HandleStringMap customizationScripts, HandleStringMap addons, bool simRunning, bool isRunningJustChanged);
     void setHistory(QStringList history);
     void setAutoAcceptCommonCompletionPrefix(bool b);
     void setShowMatchingHistory(bool b);
-    void setSelectedScript(int scriptHandle, bool silent, bool fallbackToSandbox);
+    void setSelectedScript(sim::handle_t scriptHandle, bool silent, bool fallbackToSandbox);
 
 signals:
-    void askCompletion(int scriptHandle, QString input, int pos, QStringList *clout);
-    void askCallTip(int scriptHandle, QString input, int pos);
-    void execCode(int scriptHandle, QString code);
+    void askCompletion(sim::handle_t scriptHandle, QString input, int pos, QStringList *clout);
+    void askCallTip(sim::handle_t scriptHandle, QString input, int pos);
+    void execCode(sim::handle_t scriptHandle, QString code);
     void addLog(int verbosity, QString message);
-    void currentScriptChanged(int scriptHandle);
+    void currentScriptChanged(sim::handle_t scriptHandle);
 
 private:
-    QMap<int,QString> sandboxScripts;
+    HandleStringMap sandboxScripts;
     QList<int> statusbarSize;
     QList<int> statusbarSizeFocused;
 

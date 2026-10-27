@@ -174,7 +174,7 @@ void SIM::addLog(int verbosity, QString message)
     sim::addLog(verbosity, message.toStdString());
 }
 
-void SIM::onExecCode(int scriptHandle, QString code)
+void SIM::onExecCode(sim::handle_t scriptHandle, QString code)
 {
     ASSERT_THREAD(!UI);
 
@@ -191,7 +191,7 @@ void SIM::onExecCode(int scriptHandle, QString code)
 
     try
     {
-        int stackHandle = sim::createStack();
+        sim::handle_t stackHandle = sim::createStack();
         QString ewFunc = "_evalExec";
         auto i = execWrapper.find(scriptHandle);
         if(i != execWrapper.end()) ewFunc = i.value();
@@ -207,12 +207,12 @@ void SIM::onExecCode(int scriptHandle, QString code)
     sim::announceSceneContentChange();
 }
 
-void SIM::onAskCompletion(int scriptHandle, QString input, int pos, QStringList *clout)
+void SIM::onAskCompletion(sim::handle_t scriptHandle, QString input, int pos, QStringList *clout)
 {
     ASSERT_THREAD(!UI);
 
     QStringList cl;
-    int stackHandle = sim::createStack();
+    sim::handle_t stackHandle = sim::createStack();
     writeToStack(input.toStdString(), stackHandle);
     writeToStack(pos, stackHandle);
     try
@@ -239,9 +239,9 @@ void SIM::onAskCompletion(int scriptHandle, QString input, int pos, QStringList 
     emit setCompletion(cl);
 }
 
-void SIM::onAskCallTip(int scriptHandle, QString input, int pos)
+void SIM::onAskCallTip(sim::handle_t scriptHandle, QString input, int pos)
 {
-    int stackHandle = sim::createStack();
+    sim::handle_t stackHandle = sim::createStack();
     writeToStack(input.toStdString(), stackHandle);
     writeToStack(pos, stackHandle);
     writeToStack(scriptHandle, stackHandle);
@@ -257,7 +257,7 @@ void SIM::onAskCallTip(int scriptHandle, QString input, int pos)
     sim::releaseStack(stackHandle);
 }
 
-void SIM::onCurrentScriptChanged(int scriptHandle)
+void SIM::onCurrentScriptChanged(sim::handle_t scriptHandle)
 {
     auto type = sim::getStringProperty(scriptHandle, "script.type");
     if(type == "sandbox")
