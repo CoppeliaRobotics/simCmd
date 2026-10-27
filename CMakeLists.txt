@@ -46,6 +46,7 @@ FetchContent_Declare(jsoncons
     GIT_REPOSITORY https://github.com/danielaparker/jsoncons
     GIT_TAG v1.7.0
     SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/jsoncons
+    EXCLUDE_FROM_ALL
 )
 set(JSONCONS_BUILD_TESTS OFF CACHE BOOL "Build jsoncons tests")
 FetchContent_MakeAvailable(jsoncons)
