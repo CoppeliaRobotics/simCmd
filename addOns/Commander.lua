@@ -182,7 +182,7 @@ function sysCall_moduleEntry(inData)
 end
 
 function sysCall_event(eventData)
-    local cbor = require 'simCBOR'
+    local cbor = require 'sim.cbor'
     events = cbor.decode(eventData)
     for _, e in ipairs(events) do
         if e.handle == sim.handle_app and e.event == 'objectChanged' then
