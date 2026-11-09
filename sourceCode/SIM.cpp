@@ -192,7 +192,7 @@ void SIM::onExecCode(sim::handle_t scriptHandle, QString code)
     try
     {
         sim::handle_t stackHandle = sim::createStack();
-        QString ewFunc = "_evalExec";
+        QString ewFunc = "_evalExec@lua";
         auto i = execWrapper.find(scriptHandle);
         if(i != execWrapper.end()) ewFunc = i.value();
         sim::pushStringOntoStack(stackHandle, code.toStdString());
@@ -217,7 +217,7 @@ void SIM::onAskCompletion(sim::handle_t scriptHandle, QString input, int pos, QS
     writeToStack(pos, stackHandle);
     try
     {
-        QString func = "_getCompletion";
+        QString func = "_getCompletion@lua";
         sim::callScriptFunctionEx(scriptHandle, func.toStdString(), stackHandle);
         std::vector<std::string> r;
         readFromStack(stackHandle, &r);
@@ -247,7 +247,7 @@ void SIM::onAskCallTip(sim::handle_t scriptHandle, QString input, int pos)
     writeToStack(scriptHandle, stackHandle);
     try
     {
-        QString func = "_getCalltip";
+        QString func = "_getCalltip@lua";
         sim::callScriptFunctionEx(scriptHandle, func.toStdString(), stackHandle);
         std::string r;
         readFromStack(stackHandle, &r);
