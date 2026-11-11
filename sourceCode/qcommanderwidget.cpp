@@ -153,7 +153,8 @@ QCommanderWidget::QCommanderWidget(QWidget *parent)
     connect(SIM::getInstance(), &SIM::toggleStatusbarHeight, this, &QCommanderWidget::toggleStatusbarHeight);
     connect(scriptCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=] (int) {
         sim::handle_t scriptHandle = getSelectedScriptHandle();
-        emit currentScriptChanged(scriptHandle);
+        if(scriptHandle != -1)
+            emit currentScriptChanged(scriptHandle);
     });
 }
 
@@ -163,8 +164,11 @@ QCommanderWidget::~QCommanderWidget()
 
 sim::handle_t QCommanderWidget::getSelectedScriptHandle()
 {
-    int idx = scriptCombo->currentIndex();
-    return idx >= 0 ? scriptCombo->itemData(idx).toLongLong() : -1;
+    const int idx = scriptCombo->currentIndex();
+    if(idx < 0) return -1;
+    const QVariant data = scriptCombo->itemData(idx);
+    if(!data.isValid()) return -1;   // separator or item with no userData
+    return data.toLongLong();
 }
 
 void QCommanderWidget::onAskCompletion(const QString &cmd, int cursorPos)
@@ -401,7 +405,8 @@ void QCommanderWidget::selectPreviousOrNextScript(int delta)
     {
         index = (index + dir + count) % count;
         const QModelIndex mi = model->index(index, column, root);
-        if(model->flags(mi) & Qt::ItemIsSelectable)
+        const bool isSeparator = model->data(mi, Qt::AccessibleDescriptionRole).toString() == QLatin1String("separator");
+        if(!isSeparator && (model->flags(mi) & Qt::ItemIsSelectable))
             break;
     }
     scriptCombo->setCurrentIndex(index);
