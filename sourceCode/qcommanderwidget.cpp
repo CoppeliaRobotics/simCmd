@@ -342,6 +342,10 @@ void QCommanderWidget::onScriptListChanged(HandleStringMap sandboxScripts, Handl
         }
     }
 
+    // if nothing is going to be selected up to this point, select first sandbox:
+    if(oldScriptHandle == -1 && !sandboxScripts.isEmpty())
+        oldScriptHandle = sandboxScripts.firstKey();
+
     // restore selection:
     setSelectedScript(oldScriptHandle, true, isRunningJustChanged);
 }
